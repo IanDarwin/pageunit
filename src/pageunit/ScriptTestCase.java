@@ -66,6 +66,12 @@ public class TestRunner extends TestCase {
 			String page;
 
 			switch(c) {
+			case 'D':	// debug on/off
+				if (restOfLine.charAt(0) == 't') {
+					TestUtils.setDebug(true);
+				} else if (restOfLine.charAt(0) == 'f')	{
+					TestUtils.setDebug(false);
+				}
 			case 'U':	// get Unprotected page
 				page = restOfLine;
 				session = new HttpClient(); // XXX ??

@@ -7,7 +7,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
@@ -16,8 +15,6 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.cookie.CookieSpec;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -29,8 +26,8 @@ import org.apache.commons.httpclient.methods.PostMethod;
 public class TestUtils {
 	
 	private static final String TCPTEST_PROPERTIES_FILENAME = ".tcptest.properties";
-	static TestUtils singleton;
 	private static Properties props  = new Properties();
+	private static boolean debug;
 	
 	static {
 		String home = System.getProperty("user.home");
@@ -66,8 +63,10 @@ public class TestUtils {
 		GetMethod initialGet = new GetMethod(targetPage);
 
 		session.executeMethod(initialGet); // request protected page.
-		System.out.println("Initial Page get: "
+		if (debug) {
+			System.out.println("Initial Page get: "
 				+ initialGet.getStatusLine().toString());
+		}
 
 		return initialGet;
 	}
@@ -103,20 +102,11 @@ public class TestUtils {
 
 		session.executeMethod(interaction); // request protected page, and
 											// handle redirection here.
-		System.out.println("Initial Page get: "
+		if (debug) {
+				System.out.println("Initial Page get: "
 				+ interaction.getStatusLine().toString());
-		int statusCode = interaction.getStatusCode();
-
-		CookieSpec cookiespec = CookiePolicy.getDefaultSpec();
-		Cookie sessionCookie = null;
-        Cookie[] initcookies = cookiespec.match(
-            targetHost, targetPort, "/", false, session.getState().getCookies());
-        for (int i = 0; i < initcookies.length; i++) {
-			Cookie cookie = initcookies[i];
-			if (cookie.getPath().equals("JSESSIONID"))
-				sessionCookie  = cookie;
-				break;
 		}
+		int statusCode = interaction.getStatusCode();
         
 		if (!isRedirectCode(statusCode)) {
 			throw new IllegalStateException("Requested page did not redirect");
@@ -126,8 +116,6 @@ public class TestUtils {
 		// J2EE container-managed-security always uses this hard-coded URL:
 		PostMethod loginPost = new PostMethod("/j_security_check");
 		loginPost.setFollowRedirects(false);
-		session.getState().addCookie(sessionCookie);
-		loginPost.addRequestHeader("Referer", "http://localhost:8080/login.jsp"); // XXX
 
 		NameValuePair[] request = {
 				new NameValuePair("j_username", login),
@@ -136,14 +124,18 @@ public class TestUtils {
 		loginPost.setRequestBody(request);
 
 		statusCode = session.executeMethod(loginPost); // SEND THE LOGIN
-		System.out.println("Login return " + loginPost.getStatusLine());
+		if (debug) {
+			System.out.println("Login return " + loginPost.getStatusLine());
+		}
 
 		// Should be yet another redirect, back to original request page
 		if (!isRedirectCode(statusCode)) {
 			throw new IllegalStateException("Login page did not redirect");
 		}
 		String redirectURL = getRedirectURL(loginPost);
-		System.out.println("Login page redirects to " + redirectURL);
+		if (debug) {
+			System.out.println("Login page redirects to " + redirectURL);
+		}
 		interaction = new GetMethod(redirectURL);
 		session.executeMethod(interaction);
 		interaction.setFollowRedirects(false);
@@ -179,7 +171,9 @@ public class TestUtils {
 
 		GetMethod logoutGet = new GetMethod("/LogoutServlet");
 		int statusCode = session.executeMethod(logoutGet);
-		System.out.println("Logout status: " + statusCode);
+		if (debug) {
+			System.out.println("Logout status: " + statusCode);
+		}
 	}
 
 	/**
@@ -215,5 +209,18 @@ public class TestUtils {
 			throw new IllegalArgumentException("getIntProperty: " + string + " does not exist");
 		}
 		return Integer.parseInt(intStr);
+	}
+	
+	/**
+	 * @return Returns the debug.
+	 */
+	public static boolean isDebug() {
+		return debug;
+	}
+	/**
+	 * @param debug The debug to set.
+	 */
+	public static void setDebug(boolean debug) {
+		TestUtils.debug = debug;
 	}
 }
