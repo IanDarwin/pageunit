@@ -8,9 +8,7 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 /** A simple but reusable recursive-descent HTML/XML tag extractor.
  * @author Ian Darwin, Darwin Open Systems, www.darwinsys.com.
