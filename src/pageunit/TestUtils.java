@@ -188,7 +188,7 @@ public class TestUtils {
 	
 
 	
-	/** Retrieve a property from Util, either from the System Properties (consulted first, to allow overriding on the command line)
+	/** Retrieve a property, either from the System Properties (consulted first, to allow overriding on the command line)
 	 * or in the user's property file (${user.home} + TCPTEST_PROPERTIES_FILENAME);
 	 * @param property the key to look up
 	 * @return The value corresponding to the given key.
