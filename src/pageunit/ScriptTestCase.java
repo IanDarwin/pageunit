@@ -42,8 +42,11 @@ public class TestRunner extends TestCase {
 		HttpClient session = new HttpClient();
 		HttpMethod result = null;
 		String login = TestUtils.getProperty("admin_login");
+		assertNotNull("login", login);
 		String pass = TestUtils.getProperty("admin_passwd");
+		assertNotNull("pass", pass);
 		String host = TestUtils.getProperty("host");
+		assertNotNull("hostname", host);
 		int port = TestUtils.getIntProperty("port");
 		
 		while (testsIterator.hasNext()) {
@@ -65,12 +68,15 @@ public class TestRunner extends TestCase {
 			String restOfLine = line.substring(2);
 			String page;
 
+			char firstChar = restOfLine.charAt(0);
 			switch(c) {
 			case 'D':	// debug on/off
-				if (restOfLine.charAt(0) == 't') {
+				if (firstChar == 't' || firstChar == '1') {
 					TestUtils.setDebug(true);
-				} else if (restOfLine.charAt(0) == 'f')	{
+				} else if (firstChar == 'f' || firstChar == '0')	{
 					TestUtils.setDebug(false);
+				} else {
+					System.err.println("Warning: invalid Debug setting in " + line);
 				}
 			case 'U':	// get Unprotected page
 				page = restOfLine;
@@ -87,7 +93,7 @@ public class TestRunner extends TestCase {
 				break;
 			case 'T':	// page contains text
 				if (result == null) {
-					throw new IOException("Invalid test.txt: ask for txt before getting page");
+					throw new IOException("Invalid test.txt: requested txt before getting page");
 				}
 				assertTrue("page contains text", 
 						TestUtils.checkResultForPattern(result.getResponseBodyAsString(), restOfLine));
