@@ -2,7 +2,6 @@ package regress.webtest;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 
@@ -19,7 +18,7 @@ public class TestTest extends TestCase {
 	/** Test that we can get to the index page correctly.
 	 * @throws Exception
 	 */
-	public void NOtestIndexPage() throws Exception {
+	public void testIndexPage() throws Exception {
 		System.out.println("TestTest.testIndexPage()");
 		HttpClient session = new HttpClient();
 		HttpMethod res = TestUtils.getSimplePage(session, "localhost", 8080, "/index.jsp");
@@ -45,18 +44,15 @@ public class TestTest extends TestCase {
 				TARGET_PATH, login, pass);
 		int statusCode = result.getStatusCode();
 		assertEquals("login code", 200, statusCode);
-		Header header = result.getResponseHeader("location");
-		if (header != null) {
-			String redirect = header.getValue();
-			assertEquals("Good login status", TARGET_PATH, redirect);
-		}
+		System.out.println(result.getPath());
+		assertEquals("login page", result.getPath(), TARGET_PATH);
 		
 		TestUtils.doLogout(session);
 	}
 
 	/** Test that a bad login redirects back to the login page.
 	 */
-	public void NOtestBadLogin() throws Exception {
+	public void testBadLogin() throws Exception {
 		System.out.println("TestTest.testBadLogin()");
 		HttpClient session = new HttpClient();
 
@@ -64,7 +60,7 @@ public class TestTest extends TestCase {
 		String pass = "complete gibberish";
 
 		HttpMethod result = TestUtils.getProtectedPage(session, "localhost", 8080, TARGET_PATH, login, pass);
-		assertTrue("Bad login status", result.getPath().indexOf("/login.jsp") != -1);
+		assertEquals("Bad login status", result.getPath(), "/loginfailure.jsp");
 		
 	}
 }

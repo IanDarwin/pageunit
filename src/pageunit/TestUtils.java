@@ -148,7 +148,8 @@ public class TestUtils {
 	 * @param interaction
 	 * @return
 	 */
-	private static String getRedirectURL(HttpMethod interaction) {
+	public static String getRedirectURL(HttpMethod interaction) {
+		
 		Header header = interaction.getResponseHeader("location");
 		if (header == null) {
 			throw new IllegalStateException("no redirect location found");
