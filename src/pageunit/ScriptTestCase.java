@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -23,8 +24,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 /**
  * Run the classes listed in tests.txt. This is set up as a JUnit "test case" not as a JUnit Test Runner,
- * until we find a way to do the latter, so (a) it all appears as one ginormous test, and (b) it fails on the
- * first AssertionException, and (c) it also has a Main method so you can run it standalone.
+ * until we find a way to do the latter, so (a) it all appears as one ginormous test, and 
+ * (b) it also has a Main method so you can run it standalone.
  * <br>
  * TODO: Maybe make this class be a JUnit "TestRunner" so each test is reported separately?
  * TODO: Add "Back button" functionality!
@@ -35,6 +36,10 @@ public class TestRunner extends TestCase {
 	private static final String TESTS_FILE = "tests.txt";
 	
 	private static final int HTTP_STATUS_OK = 200;
+	
+	private int nTests;
+	private int nSucceeded;
+	private int nFailures;
 	
 	public void testAllTests() throws Exception {
 		run(TESTS_FILE);
@@ -104,6 +109,7 @@ public class TestRunner extends TestCase {
 		// The "testsIterator" goes over all the lines in the text file...
 		Iterator testsIterator = tests.iterator();
 		while (testsIterator.hasNext()) {
+			
 			String line = (String) testsIterator.next();
 			if (line.length() == 0) {
 				System.out.println();
@@ -114,7 +120,7 @@ public class TestRunner extends TestCase {
 				continue;
 			}
 			System.out.println("TEST: " + line);
-			// this.testStarted(line);
+			
 			StringTokenizer st = new StringTokenizer(line);
 			if (st.countTokens() < 1) {
 				throw new IOException("invalid line " + line);
@@ -126,7 +132,9 @@ public class TestRunner extends TestCase {
 			char c = cmd.charAt(0);
 			String restOfLine = line.length() > 2 ? line.substring(2) : "";
 			String page;
-
+			boolean done = false;
+			
+			// Handle declarative (non-test) requests here
 			switch(c) {
 			case 'X':
 				String className = restOfLine;
@@ -139,6 +147,8 @@ public class TestRunner extends TestCase {
 					}
 					filter = (TestFilter)o;
 				}
+				
+				done = true;
 				break;
 			case 'D':	// debug on/off
 				char firstChar = restOfLine.charAt(0);
@@ -149,193 +159,239 @@ public class TestRunner extends TestCase {
 				} else {
 					System.err.println("Warning: invalid Debug setting in " + line);
 				}
-				
-			case 'U':	// get Unprotected page
-				resetForPage();
-				page = restOfLine;
-
-				thePage = TestUtils.getSimplePage(session, host, port, page);
-				theResult = thePage.getWebResponse();
-				filter.filterPage(thePage, theResult);
-				assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
-				break;
-				
-			case 'P':	// get protected page
-				resetForPage();
-				page = restOfLine;
-
-				thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
-				theResult = thePage.getWebResponse();
-				filter.filterPage(thePage, theResult);
-				assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
-				assertEquals("protected page redirect", page, theResult.getUrl().getPath());
-				break;
-				
-			case 'M':	// page contains text
-				// PreCondition: theResult has been set by the U or P code above
-				theLink = null;
-				assertNotNull("Invalid test.txt: requested txt before getting page", thePage);
-				theResult = thePage.getWebResponse();
-				String contentAsString = theResult.getContentAsString();
-				assertTrue("page contains text <" + restOfLine + ">", 
-						TestUtils.checkResultForPattern(contentAsString, restOfLine));
-				break;
-				
-			case 'T':	// page contains tag with text (in bodytext or attribute value)
-				// PreCondition: theResult has been set by the U or P code above
-				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
-				
-				String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
-				String tagType = ttmp[0];
-				String tagText = ttmp[1];
-				
-				// special case for "title" tag; assume only one <title> tag per HTML page
-				if ("title".equals(tagType)) {
-					String titleText = thePage.getTitleText();
-					System.out.println("TITLE = " + titleText);
-					assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
-					break; // out of case 'T'
-				}
-				
-				// look for tag;
-				boolean found = false;
-				
-				for (Iterator iter = thePage.getChildIterator(); iter.hasNext();) {
-					HtmlElement element = (HtmlElement) iter.next();
-					String bodyText = element.getNodeValue();
-					if (bodyText != null && bodyText.indexOf(tagText) != -1) {
-						found = true;
-						break; // out of this for loop
-					}
-				}
-				assertTrue("did not find tag type " + tagType + " witth text: " + tagText, found);
-				break;
-				
-			case 'L':	// page contains Link
-				// PreCondition: theResult has been set by the U or P code above
-				theLink = null;
-				Iterator iter = thePage.getAnchors().iterator();
-				while (iter.hasNext()) {
-					HtmlAnchor oneLink = (HtmlAnchor) iter.next();
-					
-					// Check in the Name attribute, if any
-					String n = oneLink.getNameAttribute();
-					if (n != null && n.indexOf(restOfLine) != -1) {
-						System.out.println("MATCH NAME");
-						theLink = oneLink;
-						break;
-					}
-					
-					// Check the Href attribute too
-					n = oneLink.getHrefAttribute();
-					if (n != null && n.indexOf(restOfLine) != -1) {
-						System.out.println("MATCH NAME");
-						theLink = oneLink;
-						break;
-					}
-					
-					// Check in the body text, if any.
-					// Note: will fail if body text is nested in e.g., font tag!
-					String t = oneLink.asText();
-					if (t != null && t.indexOf(restOfLine) != -1) {
-						System.out.println("MATCH BODYTEXT");
-						theLink = oneLink;
-						break;
-					}
-				}
-				assertNotNull("link not found" ,  theLink);
-				break;
-				
-			case 'G':	// Go to link
-				// PreCondition: theLink has been set by the 'L' case above.
-				assertNotNull("found link before gotoLink", theLink);
-				thePage = (HtmlPage)theLink.click();
-
-				assertEquals("go to link response code", HTTP_STATUS_OK, thePage.getWebResponse().getStatusCode());
+				done = true; 
 				break;
 			case 'N':	// start new session
 				session = new WebClient();
 				session.setThrowExceptionOnFailingStatusCode(false);
 				theLink = null;
-				break;
-				
-			// FORMS
-
-			case 'F':
-				// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
-				String formName = restOfLine;
-				List theForms = thePage.getAllForms();
-				for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {
-					HtmlForm oneForm = (HtmlForm) iterator.next();
-					if (oneForm.getNameAttribute().indexOf(formName) != -1) {
-						theForm = oneForm;	// "You are the One"
-					}
-				}
-				assertNotNull("Find form named " + formName, theForm);
-				break;
-
-			case 'R':	// set parameter to value
-				// PRECONDITION: theForm has been set by a previous F command
-				assertNotNull("find a form before setting Parameters", theForm);
-				
-				String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
-				String attrName = rtmp[0];
-				String attrValue = rtmp[1];
-				
-				if (debug) {
-					System.err.println("Name=" + attrName + "; value=" + attrValue);
-				}
-				Iterator inputs = theForm.getChildIterator();
-				while (inputs.hasNext()) {
-					Object element = (Object) inputs.next();
-					System.out.println("LIST CONTAINS " + element);
-				}
-				HtmlInput theButton = theForm.getInputByName(attrName);
-				System.out.println("GETTING IT EXPLICITLY --> " + theButton);
-				theButton.setValueAttribute(attrValue);
-				
-				break;
-				
-			case 'S':
-				assertNotNull("Form found before submit", theForm);
-
-				String submitValue = restOfLine;
-
-				if (submitValue == null || "".equals(submitValue)) {
-					thePage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
-				} else {
-					final HtmlSubmitInput button = (HtmlSubmitInput)theForm.getInputByName(submitValue);
-					thePage = (HtmlPage)button.click();
-				}
-
-				// Should take us to a new page; HtmlUnit handles redirections automatically on regular
-				// page gets, but for some reason not on form submits. I dunno, ask Brian.
-				WebResponse formResponse = thePage.getWebResponse();
-				int statusCode = formResponse.getStatusCode();
-				
-				if (TestUtils.isRedirectCode(statusCode)) {
-					String newLocation = formResponse.getResponseHeaderValue("location");
-					System.out.println(newLocation);
-					assertNotNull("form submit->redirection: location header", newLocation);
-					thePage = TestUtils.getSimplePage(session, new URL(newLocation));
-					theResult = thePage.getWebResponse();
-					assertEquals("form with redirect: page load", HTTP_STATUS_OK, theResult.getStatusCode());
-				}				
-				
-				break;
-				
+				done = true;
+				break;	
 			case 'Q':
 				System.out.println("*****************************************************************");
 				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
 				System.out.println("*****************************************************************");
+				report();
 				return;
-				
-			default:
-				fail("Unknown request: " + line);
 			}
-			// this.testEnded(line);
+			
+			if (done) {
+				continue;
+			}
+			
+			// Handle actual tests here
+			try {
+				this.testStarted(line);
+				switch (c) {
+				
+				case 'U':	// get Unprotected page
+					resetForPage();
+					page = restOfLine;
+					
+					thePage = TestUtils.getSimplePage(session, host, port, page);
+					theResult = thePage.getWebResponse();
+					filter.filterPage(thePage, theResult);
+					assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
+					break;
+					
+				case 'P':	// get protected page
+					resetForPage();
+					page = restOfLine;
+					
+					thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
+					theResult = thePage.getWebResponse();
+					filter.filterPage(thePage, theResult);
+					assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
+					assertEquals("protected page redirect", page, theResult.getUrl().getPath());
+					break;
+					
+				case 'M':	// page contains text
+					// PreCondition: theResult has been set by the U or P code above
+					theLink = null;
+					assertNotNull("Invalid test.txt: requested txt before getting page", thePage);
+					theResult = thePage.getWebResponse();
+					String contentAsString = theResult.getContentAsString();
+					assertTrue("page contains text <" + restOfLine + ">", 
+							TestUtils.checkResultForPattern(contentAsString, restOfLine));
+					break;
+					
+				case 'T':	// page contains tag with text (in bodytext or attribute value)
+					// PreCondition: theResult has been set by the U or P code above
+					assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
+					
+					String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
+					String tagType = ttmp[0];
+					String tagText = ttmp[1];
+					
+					// special case for "title" tag; assume only one <title> tag per HTML page
+					if ("title".equals(tagType)) {
+						String titleText = thePage.getTitleText();
+						System.out.println("TITLE = " + titleText);
+						assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
+						break; // out of case 'T'
+					}
+					
+					// look for tag;
+					boolean found = false;
+					
+					for (Iterator iter = thePage.getChildIterator(); iter.hasNext();) {
+						HtmlElement element = (HtmlElement) iter.next();
+						String bodyText = element.getNodeValue();
+						if (bodyText != null && bodyText.indexOf(tagText) != -1) {
+							found = true;
+							break; // out of this for loop
+						}
+					}
+					assertTrue("did not find tag type " + tagType + " witth text: " + tagText, found);
+					break;
+					
+				case 'L':	// page contains Link
+					// PreCondition: theResult has been set by the U or P code above
+					theLink = null;
+					Iterator iter = thePage.getAnchors().iterator();
+					while (iter.hasNext()) {
+						HtmlAnchor oneLink = (HtmlAnchor) iter.next();
+						
+						// Check in the Name attribute, if any
+						String n = oneLink.getNameAttribute();
+						if (n != null && n.indexOf(restOfLine) != -1) {
+							System.out.println("MATCH NAME");
+							theLink = oneLink;
+							break;
+						}
+						
+						// Check the Href attribute too
+						n = oneLink.getHrefAttribute();
+						if (n != null && n.indexOf(restOfLine) != -1) {
+							System.out.println("MATCH NAME");
+							theLink = oneLink;
+							break;
+						}
+						
+						// Check in the body text, if any.
+						// Note: will fail if body text is nested in e.g., font tag!
+						String t = oneLink.asText();
+						if (t != null && t.indexOf(restOfLine) != -1) {
+							System.out.println("MATCH BODYTEXT");
+							theLink = oneLink;
+							break;
+						}
+					}
+					assertNotNull("link not found" ,  theLink);
+					break;
+					
+				case 'G':	// Go to link
+					// PreCondition: theLink has been set by the 'L' case above.
+					assertNotNull("found link before gotoLink", theLink);
+					thePage = (HtmlPage)theLink.click();
+					
+					assertEquals("go to link response code", HTTP_STATUS_OK, thePage.getWebResponse().getStatusCode());
+					break;
+					
+					// FORMS
+					
+				case 'F':
+					// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
+					String formName = restOfLine;
+					List theForms = thePage.getAllForms();
+					for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {
+						HtmlForm oneForm = (HtmlForm) iterator.next();
+						if (oneForm.getNameAttribute().indexOf(formName) != -1) {
+							theForm = oneForm;	// "You are the One"
+						}
+					}
+					assertNotNull("Find form named " + formName, theForm);
+					break;
+					
+				case 'R':	// set parameter to value
+					// PRECONDITION: theForm has been set by a previous F command
+					assertNotNull("find a form before setting Parameters", theForm);
+					
+					String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
+					String attrName = rtmp[0];
+					String attrValue = rtmp[1];
+					
+					if (debug) {
+						System.err.println("Name=" + attrName + "; value=" + attrValue);
+					}
+					Iterator inputs = theForm.getChildIterator();
+					while (inputs.hasNext()) {
+						Object element = (Object) inputs.next();
+						System.out.println("LIST CONTAINS " + element);
+					}
+					HtmlInput theButton = theForm.getInputByName(attrName);
+					System.out.println("GETTING IT EXPLICITLY --> " + theButton);
+					theButton.setValueAttribute(attrValue);
+					
+					break;
+					
+				case 'S':
+					assertNotNull("Form found before submit", theForm);
+					
+					String submitValue = restOfLine;
+					
+					if (submitValue == null || "".equals(submitValue)) {
+						thePage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
+					} else {
+						final HtmlSubmitInput button = (HtmlSubmitInput)theForm.getInputByName(submitValue);
+						thePage = (HtmlPage)button.click();
+					}
+					
+					// Should take us to a new page; HtmlUnit handles redirections automatically on regular
+					// page gets, but for some reason not on form submits. I dunno, ask Brian.
+					WebResponse formResponse = thePage.getWebResponse();
+					int statusCode = formResponse.getStatusCode();
+					
+					if (TestUtils.isRedirectCode(statusCode)) {
+						String newLocation = formResponse.getResponseHeaderValue("location");
+						System.out.println(newLocation);
+						assertNotNull("form submit->redirection: location header", newLocation);
+						thePage = TestUtils.getSimplePage(session, new URL(newLocation));
+						theResult = thePage.getWebResponse();
+						assertEquals("form with redirect: page load", HTTP_STATUS_OK, theResult.getStatusCode());
+					}				
+					
+					break;
+					
+					
+				default:
+					fail("Unknown request: " + line);
+				}
+				this.testPassed(line);
+				
+			} catch (AssertionFailedError tf) {
+				this.testFailed(line);
+				throw tf;
+			} catch (Exception ex) {
+				this.testFailed(line);
+				System.err.println("FAILURE: " + line);
+				System.err.println(ex);
+			}
 		}
+		report();
 	}
+	
+	/**
+	 * @param line
+	 */
+	private void testStarted(String line) {
+		++nTests;
+	}
+
+	/**
+	 * @param line
+	 */
+	private void testFailed(String line) {
+		++nFailures;
+	}
+
+	/**
+	 * @param line
+	 */
+	private void testPassed(String line) {
+		++nSucceeded;
+	}
+
 
 	/**
 	 * Reset common fields for pages, and do some common error checking.
@@ -347,6 +403,10 @@ public class TestRunner extends TestCase {
 			System.err.println("Warning: no Session before Get Unprotected Page");
 			session = new WebClient();
 		}
+	}
+	
+	private void report() {
+		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures);
 	}
 	
 	/**
