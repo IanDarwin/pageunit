@@ -107,13 +107,13 @@ public class TestUtils {
 				break;
 		}
         
-//		if (!isRedirectCode(statusCode)) {
-//			throw new IllegalStateException("Requested page did not redirect");
-//		}
-//		String newuri = getRedirectURL(interaction);
-//		
-//		// Grab the form just to keep the J2EE happy??
-//		session.executeMethod(new GetMethod(newuri));
+		if (!isRedirectCode(statusCode)) {
+			throw new IllegalStateException("Requested page did not redirect");
+		}
+		String newuri = getRedirectURL(interaction);
+		
+		// Grab the form just to keep the J2EE happy??
+		session.executeMethod(new GetMethod(newuri));
 		
 		// shortcut: instead of parsing the form, we "know" that
 		// J2EE container-managed-security always uses this hard-coded URL:
