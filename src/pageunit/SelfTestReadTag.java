@@ -14,7 +14,8 @@ import junit.framework.TestCase;
  */
 public class SelfTestReadTag extends TestCase {
 	
-	String htmlText = "<html><head><foo><bar></head><body><p>Paragraph<a href='http://grelber/' name=\"grelber\">";
+	String htmlText = "<html><head><foo><bar></head><body><p>Paragraph" + 
+		"<a href='http://grelber/' name=\"grelber\">Grelber Info</a>";
 	
 	public void testReadAll() throws Exception {
 		Reader is = new StringReader(htmlText);
@@ -76,5 +77,6 @@ public class SelfTestReadTag extends TestCase {
 		System.out.println("HREF='" + el.getAttribute("href") + "'");
 		assertEquals("name attribute", "grelber", el.getAttribute("name"));
 		assertEquals("href attribute", "http://grelber/", el.getAttribute("href"));
+		assertEquals("body text", "Grelber Info", el.getBodyText());
 	}
 }
