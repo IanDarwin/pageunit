@@ -17,7 +17,7 @@ P /Jsp/view/PersonList.jsp
 M Person List
 L ?person_key=
 L _nameLink_4
-# Leila Baghdadi is near the start alphabetically. Will break on LIMS when get a lot of Person entries.
+# Leila Baghdadi is near the start alphabetically. Will break on LIMS when there are a lot of Person entries.
 L Baghdadi
 G
 M Leila
@@ -32,8 +32,7 @@ F pageForm
 R htmlPageTopContainer_pageForm_box1_displaybox1_firstName=Ian
 R htmlPageTopContainer_pageForm_box1_displaybox1_lastName=Darwin
 #
-# Should go back to list page, but HtmlUnit objects if a page redirects back to itself!!!
-#S htmlPageTopContainer_pageForm_box1_displaybox1_search
+S htmlPageTopContainer_pageForm_box1_displaybox1_search
 #T title Person List
 #M Ian Darwin
 #L Ian Darwin

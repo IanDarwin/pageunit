@@ -3,6 +3,7 @@ package regress.webtest;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -46,17 +47,18 @@ public class TestRunner extends TestCase {
 		}
 	}
 	
+	private Iterator testsIterator = tests.iterator();
+	private WebClient session = new WebClient();
+	private WebResponse theResult = null;
+	private HtmlPage thePage = null;
+	private HtmlAnchor theLink = null;
+	private HtmlForm theForm = null;
+	private boolean debug;
+	
 	/** Run ALL the tests in the given "test.txt" or similar file.
 	 * @throws Exception
 	 */
 	public void testListedTests() throws Exception {
-
-		Iterator testsIterator = tests.iterator();
-		WebClient session = new WebClient();
-		WebResponse theResult = null;
-		HtmlPage thePage = null;
-		HtmlAnchor theLink = null;
-		HtmlForm theForm = null;
 
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
@@ -97,36 +99,30 @@ public class TestRunner extends TestCase {
 			String restOfLine = line.length() > 2 ? line.substring(2) : "";
 			String page;
 
-
 			switch(c) {
 			case 'D':	// debug on/off
 				char firstChar = restOfLine.charAt(0);
 				if (firstChar == 't' || firstChar == '1') {
-					TestUtils.setDebug(true);
+					setDebug(true);
 				} else if (firstChar == 'f' || firstChar == '0')	{
-					TestUtils.setDebug(false);
+					setDebug(false);
 				} else {
 					System.err.println("Warning: invalid Debug setting in " + line);
 				}
 				
 			case 'U':	// get Unprotected page
+				resetForPage();
 				page = restOfLine;
-				if (session == null) {
-					System.err.println("Warning: no Session before Get Unprotected Page");
-					session = new WebClient();
-				}
+
 				thePage = TestUtils.getSimplePage(session, host, port, page);
 				theResult = thePage.getWebResponse();
 				assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
 				break;
 				
 			case 'P':	// get protected page
-				theLink = null;
+				resetForPage();
 				page = restOfLine;
-				if (session == null) {
-					System.err.println("Warning: no Session before Get Protected Page");
-					session = new WebClient();
-				}
+
 				thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
 				theResult = thePage.getWebResponse();
 				assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
@@ -146,14 +142,16 @@ public class TestRunner extends TestCase {
 			case 'T':	// page contains tag with text (in bodytext or attribute value)
 				// PreCondition: theResult has been set by the U or P code above
 				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
-				int i = restOfLine.indexOf(' ');
-				assertTrue("tag in line", i > 0);
-				String tagType = restOfLine.substring(0, i);
-				String tagText = restOfLine.substring(i + 1);
+				
+				String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
+				String tagType = ttmp[0];
+				String tagText = ttmp[1];
 				
 				// special case for "title" tag; assume only one <title> tag per HTML page
 				if ("title".equals(tagType)) {
-					assertTrue("T title", thePage.getTitleText().indexOf(tagText) != -1);
+					String titleText = thePage.getTitleText();
+					System.out.println("TITLE = " + titleText);
+					assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
 					break; // out of case 'T'
 				}
 				
@@ -215,6 +213,7 @@ public class TestRunner extends TestCase {
 				break;
 			case 'N':	// start new session
 				session = new WebClient();
+				session.setThrowExceptionOnFailingStatusCode(false);
 				theLink = null;
 				break;
 				
@@ -236,11 +235,14 @@ public class TestRunner extends TestCase {
 			case 'R':	// set parameter to value
 				// PRECONDITION: theForm has been set by a previous F command
 				assertNotNull("find a form before setting Parameters", theForm);
-				int j = restOfLine.indexOf('=');
-				assertTrue("name and value in line", j > 0);
-				String attrName = restOfLine.substring(0, j);
-				String attrValue = restOfLine.substring(j + 1);
-				System.err.println("Name=" + attrName + "; value=" + attrValue);
+				
+				String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
+				String attrName = rtmp[0];
+				String attrValue = rtmp[1];
+				
+				if (debug) {
+					System.err.println("Name=" + attrName + "; value=" + attrValue);
+				}
 				HtmlInput theButton = theForm.getInputByName(attrName);
 				theButton.setValueAttribute(attrValue);
 				
@@ -250,18 +252,27 @@ public class TestRunner extends TestCase {
 				assertNotNull("Form found before submit", theForm);
 
 				String submitValue = restOfLine;
-				HtmlPage formResultsPage = null;
+
 				if (submitValue == null || "".equals(submitValue)) {
-					formResultsPage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
+					thePage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
 				} else {
 					final HtmlSubmitInput button = (HtmlSubmitInput)theForm.getInputByName(submitValue);
-					formResultsPage = (HtmlPage)button.click();
+					thePage = (HtmlPage)button.click();
 				}
 
-				// Should take us to a new page
-				WebResponse formResponse = formResultsPage.getWebResponse();
+				// Should take us to a new page; HtmlUnit handles redirections automatically on regular
+				// page gets, but for some reason not on form submits. I dunno, ask Brian.
+				WebResponse formResponse = thePage.getWebResponse();
 				int statusCode = formResponse.getStatusCode();
-				assertEquals("form submit status", HTTP_STATUS_OK, statusCode);
+				
+				if (TestUtils.isRedirectCode(statusCode)) {
+					String newLocation = formResponse.getResponseHeaderValue("location");
+					System.out.println(newLocation);
+					assertNotNull("form submit->redirection: location header", newLocation);
+					thePage = TestUtils.getSimplePage(session, new URL(newLocation));
+					theResult = thePage.getWebResponse();
+					assertEquals("form with redirect: page load", HTTP_STATUS_OK, theResult.getStatusCode());
+				}				
 				
 				break;
 				
@@ -278,5 +289,45 @@ public class TestRunner extends TestCase {
 		}
 	}
 
-
+	/**
+	 * Reset common fields for pages, and do some common error checking.
+	 */
+	private void resetForPage() {
+		theLink = null;
+		
+		if (session == null) {
+			System.err.println("Warning: no Session before Get Unprotected Page");
+			session = new WebClient();
+		}
+	}
+	
+	/**
+	 * Split the rest of the line into a tag and the rest of the line, based on delim
+	 * @param wordDescription a short description of what you are looking for, e.g., "tag" or "name" or ...
+	 * @param lineAfterCommand The "restOfLine" variable, that is, the input line minus the one-letter command. 
+	 * @param delim A character such as ' ' or '=' to split the line on.
+	 * @return String[2] containing the tag and the rest of the line
+	 */
+	private String[] getTwoArgs(String wordDescription, String lineAfterCommand, char delim) {
+		int i = lineAfterCommand.indexOf(delim);
+		assertTrue(wordDescription + " in line", i > 0);
+		String verb = lineAfterCommand.substring(0, i);
+		String args = lineAfterCommand.substring(i + 1);
+		return new String[] { verb, args };
+	}
+	/**
+	 * Returns true if debug is enabled.
+	 */
+	public boolean isDebug() {
+		return debug;
+	}
+	
+	/**
+	 * Enable debugging both here and in TestUtils.
+	 * @param debug The debug setting.
+	 */
+	public void setDebug(boolean debug) {
+		this.debug = debug;
+		TestUtils.setDebug(debug);
+	}
 }

@@ -61,13 +61,23 @@ public class TestUtils {
 		}
 
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
+		
+		return getSimplePage(webClient, url);
+
+	}
+	
+	/**
+	 * Get an unprotected page given its URL
+	 * @param webclient
+	 * @param newLocation
+	 * @return
+	 */
+	public static HtmlPage getSimplePage(WebClient webClient, URL url) throws IOException {
 		final HtmlPage page = (HtmlPage) webClient.getPage(url);
-		System.out.println("Got to simple page: " + page.getTitleText());
+		System.out.println("Got to simple page: " + page.getWebResponse().getUrl());
 		
 		return page;
 	}
-	
-
 
 	/**
 	 * Get an HTML page that is protected by J2EE Container-based Forms
@@ -184,4 +194,8 @@ public class TestUtils {
 	public static void setDebug(boolean debug) {
 		TestUtils.debug = debug;
 	}
+
+
+
+
 }
