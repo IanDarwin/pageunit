@@ -61,6 +61,9 @@ public class TestRunner extends TestCase {
 		}
 	}
 
+	/** Accumulate all the tests from the named file, call testListedTests to run them.
+	 * @param fileName the test script file name.
+	 */
 	public void run(String fileName) throws Exception {
 		List tests = new ArrayList();
 		try {
@@ -86,7 +89,7 @@ public class TestRunner extends TestCase {
 	private boolean debug;
 	private TestFilter filter = NullTestFilter.getInstance();
 	
-	/** Run ALL the tests in the given "test.txt" or similar file.
+	/** Run ALL the tests in the List, usually created by run().
 	 * @param tests 
 	 * @throws Exception
 	 */
@@ -136,7 +139,7 @@ public class TestRunner extends TestCase {
 			
 			// Handle declarative (non-test) requests here
 			switch(c) {
-			case 'X':
+			case 'X':	// XTENTION or PLUG-IN
 				String className = restOfLine;
 				if (className == null || className.length() == 0) {
 					filter = NullTestFilter.getInstance();
@@ -146,10 +149,10 @@ public class TestRunner extends TestCase {
 						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
 					}
 					filter = (TestFilter)o;
-				}
-				
+				}				
 				done = true;
 				break;
+				
 			case 'D':	// debug on/off
 				char firstChar = restOfLine.charAt(0);
 				if (firstChar == 't' || firstChar == '1') {
@@ -161,17 +164,27 @@ public class TestRunner extends TestCase {
 				}
 				done = true; 
 				break;
+				
 			case 'N':	// start new session
 				session = new WebClient();
 				session.setThrowExceptionOnFailingStatusCode(false);
 				theLink = null;
 				done = true;
 				break;	
+				
+			case 'C':	// Credentials
+				String[] cred = getTwoArgs("credentials", restOfLine, ' ');
+				login = cred[0];
+				pass = cred[1];
+				done = true;
+				break;
+				
 			case 'Q':
 				System.out.println("*****************************************************************");
 				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
 				System.out.println("*****************************************************************");
 				report();
+				done = true;
 				return;
 			}
 			
