@@ -102,11 +102,15 @@ public class TestRunner extends TestCase {
 						TestUtils.checkResultForPattern(theResult.getResponseBodyAsString(), restOfLine));
 				break;
 			case 'L':	// page contains Link
+				// PreCondition: theResult has been set by the U or P code above
+				theLink = null;
 				ReadTag r = new ReadTag(theResult.getResponseBodyAsStream());
 				r.setWantedTags(new String[] { "a" });
 				List l = r.readTags();
 				for (Iterator iter = l.iterator(); iter.hasNext();) {
 					Element tag = (Element) iter.next();
+					
+					// Check in the href first
 					String h = tag.getAttribute("href");
 					if (h == null) {
 						// Presumably, a named anchor, like "<a name='foo'>". 
@@ -114,18 +118,29 @@ public class TestRunner extends TestCase {
 						continue;
 					}
 					if (h.indexOf(restOfLine) != -1) {
+						System.out.println("MATCH HREF");
 						theLink = h;
 						break;
 					}
+					
+					// Check in the Name attribute, if any
 					String n = tag.getAttribute("name");
-					if (n == null)
-						continue;
-					if (n.indexOf(restOfLine) != -1) {
+					if (n != null && n.indexOf(restOfLine) != -1) {
+						System.out.println("MATCH NAME");
+						theLink = h;
+						break;
+					}
+					
+					// Check in the body text, if any.
+					// Note: will fail if body text is nested in e.g., font tag!
+					String t = tag.getBodyText();
+					if (t != null && t.indexOf(restOfLine) != -1) {
+						System.out.println("MATCH BODYTEXT");
 						theLink = h;
 						break;
 					}
 				}
-				assertNotNull("link not found" ,  restOfLine);
+				assertNotNull("link not found" ,  theLink);
 				break;
 			case 'G':
 				// PreCondition: theLink has been set by the 'L' case above.
