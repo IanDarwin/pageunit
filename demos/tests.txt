@@ -2,7 +2,7 @@
 # TCP Test Suite Driver
 # $Id$
 
-# Input language describe in documents/devtools/webtscript.html
+# Input language described in documents/devtools/webtscript.html
 
 N
 

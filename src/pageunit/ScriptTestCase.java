@@ -64,12 +64,12 @@ public class TestRunner extends TestCase {
 			while ((line = is.readLine()) != null) {
 				tests.add(line);
 			}
-			testListedTests(tests);
 		} catch (IOException e) {
 			System.err.println("Cannot open " + TESTS_FILE);
 			System.err.println(e);
 			throw new IllegalArgumentException("Cannot open tests file");
 		}
+		testListedTests(tests);
 	}
 	
 
@@ -285,7 +285,13 @@ public class TestRunner extends TestCase {
 				if (debug) {
 					System.err.println("Name=" + attrName + "; value=" + attrValue);
 				}
+				Iterator inputs = theForm.getChildIterator();
+				while (inputs.hasNext()) {
+					Object element = (Object) inputs.next();
+					System.out.println("LIST CONTAINS " + element);
+				}
 				HtmlInput theButton = theForm.getInputByName(attrName);
+				System.out.println("GETTING IT EXPLICITLY --> " + theButton);
 				theButton.setValueAttribute(attrValue);
 				
 				break;
