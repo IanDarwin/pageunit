@@ -1,11 +1,13 @@
 #
 # TCP Test Suite Driver
+# $Id$
+
 # Input language: one-char command, plus operands.
 # commands:
 # U rURL - get unprotected page
 # P rURL - get protected page
 # M text... - check that previously-gotten page contains given Text (or regex) anywhere in HTML
-# T tag text... - chech that prev. page has at least one tag with the given text (in bodytext or attribute value
+# T tag text... - check that prev. page has at least one tag of type "<tag>" with given text (in bodytext or attribute value
 # N - start new session
 # L - find Link with matching href (TODO: or anchor text)
 # G - Go to link
@@ -17,11 +19,11 @@
 
 # R - fill in paRameter
 # S - submit previously-found form
-#
-# $Version$
-#
 
 N
+
+# Check that logout is harmless when you're not logged in.
+U /LogoutServlet
 
 U /index.jsp
 M Toronto Centre for Phenogenomics
@@ -29,16 +31,18 @@ T title Toronto Centre for Phenogenomics
 
 P /Jsp/view/PersonList.jsp
 M Person List
-##L ?person_key=
-#L _nameLink_4
-#L Darwin
-#G
-U /LogoutServlet
-# Show that logout is harmless when you're logged out.
+#L ?person_key=
+L _nameLink_4
+# Leila is near the start alphabetically. Will break on LIMS when get a lot of Person entries.
+L Baghdadi
+G
 U /LogoutServlet
 
+
 P /Jsp/upload/uploaddetail.jsp
-#T Scan List
+T title Upload
+# Warning: Match uses regexes, so "Upload File(s)" actually looks for "Upload Files"
+M Upload File.s.
 F pageForm
 #R mouse_id 123
 #R project_key 123

@@ -99,6 +99,7 @@ public class TestRunner extends TestCase {
 				} else {
 					System.err.println("Warning: invalid Debug setting in " + line);
 				}
+				
 			case 'U':	// get Unprotected page
 				page = restOfLine;
 				if (session == null) {
@@ -109,6 +110,7 @@ public class TestRunner extends TestCase {
 				theResult = thePage.getWebResponse();
 				assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
 				break;
+				
 			case 'P':	// get protected page
 				theLink = null;
 				page = restOfLine;
@@ -137,37 +139,32 @@ public class TestRunner extends TestCase {
 				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
 				int i = restOfLine.indexOf(' ');
 				assertTrue("tag in line", i > 0);
-				String tagName = restOfLine.substring(0, i);
-				restOfLine = restOfLine.substring(i + 1);
+				String tagType = restOfLine.substring(0, i);
+				String tagText = restOfLine.substring(i + 1);
 				
-				// special case for "title" tag
-				if ("title".equals(tagName)) {
-					assertEquals("T title", restOfLine, thePage.getTitleText());
+				// special case for "title" tag; assume only one <title> tag per HTML page
+				if ("title".equals(tagType)) {
+					assertTrue("T title", thePage.getTitleText().indexOf(tagText) != -1);
 					break; // out of case 'T'
 				}
 				
-				// look for "tagName";
+				// look for tag;
 				boolean found = false;
 				
 				for (Iterator iter = thePage.getChildIterator(); iter.hasNext();) {
 					HtmlElement element = (HtmlElement) iter.next();
 					String bodyText = element.getNodeValue();
-					System.out.println("T LOOP: " + bodyText);
-					if (bodyText != null && bodyText.indexOf(restOfLine) != -1) {
+					if (bodyText != null && bodyText.indexOf(tagText) != -1) {
 						found = true;
 						break; // out of this for loop
 					}
 				}
-				assertTrue("did not find text: ", found);
+				assertTrue("did not find tag type " + tagType + " witth text: " + tagText, found);
 				break;
+				
 			case 'L':	// page contains Link
 				// PreCondition: theResult has been set by the U or P code above
-				theLink = thePage.getAnchorByHref(restOfLine);
-				if (theLink != null) {
-					System.out.println("MATCH HREF by Href");
-					break;
-				}
-
+				theLink = null;
 				Iterator iter = thePage.getAnchors().iterator();
 				while (iter.hasNext()) {
 					HtmlAnchor tag = (HtmlAnchor) iter.next();
@@ -182,19 +179,20 @@ public class TestRunner extends TestCase {
 					
 					// Check in the body text, if any.
 					// Note: will fail if body text is nested in e.g., font tag!
-//					String t = tag.get
-//					if (t != null && t.indexOf(restOfLine) != -1) {
-//						System.out.println("MATCH BODYTEXT");
-//						theLink = h;
-//						break;
-//					}
+					String t = tag.asText();
+					if (t != null && t.indexOf(restOfLine) != -1) {
+						System.out.println("MATCH BODYTEXT");
+						theLink = tag;
+						break;
+					}
 				}
 				assertNotNull("link not found" ,  theLink);
 				break;
-			case 'G':
+				
+			case 'G':	// Go to link
 				// PreCondition: theLink has been set by the 'L' case above.
 				assertNotNull("found link before gotoLink", theLink);
-//				if (!theLink.getHrefAttribute(). startsWith("/")) {
+//				if (!theLink.getHrefAttribute().startsWith("/")) {
 //					String oldPath = theResult.getUrl().getPath();
 //					theLink = oldPath.substring(0, oldPath.lastIndexOf("/")) + "/" + theLink;
 //				}
@@ -216,7 +214,6 @@ public class TestRunner extends TestCase {
 				List theForms = thePage.getAllForms();
 				for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {
 					HtmlForm oneForm = (HtmlForm) iterator.next();
-					System.out.println("ONEFORM: " + oneForm);
 					if (oneForm.getNameAttribute().indexOf(formName) != -1) {
 						theForm = oneForm;	// "You are the One"
 					}
