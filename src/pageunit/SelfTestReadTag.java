@@ -20,7 +20,7 @@ public class SelfTestReadTag extends TestCase {
 		ReadTag red = new ReadTag(is);
 		List readTags = red.readTags();
 		assertNotNull("list from readTags", readTags);
-		assertFalse("any tags from readTags", 0 == readTags.size());
+		assertTrue("any tags from readTags", 7 == readTags.size());
 		Iterator tagsIterator = readTags.iterator();
 		while (tagsIterator.hasNext()) {
 			System.out.println(tagsIterator.next());
