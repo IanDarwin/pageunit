@@ -176,8 +176,9 @@ public class TestUtils {
 		}
 	}
 
-	/**
-	 * @param sb
+	/** Test the input against a pattern.
+	 * @param sb The input sequence
+	 * @param expect The string (which can be a Java 1.4 regex).
 	 */
 	public static boolean checkResultForPattern(CharSequence sb, String expect) {
 		Pattern pE = Pattern.compile(expect);

@@ -1,3 +1,20 @@
+#
+# Input language: one-char command, plus operands.
+# commands:
+# U - get unprotected page
+# P - get protected page
+# T - check that previously-gotten page contains given Text (or regex)
+# S - start new session
+# NOT IMPLEMENTED YET
+# L - find Link with matching anchor text
+# G - Go to link
+# F - find Form
+# R - fill in paRameter
+# S - submit previously-found link or form
+#
+# $Version$
+#
+
 U /index.jsp
 T Toronto Centre for Phenogenomics
 P /Jsp/view/PersonList.jsp
