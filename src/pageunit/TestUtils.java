@@ -64,7 +64,7 @@ public class TestUtils {
 
 		GetMethod initialGet = new GetMethod(targetPage);
 
-		session.executeMethod(initialGet); // request protected page.
+		session.executeMethod(initialGet); // request the page.
 		state = session.getState();
 		if (debug) {
 			System.out.println("Initial Page get: "

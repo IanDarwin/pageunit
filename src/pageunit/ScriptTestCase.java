@@ -150,13 +150,18 @@ public class TestRunner extends TestCase {
 					theLink = oldPath.substring(0, oldPath.lastIndexOf("/")) + "/" + theLink;
 				}
 				System.out.println("Trying to go to " + theLink);
-				// Even if we are inside a protected area, we don't need to login here, so getSimplePage().
+				// Even if we are inside a protected area, we don't need to login here.
 				theResult = TestUtils.followLink(session, theLink);
 				assertEquals("go to link response code", 200, theResult.getStatusCode());
 				break;
-			case 'S':	// start new session
+			case 'N':	// start new session
 				session = new HttpClient();
 				theLink = null;
+				break;
+			case 'F':
+			case 'R':
+			case 'S':
+				fail("code for " + c + " not written yet");
 				break;
 			}
 			
