@@ -1,6 +1,7 @@
 package regress.webtest;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,6 +61,15 @@ public class Element {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return '<' + type + '>';
+		StringBuffer sb = new StringBuffer();
+		sb.append('<').append(type);
+		Set keyset = attributes.keySet();
+		for (Iterator iter = keyset.iterator(); iter.hasNext();) {
+			String name = (String) iter.next();
+			String value = (String) attributes.get(name);
+			sb.append(' ').append(name).append('=').append(value);
+		}
+		sb.append('>');
+		return sb.toString();
 	}
 }

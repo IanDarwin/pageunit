@@ -22,5 +22,5 @@ U /index.jsp
 T Toronto Centre for Phenogenomics
 P /Jsp/view/PersonList.jsp
 T Person List
-L index.jsp
-G
+L ?person_key=22
+#G

@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A simple but reusable recursive-descent HTML/XML tag extractor.
+/** A simple but reusable HTML/XML tag extractor.
  * @author Ian Darwin, Darwin Open Systems, www.darwinsys.com.
  * @version $Id$
  */
@@ -62,13 +62,13 @@ public class ReadTag {
 		List tags = new ArrayList();
 		Element aTag;
 		while ((aTag = nextTag()) != null) {
-			if (aTag.getType().startsWith(XML_ENDTAG_LEADIN))
+			if (aTag.getType().startsWith(XML_ENDTAG_LEADIN)) // e.g., </html>
 				continue;
 			if (wantedTags == null) {
 				tags.add(aTag);
 			} else {
 				for (int i = 0; i < wantedTags.length; i++) {
-					if (aTag.getType().equals(wantedTags[i])) {
+					if (aTag.getType().equalsIgnoreCase(wantedTags[i])) {
 						tags.add(aTag);
 						break;
 					}
@@ -93,14 +93,12 @@ public class ReadTag {
 
 	/** Read one tag. 
 	 * @author Ian Darwin
-	 * @author Long ago it was based on code that I adapted from code by Elliotte Rusty Harold
 	 */
 	protected Element readTag() throws IOException {
 		StringBuffer tagType = new StringBuffer(XML_TAG_START);
 		int i = XML_TAG_START;
 	  
-		while ((i = inrdr.read()) != -1 && i != XML_TAG_END && 
-				
+		while ((i = inrdr.read()) != -1 && i != XML_TAG_END && 				
 				!Character.isWhitespace((char)i)) {
 			
 				tagType.append((char)i);
@@ -108,7 +106,7 @@ public class ReadTag {
 
 		Element tag = new Element(tagType.toString());
 		if (i == XML_TAG_END) {
-			return tag;		// not attributes
+			return tag;		// no attributes
 		}
 		readAttributes(tag, i);
 		return tag;
@@ -123,8 +121,8 @@ public class ReadTag {
 		final int S_INITIAL = S_INNAME;
 		int state = S_INNAME;
 		StringBuffer attrName = new StringBuffer(), attrValue = new StringBuffer();
-		while (i != XML_TAG_END && (i = inrdr.read()) != -1) {
-			
+		while ((i = inrdr.read()) != -1 && i != XML_TAG_END) {
+
 			if (state == Q_SQUOTE && i != Q_SQUOTE) {
 				attrValue.append((char)i);
 			} else if (state == Q_DQUOTE && i != Q_DQUOTE) {
@@ -144,7 +142,9 @@ public class ReadTag {
 				} else 
 					state = Q_DQUOTE;
 			} else if (Character.isWhitespace((char)i)) {
-				setOneAttribute(tag, attrName, attrValue);
+				if (attrName.length() > 0) {
+					setOneAttribute(tag, attrName, attrValue);
+				}
 				state = S_INITIAL;
 			} else {
 				StringBuffer whereToPutChars = state==S_INNAME ? attrName : attrValue;
@@ -156,13 +156,18 @@ public class ReadTag {
 		}
 	}
 
-	/**
+	/** Create one attribute in the map, converting name to lower case (since HTML tags
+	 * are case-insensitive). XXX Consider moving this up to the caller to worry about.
 	 * @param tag
 	 * @param attrName
 	 * @param attrValue
 	 */
 	private void setOneAttribute(Element tag, StringBuffer attrName, StringBuffer attrValue) {
-		tag.setAttribute(attrName.toString(), attrValue.toString());
+		if (attrName.length() == 0 || !Character.isLetter(attrName.charAt(0))) {
+			// System.err.println("warning: invalid attribute name: " + attrName);
+			return;
+		}
+		tag.setAttribute(attrName.toString().toLowerCase(), attrValue.toString());
 		attrName.setLength(0);
 		attrValue.setLength(0);
 	}

@@ -66,12 +66,13 @@ public class TestRunner extends TestCase {
 				throw new IOException("invalid line " + line);
 			}
 			char c = cmd.charAt(0);
-			String restOfLine = line.substring(2);
+			String restOfLine = line.length() > 2 ? line.substring(2) : "";
 			String page;
 
-			char firstChar = restOfLine.charAt(0);
+
 			switch(c) {
 			case 'D':	// debug on/off
+				char firstChar = restOfLine.charAt(0);
 				if (firstChar == 't' || firstChar == '1') {
 					TestUtils.setDebug(true);
 				} else if (firstChar == 'f' || firstChar == '0')	{
@@ -103,31 +104,38 @@ public class TestRunner extends TestCase {
 				break;
 			case 'L':	// page contains Link
 				ReadTag r = new ReadTag(theResult.getResponseBodyAsStream());
+				//System.out.println(theResult.getResponseBodyAsString());
 				r.setWantedTags(new String[] { "a" });
 				List l = r.readTags();
 				for (Iterator iter = l.iterator(); iter.hasNext();) {
 					Element tag = (Element) iter.next();
+					// System.out.println(tag);
 					String h = tag.getAttribute("href");
 					if (h == null) {
 						// Presumably, a named anchor, like "<a name='foo'>". 
 						// Nothing wrong with this, but we can't use it as a goto target, so just ignore.
 						continue;
 					}
+					System.out.println(h);
 					if (h.indexOf(restOfLine) != -1) {
 						theLink = h;
 						break;
 					}
 					String n = tag.getAttribute("name");
+					if (n == null)
+						continue;
 					if (n.indexOf(restOfLine) != -1) {
 						theLink = h;
 						break;
 					}
 				}
-				fail("link " + restOfLine + " not found");
+				assertNotNull("link not found" ,  restOfLine);
 				break;
 			case 'G':
 				assertNotNull("found link before gotoLink", theLink);
-				theResult = TestUtils.getProtectedPage(session, host, port, theLink, login, pass);
+				// Even if we are inside a protected area, we don't need to login here, so getSimplePage().
+				theResult = TestUtils.getSimplePage(session, host, port, theLink);
+				assertEquals("go to link response code", 200, theResult.getStatusCode());
 				break;
 			case 'S':	// start new session
 				session = new HttpClient();
