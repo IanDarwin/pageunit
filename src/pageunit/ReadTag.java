@@ -58,6 +58,21 @@ public class ReadTag {
 		this.wantedTags = tags;
 	}
 	
+	/**
+	 * Accumulate the list of wanted tags one at a time in the least efficient way; for
+	 * long lists you should use setWantedTags() instead.
+	 * @param tagName
+	 */
+	public void addWantedTag(String tagName) {
+		if (wantedTags == null) {
+			wantedTags = new String[] { tagName };
+		} else {
+			String[] tempTags = new String[wantedTags.length + 1];
+			System.arraycopy(wantedTags, 0, tempTags, 0, wantedTags.length);
+			wantedTags[wantedTags.length-1] = tagName;
+		}		
+	}
+	
 	public List readTags() throws IOException {
 		List tags = new ArrayList();
 		Element aTag;
@@ -190,4 +205,6 @@ public class ReadTag {
 	public String toString() {
 		return "ReadTag[" + myOrigin.toString() + "]";
 	}
+
+
 }

@@ -94,12 +94,40 @@ public class TestRunner extends TestCase {
 				assertEquals("protected page code", 200, theResult.getStatusCode());
 				assertEquals("protected page redirect", theResult.getPath(), page);
 				break;
-			case 'T':	// page contains text
+			case 'M':	// page contains text
 				// PreCondition: theResult has been set by the U or P code above
 				theLink = null;
 				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
 				assertTrue("page contains text", 
 						TestUtils.checkResultForPattern(theResult.getResponseBodyAsString(), restOfLine));
+				break;
+			case 'T':	// page contains tag with text (in bodytext or attribute value)
+				// PreCondition: theResult has been set by the U or P code above
+				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
+				int i = restOfLine.indexOf(' ');
+				assertTrue("tag in line", i > 0);
+				String tagName = restOfLine.substring(0, i);
+				restOfLine = restOfLine.substring(i + 1);
+				ReadTag rdr = new ReadTag(theResult.getResponseBodyAsStream());
+				rdr.addWantedTag(tagName);
+				List tags = rdr.readTags();
+				boolean found = false;
+				outer: for (Iterator iter = tags.iterator(); iter.hasNext();) {
+					Element element = (Element) iter.next();
+					String bodyText = element.getBodyText();
+					if (bodyText != null && bodyText.indexOf(restOfLine) != -1) {
+						found = true;
+						break outer;
+					}
+					for (Iterator iterator = element.keySet().iterator(); iterator.hasNext();) {
+						String key = (String) iterator.next();
+						if (element.getAttribute(key).indexOf(restOfLine) != -1) {
+							found = true;
+							break outer;
+						}
+					}
+				}
+				assertTrue("did not find text: ", found);
 				break;
 			case 'L':	// page contains Link
 				// PreCondition: theResult has been set by the U or P code above

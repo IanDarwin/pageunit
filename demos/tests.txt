@@ -2,9 +2,10 @@
 # TCP Test Suite Driver
 # Input language: one-char command, plus operands.
 # commands:
-# U - get unprotected page
-# P - get protected page
-# T - check that previously-gotten page contains given Text (or regex)
+# U rURL - get unprotected page
+# P rURL - get protected page
+# M text... - check that previously-gotten page contains given Text (or regex) anywhere in HTML
+# T tag text... - chech that prev. page has at least one tag with the given text (in bodytext or attribute value
 # N - start new session # IS THIS NEEDED?
 # L - find Link with matching href (TODO: or anchor text)
 # G - Go to link
@@ -19,10 +20,11 @@
 #
 
 U /index.jsp
-T Toronto Centre for Phenogenomics
+M Toronto Centre for Phenogenomics
+T title Toronto Centre for Phenogenomics
 P /Jsp/view/PersonList.jsp
-T Person List
-L ?person_key=22
+M Person List
+L ?person_key=
 L _nameLink_4
 #L Darwin
 G
