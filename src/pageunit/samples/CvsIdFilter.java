@@ -16,7 +16,7 @@ public class CvsIdFilter implements TestFilter {
 
 		String contentAsString = theResult.getContentAsString();
 		if (!(contentAsString.indexOf("$Source") > -1) && !(contentAsString.indexOf("$Id") > -1))  {
-			System.err.println("ERROR: Page does not have a CVS Identifier (Source or Id");
+			throw new RuntimeException("ERROR: Page does not have a CVS Identifier (neither Source nor Id)");
 		}
 	}
 

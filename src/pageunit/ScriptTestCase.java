@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -364,21 +363,16 @@ public class TestRunner extends TestCase {
 						assertEquals("form with redirect: page load", HTTP_STATUS_OK, theResult.getStatusCode());
 					}				
 					
-					break;
-					
+					break;				
 					
 				default:
 					fail("Unknown request: " + line);
 				}
 				this.testPassed(line);
 				
-			} catch (AssertionFailedError tf) {
+			} catch (Throwable ex) {
 				this.testFailed(line);
-				throw tf;
-			} catch (Exception ex) {
-				this.testFailed(line);
-				System.err.println("FAILURE: " + line);
-				System.err.println(ex);
+				System.err.println("FAILURE: " + line + " (" + ex + ")");
 			}
 		}
 		report();
@@ -420,6 +414,7 @@ public class TestRunner extends TestCase {
 	
 	private void report() {
 		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures);
+		assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
 	/**
