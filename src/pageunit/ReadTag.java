@@ -24,7 +24,7 @@ public class ReadTag {
 	
 	public static final char XML_TAG_START = '<';
 	private static final char XML_TAG_END = '>';
-	private static final char XML_ENDTAG_LEADIN = '/';
+	private static final String XML_ENDTAG_LEADIN = "/";
 
 	/** Construct a ReadTag given a URL String */
 	public ReadTag(String theURLString) throws 
@@ -57,6 +57,8 @@ public class ReadTag {
 		List tags = new ArrayList();
 		Element aTag;
 		while ((aTag = nextTag()) != null) {
+			if (aTag.getType().startsWith(XML_ENDTAG_LEADIN))
+				continue;
 			if (wantedTags == null) {
 				tags.add(aTag);
 			} else {
@@ -93,11 +95,12 @@ public class ReadTag {
 		int i = XML_TAG_START;
 	  
 		while ((i = inrdr.read()) != -1 && i != XML_TAG_END && 
-				i != XML_ENDTAG_LEADIN &&
+				
 				!Character.isWhitespace((char)i)) {
 			
 				tagType.append((char)i);
 		}    
+
 		Element tag = new Element(tagType.toString());
 		if (i == XML_TAG_END) {
 			return tag;		// not attributes
