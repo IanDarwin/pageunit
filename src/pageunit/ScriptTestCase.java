@@ -95,28 +95,24 @@ public class TestRunner extends TestCase {
 				assertEquals("protected page redirect", theResult.getPath(), page);
 				break;
 			case 'T':	// page contains text
+				// PreCondition: theResult has been set by the U or P code above
 				theLink = null;
-				if (theResult == null) {
-					throw new IOException("Invalid test.txt: requested txt before getting page");
-				}
+				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
 				assertTrue("page contains text", 
 						TestUtils.checkResultForPattern(theResult.getResponseBodyAsString(), restOfLine));
 				break;
 			case 'L':	// page contains Link
 				ReadTag r = new ReadTag(theResult.getResponseBodyAsStream());
-				//System.out.println(theResult.getResponseBodyAsString());
 				r.setWantedTags(new String[] { "a" });
 				List l = r.readTags();
 				for (Iterator iter = l.iterator(); iter.hasNext();) {
 					Element tag = (Element) iter.next();
-					// System.out.println(tag);
 					String h = tag.getAttribute("href");
 					if (h == null) {
 						// Presumably, a named anchor, like "<a name='foo'>". 
 						// Nothing wrong with this, but we can't use it as a goto target, so just ignore.
 						continue;
 					}
-					System.out.println(h);
 					if (h.indexOf(restOfLine) != -1) {
 						theLink = h;
 						break;
@@ -132,7 +128,12 @@ public class TestRunner extends TestCase {
 				assertNotNull("link not found" ,  restOfLine);
 				break;
 			case 'G':
+				// PreCondition: theLink has been set by the 'L' case above.
 				assertNotNull("found link before gotoLink", theLink);
+				if (!theLink.startsWith("/")) {
+					String oldPath = theResult.getPath();
+					theLink = oldPath.substring(0, oldPath.lastIndexOf("/")) + "/" + theLink;
+				}
 				System.out.println("Trying to go to " + theLink);
 				// Even if we are inside a protected area, we don't need to login here, so getSimplePage().
 				theResult = TestUtils.followLink(session, theLink);
