@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -64,6 +65,12 @@ public class TestRunner extends TestCase {
 		String host = TestUtils.getProperty("host");
 		assertNotNull("hostname", host);
 		int port = TestUtils.getIntProperty("port");
+		
+		System.out.println("*****************************************************************");
+		System.out.println(getClass().getName());
+		System.out.println("Test run with //http://" + host + ":" + port);
+		System.out.println("Run at " + new Date());
+		System.out.println("*****************************************************************");
 
 		// The "testsIterator" goes over all the lines in the text file...
 		while (testsIterator.hasNext()) {
@@ -169,22 +176,30 @@ public class TestRunner extends TestCase {
 				theLink = null;
 				Iterator iter = thePage.getAnchors().iterator();
 				while (iter.hasNext()) {
-					HtmlAnchor tag = (HtmlAnchor) iter.next();
+					HtmlAnchor oneLink = (HtmlAnchor) iter.next();
 					
 					// Check in the Name attribute, if any
-					String n = tag.getNameAttribute();
+					String n = oneLink.getNameAttribute();
 					if (n != null && n.indexOf(restOfLine) != -1) {
 						System.out.println("MATCH NAME");
-						theLink = tag;
+						theLink = oneLink;
+						break;
+					}
+					
+					// Check the Href attribute too
+					n = oneLink.getHrefAttribute();
+					if (n != null && n.indexOf(restOfLine) != -1) {
+						System.out.println("MATCH NAME");
+						theLink = oneLink;
 						break;
 					}
 					
 					// Check in the body text, if any.
 					// Note: will fail if body text is nested in e.g., font tag!
-					String t = tag.asText();
+					String t = oneLink.asText();
 					if (t != null && t.indexOf(restOfLine) != -1) {
 						System.out.println("MATCH BODYTEXT");
-						theLink = tag;
+						theLink = oneLink;
 						break;
 					}
 				}
@@ -206,7 +221,7 @@ public class TestRunner extends TestCase {
 			// FORMS
 
 			case 'F':
-				// Find Form By Name - don't use findFormByName as SOFIA puts junk at start of form name.
+				// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
 				String formName = restOfLine;
 				List theForms = thePage.getAllForms();
 				for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {

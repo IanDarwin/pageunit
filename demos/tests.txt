@@ -2,22 +2,7 @@
 # TCP Test Suite Driver
 # $Id$
 
-# Input language: one-char command, plus operands.
-# commands:
-# U rURL - get unprotected page
-# P rURL - get protected page
-# M text... - check that previously-gotten page contains given Text (or regex) anywhere in HTML
-# T tag text... - check that prev. page has at least one tag of type "<tag>" with given text (in bodytext or attribute value
-# N - start new session
-# L - find Link with matching href (TODO: or anchor text)
-# G - Go to link
-# F - find Form by form name
-# R name=value - fill in paRameter
-# S - submit previously-found form
-
-# Q - quit (for editing on tests.txt, instead of commenting out all the remaining lines...)
-
-# D - control debugging of this test framework, initially off (NOT for general use)
+# Input language describe in documents/devtools/webtscript.html
 
 N
 
@@ -30,7 +15,7 @@ T title Toronto Centre for Phenogenomics
 
 P /Jsp/view/PersonList.jsp
 M Person List
-#L ?person_key=
+L ?person_key=
 L _nameLink_4
 # Leila Baghdadi is near the start alphabetically. Will break on LIMS when get a lot of Person entries.
 L Baghdadi
