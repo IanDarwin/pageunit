@@ -21,8 +21,6 @@ import junit.framework.TestCase;
 public class TestRunner extends TestCase {
 	
 	static List tests = new ArrayList();
-	static String host = "localhost";	// XX get from properties
-	static int port = 8080;
 
 	private static final String TESTS_FILE = "tests.txt";
 	static {
@@ -45,6 +43,8 @@ public class TestRunner extends TestCase {
 		HttpMethod result = null;
 		String login = TestUtils.getProperty("admin_login");
 		String pass = TestUtils.getProperty("admin_passwd");
+		String host = TestUtils.getProperty("host");
+		int port = TestUtils.getIntProperty("port");
 		
 		while (testsIterator.hasNext()) {
 			String line = (String) testsIterator.next();
@@ -62,7 +62,7 @@ public class TestRunner extends TestCase {
 				throw new IOException("invalid line " + line);
 			}
 			char c = cmd.charAt(0);
-			String restOfLine = cmd.substring(2);
+			String restOfLine = line.substring(2);
 			String page;
 
 			switch(c) {

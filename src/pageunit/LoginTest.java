@@ -5,8 +5,6 @@ import junit.framework.TestCase;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 
-import regress.http.Util;
-
 /**
  * Trying to build a usable test engine using JUnit and Jakarta HttpClient directly.
  * @version $Id$
@@ -21,14 +19,16 @@ public class LoginTest extends TestCase {
 	public void testGoodLogin() throws Exception {
 		System.out.println("TestTest.testGoodLogin()");
 
-		String login = Util.getInstance().getProperty("admin_login");
-		String pass = Util.getInstance().getProperty("admin_passwd");
+		String login = TestUtils.getProperty("admin_login");
+		String pass = TestUtils.getProperty("admin_passwd");
+		String host = TestUtils.getProperty("host");
+		int port = TestUtils.getIntProperty("port");
 		HttpClient session = new HttpClient();
 
 		assertNotNull("login", login);
 		assertNotNull("pass", pass);
 
-		HttpMethod result = TestUtils.getProtectedPage(session, "localhost", 8080,
+		HttpMethod result = TestUtils.getProtectedPage(session, host, 8080,
 				TARGET_PATH, login, pass);
 		assertEquals("login code", 200, result.getStatusCode());
 		System.out.println(result.getPath());

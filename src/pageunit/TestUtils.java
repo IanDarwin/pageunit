@@ -204,4 +204,16 @@ public class TestUtils {
 		String s = props.getProperty(property);
 		return s;
 	}
+
+	/**
+	 * @param string
+	 * @return
+	 */
+	public static int getIntProperty(String string) {
+		String intStr = getProperty(string);
+		if (intStr == null) {
+			throw new IllegalArgumentException("getIntProperty: " + string + " does not exist");
+		}
+		return Integer.parseInt(intStr);
+	}
 }

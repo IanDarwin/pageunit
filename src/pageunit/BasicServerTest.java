@@ -18,8 +18,12 @@ public class BasicServerTest extends TestCase {
 	public void testIndexPage() throws Exception {
 		System.out.println("TestTest.testIndexPage()");
 		HttpClient session = new HttpClient();
-		HttpMethod res = TestUtils.getSimplePage(session, "localhost", 8080, "/index.jsp");
+		String host = TestUtils.getProperty("host");
+		int port = TestUtils.getIntProperty("port");
+		HttpMethod res = TestUtils.getSimplePage(session, host, port, "/index.jsp");
+		
 		assertEquals("index page load", 200, res.getStatusCode());
+		
 		assertTrue("contains title", TestUtils.checkResultForPattern(res.getResponseBodyAsString(),
 				"Toronto Centre for Phenogenomics"));
 	}
