@@ -108,6 +108,11 @@ public class TestRunner extends TestCase {
 				for (Iterator iter = l.iterator(); iter.hasNext();) {
 					Element tag = (Element) iter.next();
 					String h = tag.getAttribute("href");
+					if (h == null) {
+						// Presumably, a named anchor, like "<a name='foo'>". 
+						// Nothing wrong with this, but we can't use it as a goto target, so just ignore.
+						continue;
+					}
 					if (h.indexOf(restOfLine) != -1) {
 						theLink = h;
 						break;
@@ -118,7 +123,7 @@ public class TestRunner extends TestCase {
 						break;
 					}
 				}
-				fail("link not found");
+				fail("link " + restOfLine + " not found");
 				break;
 			case 'G':
 				assertNotNull("found link before gotoLink", theLink);
