@@ -194,15 +194,9 @@ public class TestRunner extends TestCase {
 			case 'G':	// Go to link
 				// PreCondition: theLink has been set by the 'L' case above.
 				assertNotNull("found link before gotoLink", theLink);
-				theLink.click();
-//				if (!theLink.getHrefAttribute().startsWith("/")) {
-//					String oldPath = theResult.getUrl().getPath();
-//					theLink = oldPath.substring(0, oldPath.lastIndexOf("/")) + "/" + theLink;
-//				}
-				System.out.println("Trying to go to " + theLink);
-				// Even if we are inside a protected area, we don't need to login here.
-//				theResult = TestUtils.followLink(session, theLink);
-//				assertEquals("go to link response code", HTTP_STATUS_OK, theResult.getStatusCode());
+				thePage = (HtmlPage)theLink.click();
+
+				assertEquals("go to link response code", HTTP_STATUS_OK, thePage.getWebResponse().getStatusCode());
 				break;
 			case 'N':	// start new session
 				session = new WebClient();
