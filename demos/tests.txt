@@ -23,5 +23,15 @@ T Toronto Centre for Phenogenomics
 P /Jsp/view/PersonList.jsp
 T Person List
 L ?person_key=22
+L _nameLink_4
+#L Darwin
 G
 U /LogoutServlet
+
+#P /Jsp/upload/MRISubjectList.jsp
+#T Scan List
+#F Add
+#R mouse_id 123
+#R project_key 123
+#S
+#
