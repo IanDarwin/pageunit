@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A simple but reusable HTML/XML tag extractor.
+/** A simple but reusable HTML/XML tag extractor; not to be confused with an XML parser.
  * @author Ian Darwin, Darwin Open Systems, www.darwinsys.com.
  * @version $Id$
  */
@@ -78,14 +78,23 @@ public class ReadTag {
 		return tags;
 	}
 	
+	private Element currentTag;
+	
 	/** Read the next tag.  */
 	protected Element nextTag() throws IOException {
 		int i;
+		StringBuffer bodyText = new StringBuffer();
 		while ((i = inrdr.read()) != -1) {
 			char thisChar = (char)i;
 			if (thisChar == XML_TAG_START) {
+				if (currentTag != null && bodyText.length() > 0) {
+					currentTag.setBodyText(bodyText.toString());
+					bodyText.setLength(0);
+				}
 				Element tag = readTag();
-				return tag;
+				return currentTag = tag;
+			} else {
+				bodyText.append(thisChar);
 			}
 		}
 		return null; // at EOF

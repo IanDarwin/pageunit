@@ -133,8 +133,9 @@ public class TestRunner extends TestCase {
 				break;
 			case 'G':
 				assertNotNull("found link before gotoLink", theLink);
+				System.out.println("Trying to go to " + theLink);
 				// Even if we are inside a protected area, we don't need to login here, so getSimplePage().
-				theResult = TestUtils.getSimplePage(session, host, port, theLink);
+				theResult = TestUtils.followLink(session, theLink);
 				assertEquals("go to link response code", 200, theResult.getStatusCode());
 				break;
 			case 'S':	// start new session

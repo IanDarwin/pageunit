@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -28,6 +29,7 @@ public class TestUtils {
 	private static final String TCPTEST_PROPERTIES_FILENAME = ".tcptest.properties";
 	private static Properties props  = new Properties();
 	private static boolean debug;
+	private static HttpState state;
 	
 	static {
 		String home = System.getProperty("user.home");
@@ -63,6 +65,7 @@ public class TestUtils {
 		GetMethod initialGet = new GetMethod(targetPage);
 
 		session.executeMethod(initialGet); // request protected page.
+		state = session.getState();
 		if (debug) {
 			System.out.println("Initial Page get: "
 				+ initialGet.getStatusLine().toString());
@@ -70,6 +73,8 @@ public class TestUtils {
 
 		return initialGet;
 	}
+	
+
 
 	/**
 	 * Get an HTML page that is protected by J2EE Container-based Forms
@@ -102,6 +107,7 @@ public class TestUtils {
 
 		session.executeMethod(interaction); // request protected page, and
 											// handle redirection here.
+		
 		if (debug) {
 				System.out.println("Initial Page get: "
 				+ interaction.getStatusLine().toString());
@@ -138,11 +144,30 @@ public class TestUtils {
 		}
 		interaction = new GetMethod(redirectURL);
 		session.executeMethod(interaction);
-		interaction.setFollowRedirects(false);
+		state = session.getState();
 		
 		return interaction;
 	}
 
+	
+	/** After using getSimplePage or getProtectedPage, can hopefully use followLink to go to 
+	 * a relative link on the same page.
+	 * @param session
+	 * @param targetPage
+	 * @return
+	 * @throws IOException
+	 */
+	public static HttpMethod followLink(HttpClient session, String targetPage) throws IOException {
+		HttpMethod followLink = new GetMethod(targetPage);
+		session.executeMethod(session.getHostConfiguration(), followLink, state);
+		state = session.getState();
+		if (debug) {
+			System.out.println("Initial Page get: "
+				+ followLink.getStatusLine().toString());
+		}
+		return followLink;
+	}
+	
 	/**
 	 * @param interaction
 	 * @return

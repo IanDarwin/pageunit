@@ -69,7 +69,12 @@ public class Element {
 			String value = (String) attributes.get(name);
 			sb.append(' ').append(name).append('=').append(value);
 		}
-		sb.append('>');
+
+		if (bodyText == null ) {
+			sb.append('/').append('>');
+		} else {
+			sb.append('>').append(bodyText).append('<').append("/").append(type).append('>');
+		}
 		return sb.toString();
 	}
 }

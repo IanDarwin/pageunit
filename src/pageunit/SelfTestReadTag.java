@@ -14,14 +14,14 @@ import junit.framework.TestCase;
  */
 public class SelfTestReadTag extends TestCase {
 	
-	String htmlText = "<html><head><foo><bar></head><body><a href='http://grelber/' name=\"grelber\">";
+	String htmlText = "<html><head><foo><bar></head><body><p>Paragraph<a href='http://grelber/' name=\"grelber\">";
 	
 	public void testReadAll() throws Exception {
 		Reader is = new StringReader(htmlText);
 		ReadTag red = new ReadTag(is);
 		List readTags = red.readTags();
 		assertNotNull("list from readTags", readTags);
-		assertTrue("any tags from readTags", 6 == readTags.size());
+		assertTrue("any tags from readTags", 7 == readTags.size());
 		Iterator tagsIterator = readTags.iterator();
 		while (tagsIterator.hasNext()) {
 			System.out.println(tagsIterator.next());
