@@ -6,6 +6,9 @@
 
 N
 
+# Apply site-specific filter (requires CVS identifier in page)
+X regress.webtest.CvsIdFilter
+
 # Ensure that logout is harmless when you're not logged in.
 U /LogoutServlet
 

@@ -79,6 +79,7 @@ public class TestRunner extends TestCase {
 	private HtmlAnchor theLink = null;
 	private HtmlForm theForm = null;
 	private boolean debug;
+	private TestFilter filter = NullTestFilter.getInstance();
 	
 	/** Run ALL the tests in the given "test.txt" or similar file.
 	 * @param tests 
@@ -127,6 +128,18 @@ public class TestRunner extends TestCase {
 			String page;
 
 			switch(c) {
+			case 'X':
+				String className = restOfLine;
+				if (className == null || className.length() == 0) {
+					filter = NullTestFilter.getInstance();
+				} else {
+					Object o = Class.forName(className).newInstance();
+					if (!(o instanceof TestFilter)) {
+						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
+					}
+					filter = (TestFilter)o;
+				}
+				break;
 			case 'D':	// debug on/off
 				char firstChar = restOfLine.charAt(0);
 				if (firstChar == 't' || firstChar == '1') {
@@ -143,6 +156,7 @@ public class TestRunner extends TestCase {
 
 				thePage = TestUtils.getSimplePage(session, host, port, page);
 				theResult = thePage.getWebResponse();
+				filter.filterPage(thePage, theResult);
 				assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
 				break;
 				
@@ -152,6 +166,7 @@ public class TestRunner extends TestCase {
 
 				thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
 				theResult = thePage.getWebResponse();
+				filter.filterPage(thePage, theResult);
 				assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
 				assertEquals("protected page redirect", page, theResult.getUrl().getPath());
 				break;
