@@ -42,13 +42,6 @@ public class TestUtils {
 			System.err.println("Can't load " + propsFileName);
 		}
 	}
-	
-	public static HttpClient getHttpClient(String username, String pass) {
-		HttpClient client = new HttpClient();
-		Credentials creds = new UsernamePasswordCredentials(username, pass);
-		client.getState().setCredentials(AuthScope.ANY, creds);
-		return client;
-	}
 
 	/**
 	 * Get an unprotected page

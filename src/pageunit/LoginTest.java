@@ -23,15 +23,14 @@ public class LoginTest extends TestCase {
 
 		String login = Util.getInstance().getProperty("admin_login");
 		String pass = Util.getInstance().getProperty("admin_passwd");
-		HttpClient session = TestUtils.getHttpClient(login, pass);
+		HttpClient session = new HttpClient();
 
 		assertNotNull("login", login);
 		assertNotNull("pass", pass);
 
 		HttpMethod result = TestUtils.getProtectedPage(session, "localhost", 8080,
 				TARGET_PATH, login, pass);
-		int statusCode = result.getStatusCode();
-		assertEquals("login code", 200, statusCode);
+		assertEquals("login code", 200, result.getStatusCode());
 		System.out.println(result.getPath());
 		assertEquals("login page", result.getPath(), TARGET_PATH);
 		

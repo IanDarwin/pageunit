@@ -42,15 +42,19 @@ public class TestRunner extends TestCase {
 	public void testListedTests() throws Exception {
 		Iterator testsIterator = tests.iterator();
 		HttpClient session = new HttpClient();
-		HttpMethod result;
+		HttpMethod result = null;
 		String login = TestUtils.getProperty("admin_login");
 		String pass = TestUtils.getProperty("admin_passwd");
 		
 		while (testsIterator.hasNext()) {
 			String line = (String) testsIterator.next();
+			if (line.length() == 0)
+				continue;
+			if (line.charAt(0) == '#')
+				continue;
 			System.out.println("TEST: " + line);
 			StringTokenizer st = new StringTokenizer(line);
-			if (st.countTokens() < 2) {
+			if (st.countTokens() < 1) {
 				throw new IOException("invalid line " + line);
 			}
 			String cmd = st.nextToken();
@@ -58,18 +62,29 @@ public class TestRunner extends TestCase {
 				throw new IOException("invalid line " + line);
 			}
 			char c = cmd.charAt(0);
+			String restOfLine = cmd.substring(2);
 			String page;
 
 			switch(c) {
 			case 'U':	// get Unprotected page
-				page = st.nextToken();
+				page = restOfLine;
 				session = new HttpClient(); // XXX ??
 				result = TestUtils.getSimplePage(session, host, port, page);
+				assertEquals("unprotected page load", 200, result.getStatusCode());
 				break;
 			case 'P':	// get protected page
-				page = st.nextToken();
+				page = restOfLine;
 				session = new HttpClient(); // XXX ??
 				result = TestUtils.getProtectedPage(session, host, port, page, login, pass);
+				assertEquals("protected page code", 200, result.getStatusCode());
+				assertEquals("protected page redirect", result.getPath(), page);
+				break;
+			case 'T':	// page contains text
+				if (result == null) {
+					throw new IOException("Invalid test.txt: ask for txt before getting page");
+				}
+				assertTrue("page contains text", 
+						TestUtils.checkResultForPattern(result.getResponseBodyAsString(), restOfLine));
 				break;
 			case 'S':	// start new session
 				session = new HttpClient();
