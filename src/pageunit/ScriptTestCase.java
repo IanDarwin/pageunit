@@ -52,10 +52,14 @@ public class TestRunner extends TestCase {
 		
 		while (testsIterator.hasNext()) {
 			String line = (String) testsIterator.next();
-			if (line.length() == 0)
+			if (line.length() == 0) {
+				System.out.println();
 				continue;
-			if (line.charAt(0) == '#')
+			}
+			if (line.charAt(0) == '#') {
+				System.out.println(line);
 				continue;
+			}
 			System.out.println("TEST: " + line);
 			StringTokenizer st = new StringTokenizer(line);
 			if (st.countTokens() < 1) {

@@ -60,6 +60,11 @@ public class TestUtils {
 			String targetHost, int targetPort, String targetPage)
 			throws IOException {
 
+		if (!targetPage.startsWith("/")) {
+			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
+			targetPage = "/" + targetPage;
+		}
+
 		session.getHostConfiguration().setHost(targetHost, targetPort, "http");
 
 		GetMethod initialGet = new GetMethod(targetPage);
@@ -95,6 +100,11 @@ public class TestUtils {
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException {
+		
+		if (!targetPage.startsWith("/")) {
+			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
+			targetPage = "/" + targetPage;
+		}
 
 		session.getHostConfiguration().setHost(targetHost, targetPort, "http");
 
@@ -113,7 +123,12 @@ public class TestUtils {
 				+ interaction.getStatusLine().toString());
 		}
 		int statusCode = interaction.getStatusCode();
-        
+        System.out.println("XXX " + statusCode);
+		if (statusCode == 200) {
+			System.err.println("protected page " + targetPage + " did not require login");
+			return interaction;
+		}
+		
 		if (!isRedirectCode(statusCode)) {
 			throw new IllegalStateException("Requested page did not redirect");
 		}

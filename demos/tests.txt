@@ -30,7 +30,7 @@ L _nameLink_4
 G
 U /LogoutServlet
 
-#P /Jsp/upload/MRISubjectList.jsp
+P /Jsp/upload/uploaddetail.jsp
 #T Scan List
 #F Add
 #R mouse_id 123
