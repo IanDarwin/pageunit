@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/** A simple but reusable HTML tag extractor.
+/** A simple but reusable recursive-descent HTML/XML tag extractor.
  * @author Ian Darwin, Darwin Open Systems, www.darwinsys.com.
  * @version $Id$
  */
