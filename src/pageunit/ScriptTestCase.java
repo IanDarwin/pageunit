@@ -24,7 +24,8 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 /**
  * Run the classes listed in tests.txt
  * <br>
- * TODO: Maybe make this use the JUnit API better so each test is reported separately?
+ * TODO: Maybe make this class be a JUnit "TestRunner" so each test is reported separately?
+ * TODO: Add "Back button" functionality!
  * @version $Id$
  */
 public class TestRunner extends TestCase {

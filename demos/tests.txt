@@ -13,6 +13,18 @@ U /index.jsp
 M Toronto Centre for Phenogenomics
 T title Toronto Centre for Phenogenomics
 
+# Exercise very basic server functionality
+U /tests/index.html
+L nosof.jsp
+G
+# These don't work right now... Sigh...
+#U /tests/index.html
+#L extends.jsp
+#G
+#U /tests/index.html
+#L nonav.jsp
+#G
+
 P /Jsp/view/PersonList.jsp
 M Person List
 L ?person_key=
@@ -39,6 +51,8 @@ S htmlPageTopContainer_pageForm_box1_displaybox1_search
 
 U /Jsp/upload/uploaddetail.jsp
 T title Upload
-# Warning: Match uses regexes, so "Upload File(s)" actually looks for "Upload Files"
+# Warning: Match uses regexes, so "Upload File(s)" would actually look for "Upload Files" and RE-tag the 's' :-)
 M Upload File.s.
 
+# All done.
+U /LogoutServlet
