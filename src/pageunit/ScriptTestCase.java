@@ -22,25 +22,49 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 /**
- * Run the classes listed in tests.txt
+ * Run the classes listed in tests.txt. This is set up as a JUnit "test case" not as a JUnit Test Runner,
+ * until we find a way to do the latter, so (a) it all appears as one ginormous test, and (b) it fails on the
+ * first AssertionException, and (c) it also has a Main method so you can run it standalone.
  * <br>
  * TODO: Maybe make this class be a JUnit "TestRunner" so each test is reported separately?
  * TODO: Add "Back button" functionality!
  * @version $Id$
  */
 public class TestRunner extends TestCase {
-	
-	private static final int HTTP_STATUS_OK = 200;
-	static List tests = new ArrayList();
 
 	private static final String TESTS_FILE = "tests.txt";
-	static {
+	
+	private static final int HTTP_STATUS_OK = 200;
+	
+	public void testAllTests() throws Exception {
+		run(TESTS_FILE);
+	}
+	
+	public static void main(String[] args) {
+		TestRunner t = new TestRunner();
 		try {
-			BufferedReader is = new BufferedReader(new FileReader(TESTS_FILE));
+			if (args.length == 0) {
+				t.run(TESTS_FILE);
+			} else {
+				for (int i = 0; i < args.length; i++) {
+					t.run(args[i]);
+				}
+			}
+			System.out.println("SUCCESS");
+		} catch (Exception e) {
+			System.out.println("FAILED: caught Exception " + e);
+		}
+	}
+
+	public void run(String fileName) throws Exception {
+		List tests = new ArrayList();
+		try {
+			BufferedReader is = new BufferedReader(new FileReader(fileName));
 			String line;
 			while ((line = is.readLine()) != null) {
 				tests.add(line);
 			}
+			testListedTests(tests);
 		} catch (IOException e) {
 			System.err.println("Cannot open " + TESTS_FILE);
 			System.err.println(e);
@@ -48,7 +72,7 @@ public class TestRunner extends TestCase {
 		}
 	}
 	
-	private Iterator testsIterator = tests.iterator();
+
 	private WebClient session = new WebClient();
 	private WebResponse theResult = null;
 	private HtmlPage thePage = null;
@@ -57,9 +81,10 @@ public class TestRunner extends TestCase {
 	private boolean debug;
 	
 	/** Run ALL the tests in the given "test.txt" or similar file.
+	 * @param tests 
 	 * @throws Exception
 	 */
-	public void testListedTests() throws Exception {
+	public void testListedTests(List tests) throws Exception {
 
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
@@ -76,6 +101,7 @@ public class TestRunner extends TestCase {
 		System.out.println("*****************************************************************");
 
 		// The "testsIterator" goes over all the lines in the text file...
+		Iterator testsIterator = tests.iterator();
 		while (testsIterator.hasNext()) {
 			String line = (String) testsIterator.next();
 			if (line.length() == 0) {
