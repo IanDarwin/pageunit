@@ -11,21 +11,9 @@ import regress.http.Util;
  * Trying to build a usable test engine using JUnit and Jakarta HttpClient directly.
  * @version $Id$
  */
-public class TestTest extends TestCase {
+public class LoginTest extends TestCase {
 	
 	private static final String TARGET_PATH = "/Jsp/view/PersonList.jsp";
-	
-	/** Test that we can get to the index page correctly.
-	 * @throws Exception
-	 */
-	public void testIndexPage() throws Exception {
-		System.out.println("TestTest.testIndexPage()");
-		HttpClient session = new HttpClient();
-		HttpMethod res = TestUtils.getSimplePage(session, "localhost", 8080, "/index.jsp");
-		assertEquals("index page load", 200, res.getStatusCode());
-		assertTrue("contains title", TestUtils.checkResultForPattern(res.getResponseBodyAsString(),
-				"Toronto Centre for Phenogenomics"));
-	}
 	
 	/** Test that a good login and password gets us past the login screen.
 	 * @throws Exception
@@ -62,5 +50,6 @@ public class TestTest extends TestCase {
 		HttpMethod result = TestUtils.getProtectedPage(session, "localhost", 8080, TARGET_PATH, login, pass);
 		assertEquals("Bad login status", result.getPath(), "/loginfailure.jsp");
 		
+		TestUtils.doLogout(session);	  // show that logout is harmless if you're not logged in.
 	}
 }

@@ -1,6 +1,9 @@
 package regress.webtest;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +27,21 @@ import org.apache.commons.httpclient.methods.PostMethod;
  * @version $Id$
  */
 public class TestUtils {
+	
+	private static final String TCPTEST_PROPERTIES_FILENAME = ".tcptest.properties";
+	static TestUtils singleton;
+	private static Properties props  = new Properties();
+	
+	static {
+		String home = System.getProperty("user.home");
+		String propsFileName = home + File.separator +TCPTEST_PROPERTIES_FILENAME;
+		
+		try {
+			props.load(new FileInputStream(propsFileName));
+		} catch (IOException ex) {
+			System.err.println("Can't load " + propsFileName);
+		}
+	}
 	
 	public static HttpClient getHttpClient(String username, String pass) {
 		HttpClient client = new HttpClient();
@@ -182,5 +200,19 @@ public class TestUtils {
 		Pattern pE = Pattern.compile(expect);
 		Matcher mE = pE.matcher(sb);
 		return mE.find();
+	}
+	
+
+	
+	/** Retrieve a property from Util, either from the System Properties (consulted first, to allow overriding on the command line)
+	 * or in the user's property file (${user.home} + TCPTEST_PROPERTIES_FILENAME);
+	 * @param property the key to look up
+	 * @return The value corresponding to the given key.
+	 */
+	public static String getProperty(String property) {
+		if (System.getProperty(property) != null)
+			return System.getProperty(property);
+		String s = props.getProperty(property);
+		return s;
 	}
 }

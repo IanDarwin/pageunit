@@ -1,0 +1,2 @@
+U /index.jsp
+P /Jsp/view/PersonList.jsp
