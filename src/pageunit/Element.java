@@ -1,5 +1,6 @@
 package regress.webtest;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,7 +14,9 @@ public class Element {
 	/** The type of element, e.g., in HTML, "a", "img", etc. */
 	private final String type;	
 	/** The attributes */
-	private Map attributes;
+	private Map attributes = new HashMap();
+	/** The body text, if any, or null */
+	private String bodyText;
 	
 	/**
 	 * @param type
@@ -45,6 +48,14 @@ public class Element {
 	public String getType() {
 		return type;
 	}
+	public String getBodyText() {
+		return bodyText;
+	}
+	
+	public void setBodyText(String bodyText) {
+		this.bodyText = bodyText;
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */

@@ -14,7 +14,7 @@ import junit.framework.TestCase;
  */
 public class SelfTestReadTag extends TestCase {
 	
-	String htmlText = "<html><head><foo><bar></head><body><a href='http://grelber/' name=grelber>";
+	String htmlText = "<html><head><foo><bar></head><body><a href='http://grelber/' name=\"grelber\">";
 	
 	public void testReadAll() throws Exception {
 		Reader is = new StringReader(htmlText);
@@ -52,5 +52,29 @@ public class SelfTestReadTag extends TestCase {
 		while (tagsIterator.hasNext()) {
 			System.out.println(tagsIterator.next());
 		}
+	}
+	
+	public void testReadDocType() throws Exception {
+		Reader is = new StringReader("<?xml version='1.0'?>");
+		ReadTag red = new ReadTag(is);
+		List list = red.readTags();
+		assertNotNull("list from readTags", list);
+		assertTrue("any tags from readTags", 1 == list.size());
+		Element el = (Element)list.get(0);
+		assertEquals("list type", "?xml", el.getType());
+	}
+	
+	public void testReadAttrs() throws Exception {
+		Reader is = new StringReader(htmlText);
+		ReadTag red = new ReadTag(is);
+		red.setWantedTags(new String[] { "a" });
+		List list = red.readTags();
+		assertNotNull("list from readTags", list);
+		assertTrue("any tags from readTags", 1 == list.size());
+		Element el = (Element)list.get(0);
+		assertEquals("list type", "a", el.getType());
+		System.out.println("HREF='" + el.getAttribute("href") + "'");
+		assertEquals("name attribute", "grelber", el.getAttribute("name"));
+		assertEquals("href attribute", "http://grelber/", el.getAttribute("href"));
 	}
 }

@@ -2,12 +2,15 @@ package regress.webtest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /** A simple but reusable recursive-descent HTML/XML tag extractor.
  * @author Ian Darwin, Darwin Open Systems, www.darwinsys.com.
@@ -43,6 +46,10 @@ public class ReadTag {
 	public ReadTag(Reader rdr) {
 		myOrigin = "(pre-opened reader)";
 		inrdr = new BufferedReader(rdr);
+	}
+	
+	public ReadTag(InputStream is) {
+		this(new InputStreamReader(is));
 	}
 	
 	/**
@@ -105,10 +112,61 @@ public class ReadTag {
 		if (i == XML_TAG_END) {
 			return tag;		// not attributes
 		}
-		while (i != XML_TAG_END && (i = inrdr.read()) != -1) {
-			// XXX waste chars up to end tag, for now
-		}
+		readAttributes(tag, i);
 		return tag;
+	}
+
+	/** Read all the attributes for the current tag.
+	 * @param tag
+	 * @throws IOException
+	 */
+	private void readAttributes(Element tag, int i) throws IOException {
+		final int S_INNAME = -1, S_EQUALS = '=', Q_NONE = 'N', Q_SQUOTE = '\'', Q_DQUOTE = '"';
+		final int S_INITIAL = S_INNAME;
+		int state = S_INNAME;
+		StringBuffer attrName = new StringBuffer(), attrValue = new StringBuffer();
+		while (i != XML_TAG_END && (i = inrdr.read()) != -1) {
+			
+			if (state == Q_SQUOTE && i != Q_SQUOTE) {
+				attrValue.append((char)i);
+			} else if (state == Q_DQUOTE && i != Q_DQUOTE) {
+				attrValue.append((char)i);
+			} else if (i == '=') {
+				state = S_EQUALS;
+			} else if (i == Q_SQUOTE) {
+				if (state == Q_SQUOTE) {// End of quoted string
+					setOneAttribute(tag, attrName, attrValue);
+					state = S_INITIAL;
+				} else 
+					state = Q_SQUOTE;
+			} else if (i == Q_DQUOTE) {
+				if (state == Q_DQUOTE) {// End of quoted string
+					setOneAttribute(tag, attrName, attrValue);
+					state = S_INITIAL;
+				} else 
+					state = Q_DQUOTE;
+			} else if (Character.isWhitespace((char)i)) {
+				setOneAttribute(tag, attrName, attrValue);
+				state = S_INITIAL;
+			} else {
+				StringBuffer whereToPutChars = state==S_INNAME ? attrName : attrValue;
+				whereToPutChars.append((char)i);
+			}
+		}
+		if (attrName.length() > 0) {
+			setOneAttribute(tag, attrName, attrValue);
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @param attrName
+	 * @param attrValue
+	 */
+	private void setOneAttribute(Element tag, StringBuffer attrName, StringBuffer attrValue) {
+		tag.setAttribute(attrName.toString(), attrValue.toString());
+		attrName.setLength(0);
+		attrValue.setLength(0);
 	}
 
 	public void close() throws IOException {

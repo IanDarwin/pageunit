@@ -40,7 +40,8 @@ public class TestRunner extends TestCase {
 	public void testListedTests() throws Exception {
 		Iterator testsIterator = tests.iterator();
 		HttpClient session = new HttpClient();
-		HttpMethod result = null;
+		HttpMethod theResult = null;
+		String theLink = null;
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
 		String pass = TestUtils.getProperty("admin_passwd");
@@ -81,25 +82,52 @@ public class TestRunner extends TestCase {
 			case 'U':	// get Unprotected page
 				page = restOfLine;
 				session = new HttpClient(); // XXX ??
-				result = TestUtils.getSimplePage(session, host, port, page);
-				assertEquals("unprotected page load", 200, result.getStatusCode());
+				theResult = TestUtils.getSimplePage(session, host, port, page);
+				assertEquals("unprotected page load", 200, theResult.getStatusCode());
 				break;
 			case 'P':	// get protected page
+				theLink = null;
 				page = restOfLine;
 				session = new HttpClient(); // XXX ??
-				result = TestUtils.getProtectedPage(session, host, port, page, login, pass);
-				assertEquals("protected page code", 200, result.getStatusCode());
-				assertEquals("protected page redirect", result.getPath(), page);
+				theResult = TestUtils.getProtectedPage(session, host, port, page, login, pass);
+				assertEquals("protected page code", 200, theResult.getStatusCode());
+				assertEquals("protected page redirect", theResult.getPath(), page);
 				break;
 			case 'T':	// page contains text
-				if (result == null) {
+				theLink = null;
+				if (theResult == null) {
 					throw new IOException("Invalid test.txt: requested txt before getting page");
 				}
 				assertTrue("page contains text", 
-						TestUtils.checkResultForPattern(result.getResponseBodyAsString(), restOfLine));
+						TestUtils.checkResultForPattern(theResult.getResponseBodyAsString(), restOfLine));
+				break;
+			case 'L':	// page contains Link
+				ReadTag r = new ReadTag(theResult.getResponseBodyAsStream());
+				r.setWantedTags(new String[] { "a" });
+				List l = r.readTags();
+				for (Iterator iter = l.iterator(); iter.hasNext();) {
+					Element tag = (Element) iter.next();
+					String h = tag.getAttribute("href");
+					if (h.indexOf(restOfLine) != -1) {
+						theLink = h;
+						break;
+					}
+					String n = tag.getAttribute("name");
+					if (n.indexOf(restOfLine) != -1) {
+						theLink = h;
+						break;
+					}
+				}
+				fail("link not found");
+				break;
+			case 'G':
+				assertNotNull("found link before gotoLink", theLink);
+				theResult = TestUtils.getProtectedPage(session, host, port, theLink, login, pass);
 				break;
 			case 'S':	// start new session
 				session = new HttpClient();
+				theLink = null;
+				break;
 			}
 			
 		}

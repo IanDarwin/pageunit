@@ -6,10 +6,11 @@
 # P - get protected page
 # T - check that previously-gotten page contains given Text (or regex)
 # S - start new session # IS THIS NEEDED?
+# L - find Link with matching href (TODO: or anchor text)
+# G - Go to link
 #
 # NOT IMPLEMENTED YET
-# L - find Link with matching anchor text
-# G - Go to link
+
 # F - find Form by # or by Submit button text
 # R - fill in paRameter
 # S - submit previously-found form
@@ -21,3 +22,5 @@ U /index.jsp
 T Toronto Centre for Phenogenomics
 P /Jsp/view/PersonList.jsp
 T Person List
+L index.jsp
+G
