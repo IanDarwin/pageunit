@@ -2,8 +2,9 @@ package regress.webtest;
 
 import junit.framework.TestCase;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * Just confirm that the server is running.
@@ -17,14 +18,16 @@ public class BasicServerTest extends TestCase {
 	 */
 	public void testIndexPage() throws Exception {
 		System.out.println("TestTest.testIndexPage()");
-		HttpClient session = new HttpClient();
+		WebClient session = new WebClient();
 		String host = TestUtils.getProperty("host");
 		int port = TestUtils.getIntProperty("port");
-		HttpMethod res = TestUtils.getSimplePage(session, host, port, "/index.jsp");
 		
-		assertEquals("index page load", 200, res.getStatusCode());
+		HtmlPage page = TestUtils.getSimplePage(session, host, port, "/index.jsp");
 		
-		assertTrue("contains title", TestUtils.checkResultForPattern(res.getResponseBodyAsString(),
+		WebResponse resp = page.getWebResponse();
+		assertEquals("index page load", 200, resp.getStatusCode());
+		
+		assertTrue("contains title", TestUtils.checkResultForPattern(resp.getContentAsString(),
 				"Toronto Centre for Phenogenomics"));
 	}
 }

@@ -12,7 +12,6 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("regress.webtest tests the TCP Site");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(SelfTestReadTag.class);
 		suite.addTestSuite(BasicServerTest.class);
 		suite.addTestSuite(LoginTest.class);
 		suite.addTestSuite(TestRunner.class);

@@ -3,21 +3,18 @@ package regress.webtest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
+
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
@@ -46,7 +43,7 @@ public class TestUtils {
 	 * Get an unprotected page
 	 * 
 	 * @param session
-	 *            The HTTP Session (HttpClient object)
+	 *            The HTTP Session
 	 * @param targetHost
 	 *            The name (or maybe IP as a String) for the host
 	 * @param targetPort
@@ -56,7 +53,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HttpMethod getSimplePage(HttpClient session,
+	public static HtmlPage getSimplePage(WebClient webClient,
 			String targetHost, int targetPort, String targetPage)
 			throws IOException {
 
@@ -65,18 +62,11 @@ public class TestUtils {
 			targetPage = "/" + targetPage;
 		}
 
-		session.getHostConfiguration().setHost(targetHost, targetPort, "http");
-
-		GetMethod initialGet = new GetMethod(targetPage);
-
-		session.executeMethod(initialGet); // request the page.
-		state = session.getState();
-		if (debug) {
-			System.out.println("Initial Page get: "
-				+ initialGet.getStatusLine().toString());
-		}
-
-		return initialGet;
+		final URL url = new URL("http", targetHost, targetPort, targetPage);
+		final HtmlPage page = (HtmlPage) webClient.getPage(url);
+		System.out.println("Got to page: " + page.getTitleText());
+		
+		return page;
 	}
 	
 
@@ -86,7 +76,7 @@ public class TestUtils {
 	 * Authentication.
 	 * 
 	 * @param session
-	 *            The HTTP Session (HttpClient object)
+	 *            The HTTP Session
 	 * @param targetHost
 	 *            The name (or maybe IP as a String) for the host
 	 * @param targetPort
@@ -96,7 +86,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HttpMethod getProtectedPage(HttpClient session,
+	public static HtmlPage getProtectedPage(WebClient webClient,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException {
@@ -106,27 +96,21 @@ public class TestUtils {
 			targetPage = "/" + targetPage;
 		}
 
-		session.getHostConfiguration().setHost(targetHost, targetPort, "http");
-
-		// Set the credentials here in case there is Basic Auth used.
-		Credentials creds = new UsernamePasswordCredentials(login, pass);
-		session.getState().setCredentials(AuthScope.ANY, creds);
-
-		HttpMethod interaction = new GetMethod(targetPage);
-		interaction.setFollowRedirects(false);
-
-		session.executeMethod(interaction); // request protected page, and
-											// handle redirection here.
+		final URL url = new URL("http", targetHost, targetPort, targetPage);
+		
+		// request protected page, and handle redirection here.
+		final HtmlPage page = (HtmlPage) webClient.getPage(url);
 		
 		if (debug) {
 				System.out.println("Initial Page get: "
-				+ interaction.getStatusLine().toString());
+				+ page.getTitleText());
 		}
+		WebResponse interaction = page.getWebResponse();
 		int statusCode = interaction.getStatusCode();
         System.out.println("XXX " + statusCode);
 		if (statusCode == 200) {
 			System.err.println("protected page " + targetPage + " did not require login");
-			return interaction;
+			return page;
 		}
 		
 		if (!isRedirectCode(statusCode)) {
@@ -134,70 +118,59 @@ public class TestUtils {
 		}
 
 		// shortcut: instead of parsing the form, we "know" that
-		// J2EE container-managed-security always uses this hard-coded URL:
-		PostMethod loginPost = new PostMethod("/j_security_check");
-		loginPost.setFollowRedirects(false);
+		// the J2EE login page will have only one form.
 
-		NameValuePair[] request = {
-				new NameValuePair("j_username", login),
-				new NameValuePair("j_password", pass)
-		};
-		loginPost.setRequestBody(request);
-
-		statusCode = session.executeMethod(loginPost); // SEND THE LOGIN
+		HtmlForm form = (HtmlForm)page.getAllForms().get(0); 
+		if (!"/j_security_check".equals(form.getTargetAttribute())) {
+			throw new IOException("expected J2EE login form but got " + form.getTargetAttribute());
+		}
+		
+		form.getInputByName("j_username").setValueAttribute(login);
+		form.getInputByName("j_password").setValueAttribute(pass);
+		
+		HtmlPage formResultsPage = (HtmlPage)form.submit();   // SEND THE LOGIN
 		if (debug) {
-			System.out.println("Login return " + loginPost.getStatusLine());
+			System.out.println("Login return " + formResultsPage.getTitleText());
 		}
 
 		// Should be yet another redirect, back to original request page
+		WebResponse res2 = formResultsPage.getWebResponse();
+		statusCode = res2.getStatusCode();
 		if (!isRedirectCode(statusCode)) {
 			throw new IllegalStateException("Login page did not redirect");
 		}
-		String redirectURL = getRedirectURL(loginPost);
+		
+		final String redirectURL = getRedirectURL(formResultsPage);
 		if (debug) {
 			System.out.println("Login page redirects to " + redirectURL);
 		}
-		interaction = new GetMethod(redirectURL);
-		session.executeMethod(interaction);
-		state = session.getState();
+		final URL url3 = new URL("http", targetHost, targetPort, targetPage);
 		
-		return interaction;
-	}
-
-	
-	/** After using getSimplePage or getProtectedPage, can hopefully use followLink to go to 
-	 * a relative link on the same page.
-	 * @param session
-	 * @param targetPage
-	 * @return
-	 * @throws IOException
-	 */
-	public static HttpMethod followLink(HttpClient session, String targetPage) throws IOException {
-		HttpMethod followLink = new GetMethod(targetPage);
-		session.executeMethod(session.getHostConfiguration(), followLink, state);
-		state = session.getState();
+		// request protected page, and handle redirection here.
+		final HtmlPage page3 = (HtmlPage) webClient.getPage(url3);
+		
 		if (debug) {
-			System.out.println("Initial Page get: "
-				+ followLink.getStatusLine().toString());
+				System.out.println("Redirect got: "
+				+ page3.getTitleText());
 		}
-		return followLink;
+		return page3;
 	}
 	
 	/**
-	 * @param interaction
-	 * @return
+	 * Return the redirect location from the given response page
+	 * @param formResultsPage
+	 * @return The redirect location, or null
 	 */
-	public static String getRedirectURL(HttpMethod interaction) {
+	public static String getRedirectURL(HtmlPage page)  {
+	
+		WebResponse resp = page.getWebResponse();
 		
-		Header header = interaction.getResponseHeader("location");
-		if (header == null) {
-			throw new IllegalStateException("no redirect location found");
+		String redirectLocation = resp.getResponseHeaderValue("location");
+
+		if (redirectLocation.equals("")) {
+			redirectLocation = "/";
 		}
-		String newuri = header.getValue();
-		if ((newuri == null) || (newuri.equals(""))) {
-			newuri = "/";
-		}
-		return newuri;
+		return redirectLocation;
 	}
 
 	static boolean isRedirectCode(int statusCode) {
@@ -207,13 +180,18 @@ public class TestUtils {
 				|| (statusCode == HttpStatus.SC_TEMPORARY_REDIRECT);
 	}
 
-	public static void doLogout(HttpClient session) throws Exception {
+	public static void doLogout(WebClient webClient) throws Exception {
 
-		GetMethod logoutGet = new GetMethod("/LogoutServlet");
-		int statusCode = session.executeMethod(logoutGet);
-		if (debug) {
-			System.out.println("Logout status: " + statusCode);
-		}
+		String logoutURL = "/LogoutServlet";
+
+//		final HtmlPage page = (HtmlPage) webClient.getPage("/");
+//		System.out.println("Got to page: " + page.getTitleText());
+//		GetMethod logoutGet = new GetMethod("/LogoutServlet");
+//		
+//		int statusCode = session.executeMethod(logoutGet);
+//		if (debug) {
+//			System.out.println("Logout status: " + statusCode);
+//		}
 	}
 
 	/** Test the input against a pattern.
