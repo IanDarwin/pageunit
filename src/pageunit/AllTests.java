@@ -4,7 +4,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Suite to run all the HTTP tests
+ * Suite to run all the HTTP tests; run the few self-contained tests that
+ * really need Java code before you run the TestRunner itself.
  * @version $Id$
  */
 public class AllTests {

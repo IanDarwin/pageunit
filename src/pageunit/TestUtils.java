@@ -8,7 +8,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.HttpStatus;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -26,7 +25,6 @@ public class TestUtils {
 	private static final String TCPTEST_PROPERTIES_FILENAME = ".tcptest.properties";
 	private static Properties props  = new Properties();
 	private static boolean debug;
-	private static HttpState state;
 	
 	static {
 		String home = System.getProperty("user.home");
@@ -64,7 +62,7 @@ public class TestUtils {
 
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
 		final HtmlPage page = (HtmlPage) webClient.getPage(url);
-		System.out.println("Got to page: " + page.getTitleText());
+		System.out.println("Got to simple page: " + page.getTitleText());
 		
 		return page;
 	}
@@ -98,33 +96,20 @@ public class TestUtils {
 
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
 		
-		// request protected page, and handle redirection here.
-		final HtmlPage page = (HtmlPage) webClient.getPage(url);
+		// request protected page, and let HtmlUnit handle redirection here.
+		final HtmlPage page1 = (HtmlPage) webClient.getPage(url);	// Ask for one page, really get login page
 		
 		if (debug) {
-				System.out.println("Initial Page get: "
-				+ page.getTitleText());
+				System.out.println("Protected Page get: " + page1.getTitleText());
 		}
-		WebResponse interaction = page.getWebResponse();
+		WebResponse interaction = page1.getWebResponse();
 		int statusCode = interaction.getStatusCode();
-        System.out.println("XXX " + statusCode);
-		if (statusCode == 200) {
-			System.err.println("protected page " + targetPage + " did not require login");
-			return page;
-		}
-		
-		if (!isRedirectCode(statusCode)) {
-			throw new IllegalStateException("Requested page did not redirect");
-		}
+        if (debug) {
+        	System.out.println("Protected Page Get status: " + statusCode);
+        }
 
-		// shortcut: instead of parsing the form, we "know" that
-		// the J2EE login page will have only one form.
+		HtmlForm form = page1.getFormByName("loginForm");	// dependency on our form page
 
-		HtmlForm form = (HtmlForm)page.getAllForms().get(0); 
-		if (!"/j_security_check".equals(form.getTargetAttribute())) {
-			throw new IOException("expected J2EE login form but got " + form.getTargetAttribute());
-		}
-		
 		form.getInputByName("j_username").setValueAttribute(login);
 		form.getInputByName("j_password").setValueAttribute(pass);
 		
@@ -136,62 +121,20 @@ public class TestUtils {
 		// Should be yet another redirect, back to original request page
 		WebResponse res2 = formResultsPage.getWebResponse();
 		statusCode = res2.getStatusCode();
-		if (!isRedirectCode(statusCode)) {
-			throw new IllegalStateException("Login page did not redirect");
-		}
-		
-		final String redirectURL = getRedirectURL(formResultsPage);
-		if (debug) {
-			System.out.println("Login page redirects to " + redirectURL);
-		}
-		final URL url3 = new URL("http", targetHost, targetPort, targetPage);
-		
-		// request protected page, and handle redirection here.
-		final HtmlPage page3 = (HtmlPage) webClient.getPage(url3);
-		
-		if (debug) {
-				System.out.println("Redirect got: "
-				+ page3.getTitleText());
-		}
-		return page3;
+
+		return formResultsPage;	// HtmlUnit handles redirection for us
 	}
 	
 	/**
-	 * Return the redirect location from the given response page
+	 * Return true iff the given status code is one that indicates redirection, e.g., 3xx codes.
 	 * @param formResultsPage
 	 * @return The redirect location, or null
 	 */
-	public static String getRedirectURL(HtmlPage page)  {
-	
-		WebResponse resp = page.getWebResponse();
-		
-		String redirectLocation = resp.getResponseHeaderValue("location");
-
-		if (redirectLocation.equals("")) {
-			redirectLocation = "/";
-		}
-		return redirectLocation;
-	}
-
 	static boolean isRedirectCode(int statusCode) {
 		return (statusCode == HttpStatus.SC_MOVED_TEMPORARILY)
 				|| (statusCode == HttpStatus.SC_MOVED_PERMANENTLY)
 				|| (statusCode == HttpStatus.SC_SEE_OTHER)
 				|| (statusCode == HttpStatus.SC_TEMPORARY_REDIRECT);
-	}
-
-	public static void doLogout(WebClient webClient) throws Exception {
-
-		String logoutURL = "/LogoutServlet";
-
-//		final HtmlPage page = (HtmlPage) webClient.getPage("/");
-//		System.out.println("Got to page: " + page.getTitleText());
-//		GetMethod logoutGet = new GetMethod("/LogoutServlet");
-//		
-//		int statusCode = session.executeMethod(logoutGet);
-//		if (debug) {
-//			System.out.println("Logout status: " + statusCode);
-//		}
 	}
 
 	/** Test the input against a pattern.
@@ -202,8 +145,7 @@ public class TestUtils {
 		Pattern pE = Pattern.compile(expect);
 		Matcher mE = pE.matcher(sb);
 		return mE.find();
-	}
-	
+	}	
 
 	
 	/** Retrieve a property, either from the System Properties (consulted first, to allow overriding on the command line)

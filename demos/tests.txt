@@ -9,10 +9,12 @@
 # N - start new session
 # L - find Link with matching href (TODO: or anchor text)
 # G - Go to link
+# F - find Form by form name
+#
+# D - control debugging of this test framework, initially off (NOT for general use)
 #
 # NOT IMPLEMENTED YET
 
-# F - find Form by # or by Submit button text
 # R - fill in paRameter
 # S - submit previously-found form
 #
@@ -20,21 +22,24 @@
 #
 
 N
+
 U /index.jsp
 M Toronto Centre for Phenogenomics
 T title Toronto Centre for Phenogenomics
 
 P /Jsp/view/PersonList.jsp
-#M Person List
+M Person List
 ##L ?person_key=
 #L _nameLink_4
 #L Darwin
 #G
-#U /LogoutServlet
+U /LogoutServlet
+# Show that logout is harmless when you're logged out.
+U /LogoutServlet
 
-#P /Jsp/upload/uploaddetail.jsp
+P /Jsp/upload/uploaddetail.jsp
 #T Scan List
-#F Add
+F pageForm
 #R mouse_id 123
 #R project_key 123
 #S

@@ -36,7 +36,6 @@ public class LoginTest extends TestCase {
 		System.out.println(result.getUrl());
 		// assertEquals("login page", result.getPath(), TARGET_PATH);
 		
-		TestUtils.doLogout(session);
 	}
 
 	/** Test that a bad login redirects back to the login page.
@@ -53,6 +52,5 @@ public class LoginTest extends TestCase {
 		final String path = resp.getUrl().getPath();
 		assertTrue("Bad login status", path.indexOf("/login.jsp") != -1); // should wind up back here...
 		
-		TestUtils.doLogout(session);	  // show that logout is harmless if you're not logged in.
 	}
 }

@@ -14,15 +14,18 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
  * Run the classes listed in tests.txt
- * 
+ * <br>
+ * TODO: Maybe make this use the JUnit API better so each test is reported separately?
  * @version $Id$
  */
 public class TestRunner extends TestCase {
 	
+	private static final int HTTP_STATUS_OK = 200;
 	static List tests = new ArrayList();
 
 	private static final String TESTS_FILE = "tests.txt";
@@ -44,12 +47,14 @@ public class TestRunner extends TestCase {
 	 * @throws Exception
 	 */
 	public void testListedTests() throws Exception {
-		
+
 		Iterator testsIterator = tests.iterator();
 		WebClient session = new WebClient();
 		WebResponse theResult = null;
 		HtmlPage thePage = null;
 		HtmlAnchor theLink = null;
+		HtmlForm theForm = null;
+
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
 		String pass = TestUtils.getProperty("admin_passwd");
@@ -57,7 +62,8 @@ public class TestRunner extends TestCase {
 		String host = TestUtils.getProperty("host");
 		assertNotNull("hostname", host);
 		int port = TestUtils.getIntProperty("port");
-		
+
+		// The "testsIterator" goes over all the lines in the text file...
 		while (testsIterator.hasNext()) {
 			String line = (String) testsIterator.next();
 			if (line.length() == 0) {
@@ -69,6 +75,7 @@ public class TestRunner extends TestCase {
 				continue;
 			}
 			System.out.println("TEST: " + line);
+			// this.testStarted(line);
 			StringTokenizer st = new StringTokenizer(line);
 			if (st.countTokens() < 1) {
 				throw new IOException("invalid line " + line);
@@ -100,7 +107,7 @@ public class TestRunner extends TestCase {
 				}
 				thePage = TestUtils.getSimplePage(session, host, port, page);
 				theResult = thePage.getWebResponse();
-				assertEquals("unprotected page load", 200, theResult.getStatusCode());
+				assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
 				break;
 			case 'P':	// get protected page
 				theLink = null;
@@ -111,17 +118,20 @@ public class TestRunner extends TestCase {
 				}
 				thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
 				theResult = thePage.getWebResponse();
-				assertEquals("protected page code", 200, theResult.getStatusCode());
-				// assertEquals("protected page redirect", page, theResult.getUrl().getPath());
+				assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
+				assertEquals("protected page redirect", page, theResult.getUrl().getPath());
 				break;
+				
 			case 'M':	// page contains text
 				// PreCondition: theResult has been set by the U or P code above
 				theLink = null;
 				assertNotNull("Invalid test.txt: requested txt before getting page", thePage);
 				theResult = thePage.getWebResponse();
-				assertTrue("page contains text", 
-						TestUtils.checkResultForPattern(theResult.getContentAsString(), restOfLine));
+				String contentAsString = theResult.getContentAsString();
+				assertTrue("page contains text <" + restOfLine + ">", 
+						TestUtils.checkResultForPattern(contentAsString, restOfLine));
 				break;
+				
 			case 'T':	// page contains tag with text (in bodytext or attribute value)
 				// PreCondition: theResult has been set by the U or P code above
 				assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
@@ -191,19 +201,51 @@ public class TestRunner extends TestCase {
 				System.out.println("Trying to go to " + theLink);
 				// Even if we are inside a protected area, we don't need to login here.
 //				theResult = TestUtils.followLink(session, theLink);
-//				assertEquals("go to link response code", 200, theResult.getStatusCode());
+//				assertEquals("go to link response code", HTTP_STATUS_OK, theResult.getStatusCode());
 				break;
 			case 'N':	// start new session
 				session = new WebClient();
 				theLink = null;
 				break;
+				
+			// FORMS
+
 			case 'F':
+				// Find Form By Name - don't use findFormByName as SOFIA puts junk at start of form name.
+				String formName = restOfLine;
+				List theForms = thePage.getAllForms();
+				for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {
+					HtmlForm oneForm = (HtmlForm) iterator.next();
+					System.out.println("ONEFORM: " + oneForm);
+					if (oneForm.getNameAttribute().indexOf(formName) != -1) {
+						theForm = oneForm;	// "You are the One"
+					}
+				}
+				assertNotNull("Find form named " + formName, theForm);
+				break;
+
 			case 'R':
-			case 'S':
 				fail("code for " + c + " not written yet");
 				break;
+				
+			case 'S':
+				assertNotNull("Form found before submit", theForm);
+
+				HtmlPage formResultsPage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
+
+				// Should be yet another redirect, back to original request page
+				WebResponse formResponse = formResultsPage.getWebResponse();
+				int statusCode = formResponse.getStatusCode();
+				assertEquals("form submit status", HTTP_STATUS_OK, statusCode);
+				
+				break;
+				
+			default:
+				fail("Unknown request: " + line);
 			}
-			
+			// this.testEnded(line);
 		}
 	}
+
+
 }
