@@ -12,17 +12,16 @@
 # L - find Link with matching href (TODO: or anchor text)
 # G - Go to link
 # F - find Form by form name
-#
-# D - control debugging of this test framework, initially off (NOT for general use)
-#
-# NOT IMPLEMENTED YET
-
-# R - fill in paRameter
+# R name=value - fill in paRameter
 # S - submit previously-found form
+
+# Q - quit (for editing on tests.txt, instead of commenting out all the remaining lines...)
+
+# D - control debugging of this test framework, initially off (NOT for general use)
 
 N
 
-# Check that logout is harmless when you're not logged in.
+# Ensure that logout is harmless when you're not logged in.
 U /LogoutServlet
 
 U /index.jsp
@@ -36,15 +35,25 @@ L _nameLink_4
 # Leila is near the start alphabetically. Will break on LIMS when get a lot of Person entries.
 L Baghdadi
 G
+M Leila Baghdadi
 U /LogoutServlet
 
+# Go to Person List, put name in Search box, click Search button, ensure it comes back
+# with a list containing this person...
+P /Jsp/view/PersonList.jsp
+M Person List
+F pageForm
+R htmlPageTopContainer_pageForm_box1_displaybox1_firstName=Ian
+R htmlPageTopContainer_pageForm_box1_displaybox1_lastName=Darwin
+#
+# Should go back to list page, but HtmlUnit objects if a page redirects back to itself!!!
+#S htmlPageTopContainer_pageForm_box1_displaybox1_search
+#T title Person List
+#M Ian Darwin
+#L Ian Darwin
 
-P /Jsp/upload/uploaddetail.jsp
+U /Jsp/upload/uploaddetail.jsp
 T title Upload
 # Warning: Match uses regexes, so "Upload File(s)" actually looks for "Upload Files"
 M Upload File.s.
-F pageForm
-#R mouse_id 123
-#R project_key 123
-#S
-#
+

@@ -15,7 +15,9 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlInput;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 /**
  * Run the classes listed in tests.txt
@@ -192,6 +194,7 @@ public class TestRunner extends TestCase {
 			case 'G':	// Go to link
 				// PreCondition: theLink has been set by the 'L' case above.
 				assertNotNull("found link before gotoLink", theLink);
+				theLink.click();
 //				if (!theLink.getHrefAttribute().startsWith("/")) {
 //					String oldPath = theResult.getUrl().getPath();
 //					theLink = oldPath.substring(0, oldPath.lastIndexOf("/")) + "/" + theLink;
@@ -221,21 +224,43 @@ public class TestRunner extends TestCase {
 				assertNotNull("Find form named " + formName, theForm);
 				break;
 
-			case 'R':
-				fail("code for " + c + " not written yet");
+			case 'R':	// set parameter to value
+				// PRECONDITION: theForm has been set by a previous F command
+				assertNotNull("find a form before setting Parameters", theForm);
+				int j = restOfLine.indexOf('=');
+				assertTrue("name and value in line", j > 0);
+				String attrName = restOfLine.substring(0, j);
+				String attrValue = restOfLine.substring(j + 1);
+				System.err.println("Name=" + attrName + "; value=" + attrValue);
+				HtmlInput theButton = theForm.getInputByName(attrName);
+				theButton.setValueAttribute(attrValue);
+				
 				break;
 				
 			case 'S':
 				assertNotNull("Form found before submit", theForm);
 
-				HtmlPage formResultsPage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
+				String submitValue = restOfLine;
+				HtmlPage formResultsPage = null;
+				if (submitValue == null || "".equals(submitValue)) {
+					formResultsPage = (HtmlPage)theForm.submit();   // SEND THE LOGIN
+				} else {
+					final HtmlSubmitInput button = (HtmlSubmitInput)theForm.getInputByName(submitValue);
+					formResultsPage = (HtmlPage)button.click();
+				}
 
-				// Should be yet another redirect, back to original request page
+				// Should take us to a new page
 				WebResponse formResponse = formResultsPage.getWebResponse();
 				int statusCode = formResponse.getStatusCode();
 				assertEquals("form submit status", HTTP_STATUS_OK, statusCode);
 				
 				break;
+				
+			case 'Q':
+				System.out.println("*****************************************************************");
+				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
+				System.out.println("*****************************************************************");
+				return;
 				
 			default:
 				fail("Unknown request: " + line);
