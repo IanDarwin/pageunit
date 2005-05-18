@@ -104,7 +104,7 @@ public class TestRunner extends TestCase {
 		
 		System.out.println("*****************************************************************");
 		System.out.println(getClass().getName());
-		System.out.println("Test run with //http://" + host + ":" + port);
+		System.out.println("Test run with http://" + host + ":" + port);
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
 
