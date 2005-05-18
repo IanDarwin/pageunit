@@ -6,7 +6,7 @@
 
 N
 
-# Apply site-specific filter (requires CVS identifier in page)
+# Apply site-specific filter (at our site we require a CVS identifier in every page)
 X regress.webtest.CvsIdFilter
 
 # Ensure that logout is harmless when you're not logged in.
@@ -19,16 +19,20 @@ T title Toronto Centre for Phenogenomics
 # Exercise very basic server functionality
 U /tests/index.html
 L nosof.jsp
+# Confirm that "nosofia.jsp" works
 G
-# These don't work right now... Sigh... Not the fault of the Test Suite...
-#U /tests/index.html
-#L extends.jsp
-#G
+
+# This doesn't work now... Sigh... Not the test suite fault; the page gives a 500
+U /tests/index.html
+L extends.jsp
+G
+
+# This doesn't work now... Sigh... Not the fault of the Test Suite...
 #U /tests/index.html
 #L nonav.jsp
 #G
 
-P /Jsp/view/PersonList.jsp
+P /view/PersonList.jsp
 M Person List
 L ?person_key=
 L _nameLink_4
@@ -40,7 +44,7 @@ U /LogoutServlet
 
 # Go to Person List, put name in Search box, click Search button, ensure it comes back
 # with a list containing this person...
-P /Jsp/view/PersonList.jsp
+P /view/PersonList.jsp
 M Person List
 F pageForm
 # XXX Need to change these to match using indexOf, not getInputByName.
@@ -52,7 +56,7 @@ S htmlPageTopContainer_pageForm_box1_displaybox1_search
 #M Ian Darwin
 #L Ian Darwin
 
-U /Jsp/upload/uploaddetail.jsp
+U /upload/uploaddetail.jsp
 T title Upload
 # Warning: Match uses regexes, so "Upload File(s)" would actually look for "Upload Files" and regex-tag the 's' :-)
 M Upload File.s.

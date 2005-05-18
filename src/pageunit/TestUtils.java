@@ -183,13 +183,13 @@ public class TestUtils {
 	}
 	
 	/**
-	 * @return Returns the debug.
+	 * @return Returns the debug level.
 	 */
 	public static boolean isDebug() {
 		return debug;
 	}
 	/**
-	 * @param debug The debug to set.
+	 * @param debug The debug level to set.
 	 */
 	public static void setDebug(boolean debug) {
 		TestUtils.debug = debug;
