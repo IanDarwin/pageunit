@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry sourcepath="JUNIT_HOME/junitsrc.zip" kind="var" path="JUNIT_HOME/junit.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/htmlunit-1.4.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.0-rc1.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

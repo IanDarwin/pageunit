@@ -1,4 +1,4 @@
-package regress.webtest;
+package pageunit;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -64,7 +64,7 @@ public class TestRunner extends TestCase {
 	 * @param fileName the test script file name.
 	 */
 	public void run(String fileName) throws Exception {
-		List tests = new ArrayList();
+		List<String> tests = new ArrayList<String>();
 		try {
 			BufferedReader is = new BufferedReader(new FileReader(fileName));
 			String line;
@@ -92,7 +92,7 @@ public class TestRunner extends TestCase {
 	 * @param tests 
 	 * @throws Exception
 	 */
-	public void testListedTests(List tests) throws Exception {
+	public void testListedTests(List<String> tests) throws Exception {
 
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
@@ -109,7 +109,7 @@ public class TestRunner extends TestCase {
 		System.out.println("*****************************************************************");
 
 		// The "testsIterator" goes over all the lines in the text file...
-		Iterator testsIterator = tests.iterator();
+		Iterator<String> testsIterator = tests.iterator();
 		while (testsIterator.hasNext()) {
 			
 			String line = (String) testsIterator.next();
@@ -246,7 +246,7 @@ public class TestRunner extends TestCase {
 					// look for tag;
 					boolean found = false;
 					
-					for (Iterator iter = thePage.getChildIterator(); iter.hasNext();) {
+					for (Iterator<HtmlElement> iter = thePage.getChildIterator(); iter.hasNext();) {
 						HtmlElement element = (HtmlElement) iter.next();
 						String bodyText = element.getNodeValue();
 						if (bodyText != null && bodyText.indexOf(tagText) != -1) {

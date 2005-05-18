@@ -1,4 +1,4 @@
-package regress.webtest;
+package pageunit;
 
 import java.io.File;
 import java.io.FileInputStream;

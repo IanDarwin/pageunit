@@ -1,4 +1,4 @@
-package regress.webtest;
+package pageunit;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;

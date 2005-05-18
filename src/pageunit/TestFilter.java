@@ -1,4 +1,4 @@
-package regress.webtest;
+package pageunit;
 
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
