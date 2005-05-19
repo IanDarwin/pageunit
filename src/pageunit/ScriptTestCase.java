@@ -405,6 +405,7 @@ public class TestRunner extends TestCase {
 	
 	private void report() {
 		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures);
+		assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
 	/**
