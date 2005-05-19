@@ -247,7 +247,7 @@ public class TestRunner extends TestCase {
 					boolean found = false;
 					
 					for (Iterator<HtmlElement> iter = thePage.getChildIterator(); iter.hasNext();) {
-						HtmlElement element = (HtmlElement) iter.next();
+						HtmlElement element = iter.next();
 						String bodyText = element.getNodeValue();
 						if (bodyText != null && bodyText.indexOf(tagText) != -1) {
 							found = true;
@@ -260,9 +260,9 @@ public class TestRunner extends TestCase {
 				case 'L':	// page contains Link
 					// PreCondition: theResult has been set by the U or P code above
 					theLink = null;
-					Iterator iter = thePage.getAnchors().iterator();
+					Iterator<HtmlAnchor> iter = thePage.getAnchors().iterator();
 					while (iter.hasNext()) {
-						HtmlAnchor oneLink = (HtmlAnchor) iter.next();
+						HtmlAnchor oneLink = iter.next();
 						
 						// Check in the Name attribute, if any
 						String n = oneLink.getNameAttribute();
@@ -322,6 +322,10 @@ public class TestRunner extends TestCase {
 					String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
 					String attrName = rtmp[0];
 					String attrValue = rtmp[1];
+					if (attrValue.indexOf('$') != -1) {
+						// this could be more elegant/efficient for a greater range of substitutions
+						attrValue = attrValue.replace("${USER}", login).replace("${PASS}", pass);
+					}
 					
 					if (debug) {
 						System.err.println("Name=" + attrName + "; value=" + attrValue);

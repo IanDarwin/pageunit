@@ -11,7 +11,9 @@ U /index.php
 F frm
 # Not implemented yet: idea to use username & pass from config file, so that,
 # like the hostname and port, these values are not baked into the test suite.
+D t
 R loginstring=${USER}
+D f
 R user_pw=${PASS}
 # submit the form using its default button (PHPProject doesn't name the form button)
 S

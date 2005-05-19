@@ -1,5 +1,6 @@
-package pageunit;
+package pageunit.samples;
 
+import pageunit.TestFilter;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
@@ -10,7 +11,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 public class CvsIdFilter implements TestFilter {
 
 	/* (non-Javadoc)
-	 * @see regress.webtest.TestFilter#filterPage(com.gargoylesoftware.htmlunit.html.HtmlPage, com.gargoylesoftware.htmlunit.WebResponse)
+	 * @see pageunit.TestFilter#filterPage(com.gargoylesoftware.htmlunit.html.HtmlPage, com.gargoylesoftware.htmlunit.WebResponse)
 	 */
 	public void filterPage(HtmlPage thePage, WebResponse theResult) throws Exception {
 

@@ -33,7 +33,9 @@ public class TestUtils {
 		try {
 			props.load(new FileInputStream(propsFileName));
 		} catch (IOException ex) {
-			System.err.println("Can't load " + propsFileName);
+			final String message = "Can't load " + propsFileName;
+			System.err.println(message);
+			throw new RuntimeException(message);
 		}
 	}
 

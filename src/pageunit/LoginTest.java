@@ -12,12 +12,12 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  */
 public class LoginTest extends TestCase {
 	
-	private static final String TARGET_PATH = "/Jsp/view/PersonList.jsp";
+	private static final String TARGET_PATH = "/view/PersonList.jsp";
 	
 	/** Test that a good login and password gets us past the login screen.
 	 * @throws Exception
 	 */
-	public void testGoodLogin() throws Exception {
+	public void testGoodJ2EELogin() throws Exception {
 		System.out.println("TestTest.testGoodLogin()");
 
 		String login = TestUtils.getProperty("admin_login");
@@ -40,7 +40,7 @@ public class LoginTest extends TestCase {
 
 	/** Test that a bad login redirects back to the login page.
 	 */
-	public void testBadLogin() throws Exception {
+	public void testBadJ2EELogin() throws Exception {
 		System.out.println("TestTest.testBadLogin()");
 		WebClient session = new WebClient();
 
