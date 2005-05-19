@@ -363,7 +363,7 @@ public class TestRunner extends TestCase {
 			} catch (final Throwable e) {
 				final Throwable exception = e.getCause();
 				this.testFailed(line);
-				System.err.println("FAILURE: " + line + " (" + e + ")");
+				System.err.println("FAILURE: " + fileName + ":" + is.getLineNumber() + " (" + e + ")");
 			}
 		}
 		report();
