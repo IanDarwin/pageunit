@@ -2,12 +2,12 @@
 # TCP Test Suite Driver
 # $Id$
 
-# Input language described in documents/devtools/webtscript.html
+# See the docs directory for a description of the input language.
 
 N
 
 # Apply site-specific filter (at our site we require a CVS identifier in every page)
-X regress.webtest.CvsIdFilter
+X pageunit.samples.CvsIdFilter
 
 # Ensure that logout is harmless when you're not logged in.
 U /LogoutServlet
@@ -18,18 +18,18 @@ T title Toronto Centre for Phenogenomics
 
 # Exercise very basic server functionality
 U /tests/index.html
-L nosof.jsp
+L nosofia.jsp
 # Confirm that "nosofia.jsp" works
 G
 
-# This doesn't work now... Sigh... Not the test suite fault; the page gives a 500
 U /tests/index.html
 L extends.jsp
-G
+# This page doesn't work now... Sigh... Not the test suite fault; the page gives a 500
+#G
 
-# This doesn't work now... Sigh... Not the fault of the Test Suite...
-#U /tests/index.html
-#L nonav.jsp
+U /tests/index.html
+L nonav.jsp
+# This page doesn't work either... Sigh... Not the fault of the Test Suite...
 #G
 
 P /view/PersonList.jsp

@@ -36,15 +36,31 @@
 		<attributes>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/xmlParserAPIs-2.2.1.jar">
-		<attributes>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/nekohtml-0.9.4.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/xmlParserAPIs-2.2.1.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/jaxen-1.0-FCS-full.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/saxpath-1.0-FCS.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/commons-collections-3.1.jar">
+		<attributes>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/commons-lang-2.0.jar">
 		<attributes>
 		</attributes>
 	</classpathentry>

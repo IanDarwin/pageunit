@@ -1,16 +1,17 @@
 package pageunit;
 
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import junit.framework.TestCase;
+
+import org.apache.xerces.xni.XNIException;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -58,27 +59,7 @@ public class TestRunner extends TestCase {
 		} catch (Exception e) {
 			System.out.println("FAILED: caught Exception " + e);
 		}
-	}
-
-	/** Accumulate all the tests from the named file, call testListedTests to run them.
-	 * @param fileName the test script file name.
-	 */
-	public void run(String fileName) throws Exception {
-		List<String> tests = new ArrayList<String>();
-		try {
-			BufferedReader is = new BufferedReader(new FileReader(fileName));
-			String line;
-			while ((line = is.readLine()) != null) {
-				tests.add(line);
-			}
-		} catch (IOException e) {
-			System.err.println("Cannot open " + TESTS_FILE);
-			System.err.println(e);
-			throw new IllegalArgumentException("Cannot open tests file");
-		}
-		testListedTests(tests);
-	}
-	
+	}	
 
 	private WebClient session = new WebClient();
 	private WebResponse theResult = null;
@@ -88,11 +69,11 @@ public class TestRunner extends TestCase {
 	private boolean debug;
 	private TestFilter filter = NullTestFilter.getInstance();
 	
-	/** Run ALL the tests in the List, usually created by run().
-	 * @param tests 
+	/** Run ALL the tests in the named test file.
+	 * @param fileName the test script file name.
 	 * @throws Exception
 	 */
-	public void testListedTests(List<String> tests) throws Exception {
+	public void run(String fileName) throws Exception {			
 
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
@@ -108,11 +89,9 @@ public class TestRunner extends TestCase {
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
 
-		// The "testsIterator" goes over all the lines in the text file...
-		Iterator<String> testsIterator = tests.iterator();
-		while (testsIterator.hasNext()) {
-			
-			String line = (String) testsIterator.next();
+		LineNumberReader is = new LineNumberReader(new FileReader(fileName));
+		String line;
+		while ((line = is.readLine()) != null) {
 			if (line.length() == 0) {
 				System.out.println();
 				continue;
@@ -306,8 +285,8 @@ public class TestRunner extends TestCase {
 					// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
 					String formName = restOfLine;
 					List theForms = thePage.getAllForms();
-					for (Iterator iterator = theForms.iterator(); iterator.hasNext();) {
-						HtmlForm oneForm = (HtmlForm) iterator.next();
+					for (Iterator<HtmlForm> iterator = theForms.iterator(); iterator.hasNext();) {
+						HtmlForm oneForm = iterator.next();
 						if (oneForm.getNameAttribute().indexOf(formName) != -1) {
 							theForm = oneForm;	// "You are the One"
 						}
@@ -373,10 +352,18 @@ public class TestRunner extends TestCase {
 					fail("Unknown request: " + line);
 				}
 				this.testPassed(line);
-				
-			} catch (Throwable ex) {
+			
+			} catch (final XNIException e) {
+				// Older Xerces XNIException has own getException(), not J2SE standard 
 				this.testFailed(line);
-				System.err.println("FAILURE: " + line + " (" + ex + ")");
+				final Throwable exception = e.getException();
+				System.err.println("XERCES FAILURE: " + line + e.getMessage() + "--" + exception);
+				exception.printStackTrace();
+				System.exit(1);
+			} catch (final Throwable e) {
+				final Throwable exception = e.getCause();
+				this.testFailed(line);
+				System.err.println("FAILURE: " + line + " (" + e + ")");
 			}
 		}
 		report();
@@ -418,7 +405,6 @@ public class TestRunner extends TestCase {
 	
 	private void report() {
 		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures);
-		assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
 	/**

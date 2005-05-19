@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
 public class AllTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("regress.webtest tests the TCP Site");
+		TestSuite suite = new TestSuite("PageUnit tests your web site");
 		//$JUnit-BEGIN$
 		suite.addTestSuite(BasicServerTest.class);
 		suite.addTestSuite(LoginTest.class);
