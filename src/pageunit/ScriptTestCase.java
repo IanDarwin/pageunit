@@ -3,7 +3,10 @@ package pageunit;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +70,7 @@ public class TestRunner extends TestCase {
 	private HtmlAnchor theLink = null;
 	private HtmlForm theForm = null;
 	private boolean debug;
-	private TestFilter filter = NullTestFilter.getInstance();
+	private List<TestFilter> filters = new ArrayList<TestFilter>();
 	
 	/** Run ALL the tests in the named test file.
 	 * @param fileName the test script file name.
@@ -120,15 +123,24 @@ public class TestRunner extends TestCase {
 			case 'X':	// XTENTION or PLUG-IN
 				String className = restOfLine;
 				if (className == null || className.length() == 0) {
-					filter = NullTestFilter.getInstance();
+					throw new IllegalArgumentException("Plug-In Command must have class name");
 				} else {
 					Object o = Class.forName(className).newInstance();
 					if (!(o instanceof TestFilter)) {
 						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
 					}
-					filter = (TestFilter)o;
+					filters.add((TestFilter)o);
 				}				
 				done = true;
+				break;
+			
+			case 'Y':	// REMOVE XTENTION or PLUG-IN
+				String clazzName = restOfLine;
+				for (Object o : filters) {
+					if (clazzName.equals(o.getClass().getName())) {
+						filters.remove(o);
+					}
+				}
 				break;
 				
 			case 'D':	// debug on/off
@@ -178,20 +190,22 @@ public class TestRunner extends TestCase {
 				case 'U':	// get Unprotected page
 					resetForPage();
 					page = restOfLine;
+					assertValidRURL(page);
 					
 					thePage = TestUtils.getSimplePage(session, host, port, page);
 					theResult = thePage.getWebResponse();
-					filter.filterPage(thePage, theResult);
+					filterPage(thePage, theResult);
 					assertEquals("unprotected page load", HTTP_STATUS_OK, theResult.getStatusCode());
 					break;
 					
 				case 'P':	// get protected page
 					resetForPage();
 					page = restOfLine;
+					assertValidRURL(page);
 					
 					thePage = TestUtils.getProtectedPage(session, host, port, page, login, pass);
 					theResult = thePage.getWebResponse();
-					filter.filterPage(thePage, theResult);
+					filterPage(thePage, theResult);
 					assertEquals("protected page status", HTTP_STATUS_OK, theResult.getStatusCode());
 					assertEquals("protected page redirect", page, theResult.getUrl().getPath());
 					break;
@@ -238,6 +252,7 @@ public class TestRunner extends TestCase {
 					
 				case 'L':	// page contains Link
 					// PreCondition: theResult has been set by the U or P code above
+					String linkURL = restOfLine;
 					theLink = null;
 					Iterator<HtmlAnchor> iter = thePage.getAnchors().iterator();
 					while (iter.hasNext()) {
@@ -245,7 +260,7 @@ public class TestRunner extends TestCase {
 						
 						// Check in the Name attribute, if any
 						String n = oneLink.getNameAttribute();
-						if (n != null && n.indexOf(restOfLine) != -1) {
+						if (n != null && n.indexOf(linkURL) != -1) {
 							System.out.println("MATCH NAME");
 							theLink = oneLink;
 							break;
@@ -253,7 +268,7 @@ public class TestRunner extends TestCase {
 						
 						// Check the Href attribute too
 						n = oneLink.getHrefAttribute();
-						if (n != null && n.indexOf(restOfLine) != -1) {
+						if (n != null && n.indexOf(linkURL) != -1) {
 							System.out.println("MATCH NAME");
 							theLink = oneLink;
 							break;
@@ -262,13 +277,15 @@ public class TestRunner extends TestCase {
 						// Check in the body text, if any.
 						// Note: will fail if body text is nested in e.g., font tag!
 						String t = oneLink.asText();
-						if (t != null && t.indexOf(restOfLine) != -1) {
+
+						if (t != null && t.indexOf(linkURL) != -1) {
 							System.out.println("MATCH BODYTEXT");
 							theLink = oneLink;
 							break;
 						}
 					}
 					assertNotNull("link not found" ,  theLink);
+					assertValidRURL(theLink.toString());
 					break;
 					
 				case 'G':	// Go to link
@@ -352,14 +369,17 @@ public class TestRunner extends TestCase {
 					fail("Unknown request: " + line);
 				}
 				this.testPassed(line);
-			
+
+			} catch (final NullPointerException e) {
+				// Should not happen: indicates logic or coding error in the framework or a plugin
+				e.printStackTrace();
 			} catch (final XNIException e) {
 				// Older Xerces XNIException has own getException(), not J2SE standard 
 				this.testFailed(line);
 				final Throwable exception = e.getException();
 				System.err.println("XERCES FAILURE: " + line + e.getMessage() + "--" + exception);
 				exception.printStackTrace();
-				System.exit(1);
+
 			} catch (final Throwable e) {
 				final Throwable exception = e.getCause();
 				this.testFailed(line);
@@ -369,6 +389,22 @@ public class TestRunner extends TestCase {
 		report();
 	}
 	
+	private void filterPage(HtmlPage thePage, WebResponse theResult) throws Exception {
+		for (TestFilter filter : filters) {
+			filter.filterPage(thePage, theResult);
+		}
+	}
+
+	private void assertValidRURL(String page) throws URISyntaxException {
+		// XXX FAILURE: tests.txt:38 (java.net.URISyntaxException: Illegal character 
+		//   in path at index 10: HtmlAnchor[<a href="PersonDetail.jsp?person_key=58" ...
+		//URI url;
+		//url = new URI(page);
+		//if (url.isAbsolute()) {
+		//	throw new IllegalArgumentException("URL may not be absolute: " + url);
+		//}
+	}
+
 	/**
 	 * @param line
 	 */
