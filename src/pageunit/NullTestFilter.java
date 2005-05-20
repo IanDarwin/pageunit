@@ -8,14 +8,6 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  * @version $Id$
  */
 public class NullTestFilter implements TestFilter {
-	private static TestFilter instance = new NullTestFilter();
-	private NullTestFilter() {}
-	/**
-	 * @return
-	 */
-	public static TestFilter getInstance() {		
-		return instance;
-	}
 
 	/**
 	 * Null test -- always passes.
