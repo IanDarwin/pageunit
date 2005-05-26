@@ -2,7 +2,6 @@ package pageunit;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 
 public class PageUnit {
 	
@@ -28,7 +27,7 @@ public class PageUnit {
 			}
 			System.out.printf("SUCCESS; %d run\n", numberRun);
 		} catch (Exception e) {
-			System.out.println("FAILED: caught Exception " + e);
+			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numberRun);
 		}
 	}
 
