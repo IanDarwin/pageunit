@@ -3,7 +3,6 @@ package pageunit;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,9 +33,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
  * TODO: Add "Back button" functionality!
  * @version $Id$
  */
-public class TestRunner extends TestCase {
-
-	private static final String TESTS_FILE = "tests.txt";
+public class TestRunner extends TestCase {	
 	
 	private static final int HTTP_STATUS_OK = 200;
 	
@@ -45,24 +42,8 @@ public class TestRunner extends TestCase {
 	private int nFailures;
 	
 	public void testAllTests() throws Exception {
-		run(TESTS_FILE);
+		run(PageUnit.TESTS_FILE);
 	}
-	
-	public static void main(String[] args) {
-		TestRunner t = new TestRunner();
-		try {
-			if (args.length == 0) {
-				t.run(TESTS_FILE);
-			} else {
-				for (int i = 0; i < args.length; i++) {
-					t.run(args[i]);
-				}
-			}
-			System.out.println("SUCCESS");
-		} catch (Exception e) {
-			System.out.println("FAILED: caught Exception " + e);
-		}
-	}	
 
 	private WebClient session = new WebClient();
 	private WebResponse theResult = null;
@@ -87,8 +68,9 @@ public class TestRunner extends TestCase {
 		int port = TestUtils.getIntProperty("port");
 		
 		System.out.println("*****************************************************************");
-		System.out.println(getClass().getName());
+		System.out.println("PageUnit $Version$");
 		System.out.println("Test run with http://" + host + ":" + port);
+		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
 
