@@ -1,6 +1,8 @@
 package pageunit;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class PageUnit {
 	
@@ -45,7 +47,10 @@ public class PageUnit {
 	}
 	
 	private static void loopThrough(File dir) throws Exception {
-		for (File f : dir.listFiles()) {
+		assert dir.isDirectory() : "Logic error: not a directory";
+		File[] files = dir.listFiles();
+		Arrays.sort(files);
+		for (File f : files) {
 			processOne(f);
 		}
 	}	
