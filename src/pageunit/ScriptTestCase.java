@@ -45,7 +45,7 @@ public class TestRunner extends TestCase {
 		run(PageUnit.TESTS_FILE);
 	}
 
-	private WebClient session = new WebClient();
+	private WebClient session;
 	private WebResponse theResult = null;
 	private HtmlPage thePage = null;
 	private HtmlAnchor theLink = null;
@@ -73,6 +73,8 @@ public class TestRunner extends TestCase {
 		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
+
+		session = new WebClient();
 
 		LineNumberReader is = new LineNumberReader(new FileReader(fileName));
 		String line;
@@ -422,7 +424,7 @@ public class TestRunner extends TestCase {
 	}
 	
 	private void report() {
-		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures);
+		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures + " so far.");
 		assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
