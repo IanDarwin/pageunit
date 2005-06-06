@@ -139,6 +139,13 @@ public class TestRunner extends TestCase {
 				done = true; 
 				break;
 				
+			case 'B':	// Base URL
+				URL u = new URL(restOfLine);
+				host = u.getHost();
+				port = u.getPort();
+				done = true;
+				break;
+				
 			case 'N':	// start new session
 				session = new WebClient();
 				session.setThrowExceptionOnFailingStatusCode(false);
@@ -176,6 +183,9 @@ public class TestRunner extends TestCase {
 					page = restOfLine;
 					assertValidRURL(page);
 					
+					if (debug) {
+						System.err.println(new URL("http", host, port, page));
+					}
 					thePage = TestUtils.getSimplePage(session, host, port, page);
 					theResult = thePage.getWebResponse();
 					filterPage(thePage, theResult);
