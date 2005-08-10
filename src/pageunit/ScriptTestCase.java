@@ -98,7 +98,7 @@ public class TestRunner extends TestCase {
 				throw new IOException("invalid line " + line);
 			}
 			char c = cmd.charAt(0);
-			String restOfLine = line.length() > 2 ? line.substring(2) : "";
+			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
 			String page;
 			boolean done = false;
 			
@@ -128,10 +128,9 @@ public class TestRunner extends TestCase {
 				break;
 				
 			case 'D':	// debug on/off
-				char firstChar = restOfLine.charAt(0);
-				if (firstChar == 't' || firstChar == '1') {
+				if ("on".equals(restOfLine) || restOfLine.startsWith("t")) {
 					setDebug(true);
-				} else if (firstChar == 'f' || firstChar == '0')	{
+				} else if ("off".equals(restOfLine) || restOfLine.startsWith("f"))	{
 					setDebug(false);
 				} else {
 					System.err.println("Warning: invalid Debug setting in " + line);
