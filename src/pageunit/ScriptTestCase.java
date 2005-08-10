@@ -128,13 +128,7 @@ public class TestRunner extends TestCase {
 				break;
 				
 			case 'D':	// debug on/off
-				if ("on".equals(restOfLine) || restOfLine.startsWith("t")) {
-					setDebug(true);
-				} else if ("off".equals(restOfLine) || restOfLine.startsWith("f"))	{
-					setDebug(false);
-				} else {
-					System.err.println("Warning: invalid Debug setting in " + line);
-				}
+				setDebug(getBoolean(restOfLine));
 				done = true; 
 				break;
 				
@@ -380,6 +374,19 @@ public class TestRunner extends TestCase {
 			}
 		}
 		report();
+	}
+
+	/**
+	 * Get a Boolean from an input line.
+	 * @param inputLine
+	 */
+	private boolean getBoolean(String inputLine) {
+		if ("on".equals(inputLine) || inputLine.startsWith("t")) {
+			return true;
+		} else if ("off".equals(inputLine) || inputLine.startsWith("f"))	{
+			return false;
+		}
+		throw new IllegalArgumentException("Warning: invalid Debug setting in " + inputLine);	
 	}
 	
 	private void filterPage(HtmlPage thePage, WebResponse theResult) throws Exception {
