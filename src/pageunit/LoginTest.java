@@ -7,7 +7,9 @@ import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 /**
- * Trying to build a usable test engine using JUnit and Jakarta HttpClient directly.
+ * Trying to build a usable test engine using JUnit and 
+ * Jakarta HttpClient directly; just kept around as an existence
+ * proof (this is NOT going to be part of the final pageunit package).
  * @version $Id$
  */
 public class LoginTest extends TestCase {
