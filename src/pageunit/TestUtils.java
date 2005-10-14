@@ -22,13 +22,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  */
 public class TestUtils {
 	
-	private static final String TCPTEST_PROPERTIES_FILENAME = ".tcptest.properties";
+	private static final String PAGEUNIT_PROPERTIES_FILENAME = ".pageunit.properties";
 	private static Properties props  = new Properties();
 	private static boolean debug;
 	
 	static {
 		String home = System.getProperty("user.home");
-		String propsFileName = home + File.separator +TCPTEST_PROPERTIES_FILENAME;
+		String propsFileName = home + File.separator + PAGEUNIT_PROPERTIES_FILENAME;
 		
 		try {
 			props.load(new FileInputStream(propsFileName));
