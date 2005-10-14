@@ -2,9 +2,10 @@
 # TCP Test Suite Driver
 # $Id$
 
-# Input language described in documents/devtools/webtscript.html
+# Input language described in docs/pageunit.html
 
-N
+H calendar.phenogenomics.ca
+O 80
 
 U /index.php
 # This login page has almost no distinctive text, so don't use M here.
