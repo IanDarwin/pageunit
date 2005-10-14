@@ -100,7 +100,6 @@ public class TestRunner extends TestCase {
 			char c = cmd.charAt(0);
 			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
 			String page;
-			boolean done = false;
 			
 			// Handle declarative (non-test) requests here
 			switch(c) {
@@ -115,8 +114,7 @@ public class TestRunner extends TestCase {
 					}
 					filters.add((TestFilter)o);
 				}				
-				done = true;
-				break;
+				continue;
 			
 			case 'Y':	// REMOVE XTENTION or PLUG-IN
 				String clazzName = restOfLine;
@@ -129,41 +127,40 @@ public class TestRunner extends TestCase {
 				
 			case 'D':	// debug on/off
 				setDebug(getBoolean(restOfLine));
-				done = true; 
-				break;
+				continue; 
 				
-			case 'B':	// Base URL
+			case 'B':	// hard-coded Base URL
 				URL u = new URL(restOfLine);
 				host = u.getHost();
 				port = u.getPort();
-				done = true;
-				break;
+				continue;
+				
+			case 'H':	// hard-code hostname
+				host = restOfLine.trim();
+				continue;
+				
+			case 'O':	// pOrt number
+				port = Integer.parseInt(restOfLine.trim());
+				continue;
 				
 			case 'N':	// start new session
 				session = new WebClient();
 				session.setThrowExceptionOnFailingStatusCode(false);
 				theLink = null;
-				done = true;
-				break;	
-				
+				continue;
+
 			case 'C':	// Credentials
 				String[] cred = getTwoArgs("credentials", restOfLine, ' ');
 				login = cred[0];
 				pass = cred[1];
-				done = true;
-				break;
+				continue;
 				
 			case 'Q':
 				System.out.println("*****************************************************************");
 				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
 				System.out.println("*****************************************************************");
 				report();
-				done = true;
-				return;
-			}
-			
-			if (done) {
-				continue;
+				continue;				
 			}
 			
 			// Handle actual tests here
@@ -361,16 +358,18 @@ public class TestRunner extends TestCase {
 				// Should not happen: indicates logic or coding error in the framework or a plugin
 				e.printStackTrace();
 			} catch (final XNIException e) {
-				// Older Xerces XNIException has own getException(), not J2SE standard 
+				// Older Xerces XNIException has own getException(), not Java standard 
 				this.testFailed(line);
 				final Throwable exception = e.getException();
 				System.err.println("XERCES FAILURE: " + line + e.getMessage() + "--" + exception);
 				exception.printStackTrace();
 
 			} catch (final Throwable e) {
-				final Throwable exception = e.getCause();
+				final Throwable cause = e.getCause();
 				this.testFailed(line);
-				System.err.println("FAILURE: " + fileName + ":" + is.getLineNumber() + " (" + e + ")");
+				System.err.println(
+					"FAILURE: " + fileName + ":" + is.getLineNumber() + 
+					" (" + e + ':' + cause + ")");
 			}
 		}
 		report();
