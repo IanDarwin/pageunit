@@ -3,6 +3,9 @@ package pageunit;
 import java.io.File;
 import java.util.Arrays;
 
+/** Main program to run test files under PageUnit.
+ * @author ian
+ */
 public class PageUnit {
 	
 	private static final String TEST_FILENAME_EXT = ".txt";
