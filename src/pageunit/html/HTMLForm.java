@@ -1,5 +1,8 @@
 package pageunit.html;
 
-public interface HtmlForm {
+import java.util.List;
 
+public interface HtmlForm extends HtmlElement {
+	public abstract String getURL();
+	public abstract List getInputs();
 }
