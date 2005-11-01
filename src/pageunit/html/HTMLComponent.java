@@ -1,5 +1,6 @@
 package pageunit.html;
 
 public interface HtmlElement {
-	public abstract String getName();
+	public short getNodeType();
+    public String getNodeName();
 }

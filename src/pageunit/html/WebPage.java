@@ -3,15 +3,11 @@ package pageunit.html;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.w3c.dom.Node;
-
 import pageunit.http.ScriptResult;
 import pageunit.http.WebResponse;
 
-public interface WebPage {
+public interface WebPage extends HtmlElement {
 
-    public short getNodeType();
-    public String getNodeName();
     public HtmlElement getDocumentElement();
     public String getPageEncoding();
     public HtmlElement createElement(String t);
