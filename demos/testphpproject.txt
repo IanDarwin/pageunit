@@ -10,8 +10,8 @@ O 80
 U /index.php
 # This login page has almost no distinctive text, so don't use M here.
 F frm
-# Not implemented yet: idea to use username & pass from config file, so that,
-# like the hostname and port, these values are not baked into the test suite.
+# Use username & pass from config file, so that, like the hostname
+# and port, these values are not baked into the test suite.
 R loginstring=${USER}
 R user_pw=${PASS}
 # submit the form using its default button (PHPProject doesn't name the form button)
