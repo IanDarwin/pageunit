@@ -142,7 +142,7 @@ public class TestUtils {
 	 * @param formResultsPage
 	 * @return The redirect location, or null
 	 */
-	static boolean isRedirectCode(int statusCode) {
+	public static boolean isRedirectCode(int statusCode) {
 		return (statusCode == HttpStatus.SC_MOVED_TEMPORARILY)
 				|| (statusCode == HttpStatus.SC_MOVED_PERMANENTLY)
 				|| (statusCode == HttpStatus.SC_SEE_OTHER)

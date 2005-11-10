@@ -14,7 +14,9 @@ public class PageUnit {
 	
 	private static TestRunner t = new TestRunner();
 	
-	private static int numberRun = 0;
+	private static int numFilesRun = 0;
+	
+	private static Results r = new Results(0,0,0);
 	
 	public static void main(String[] args) {
 		
@@ -28,17 +30,22 @@ public class PageUnit {
 					processOne(f);
 				}
 			}
-			System.out.printf("SUCCESS; %d run\n", numberRun);
+			System.out.printf("SUCCESS; %d files run\n", numFilesRun);
 		} catch (Exception e) {
-			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numberRun);
+			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
 		}
 	}
 
-	private static void processOne(File f) throws Exception {
+	/** Process one File; if it's a directory, recurse,
+	 * if it's a file, ending in .txt, run it as a test file.
+	 * @param f The File object to process.
+	 * @throws Exception
+	 */
+	private static void processOne(final File f) throws Exception {
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
-				++numberRun;
-				t.run(f.getAbsolutePath());
+				++numFilesRun;
+				r = t.run(f.getAbsolutePath()).add(r);
 			} else
 				System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
 		} else if (f.isDirectory()) {
@@ -48,7 +55,10 @@ public class PageUnit {
 		}
 	}
 	
-	private static void loopThrough(File dir) throws Exception {
+	/** Process one directory, recursing by calling back to processOne,
+	 * and processing files.
+	 */
+	private static void loopThrough(final File dir) throws Exception {
 		assert dir.isDirectory() : "Logic error: not a directory";
 		File[] files = dir.listFiles();
 		Arrays.sort(files);
