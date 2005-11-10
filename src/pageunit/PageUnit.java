@@ -16,7 +16,7 @@ public class PageUnit {
 	
 	private static int numFilesRun = 0;
 	
-	private static Results r = new Results(0,0,0);
+	private static ResultStat r = new ResultStat(0,0,0);
 	
 	public static void main(String[] args) {
 		
@@ -30,7 +30,8 @@ public class PageUnit {
 					processOne(f);
 				}
 			}
-			System.out.printf("SUCCESS; %d files run\n", numFilesRun);
+			System.out.printf("%d files run\n", numFilesRun);
+			System.out.println(r);
 		} catch (Exception e) {
 			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
 		}

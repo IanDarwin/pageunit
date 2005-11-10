@@ -41,7 +41,7 @@ public class TestRunner extends TestCase {
 	private int nSucceeded;
 	private int nFailures;
 	
-	public Results testAllTests() throws Exception {
+	public ResultStat testAllTests() throws Exception {
 		return run(PageUnit.TESTS_FILE);
 	}
 
@@ -57,7 +57,7 @@ public class TestRunner extends TestCase {
 	 * @param fileName the test script file name.
 	 * @throws Exception
 	 */
-	public Results run(final String fileName) throws Exception {			
+	public ResultStat run(final String fileName) throws Exception {			
 
 		String login = TestUtils.getProperty("admin_login");
 		assertNotNull("login", login);
@@ -372,7 +372,7 @@ public class TestRunner extends TestCase {
 					" (" + e + ':' + cause + ")");
 			}
 		}
-		return new Results(nTests, nFailures, nSucceeded);
+		return new ResultStat(nTests, nSucceeded, nFailures);
 	}
 
 	/**
