@@ -65,7 +65,7 @@ public class HTMLParser {
 		public void doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
 			System.out.print(tag);
 			System.out.print(' ');
-			System.out.println("name=" + attrs.getAttribute("name"));
+			System.out.println("name=" + attrs.getAttribute(HTML.Attribute.NAME));
 		}
 	}
 	
