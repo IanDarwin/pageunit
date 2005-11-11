@@ -74,10 +74,13 @@ public class HTMLParser {
 	 */
 	public static void main(String[] args) throws Exception {
 		HTMLEditorKit.ParserCallback callback = new PPCallback();
+		int n = 0;
 		for (String fileName : args) {
 			System.out.println("** START FILE: " + fileName);
 			Reader reader = new FileReader(fileName);
 			new ParserDelegator().parse(reader, callback, true);
+			++n;
 		}
+		System.out.printf("Parsed %d files%n", n);
 	}
 }
