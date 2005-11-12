@@ -23,9 +23,6 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public class HTMLParser {
 
-	
-
-
 	static class PPCallback extends HTMLEditorKit.ParserCallback {
 		
 		List<String> tags = new ArrayList<String>();

@@ -1,6 +1,7 @@
 package pageunit.html;
 
 public interface HTMLComponent {
-	public short getNodeType();
-    public String getNodeName();
+    public String getName();
+    public String getBody();
+    public void setBody(String body);
 }
