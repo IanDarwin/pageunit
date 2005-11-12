@@ -5,7 +5,6 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
 
 /** Encapsulate all knowledge of how to create any HTMLComponent.
- * 
  * @author ian
  */
 public class HTMLComponentFactory {
@@ -18,6 +17,13 @@ public class HTMLComponentFactory {
 			HTMLAnchor comp = new HTMLAnchorImpl(name, url);
 			return comp;
 		}
+		if (tag == HTML.Tag.FORM) {
+			String action = (String)attrs.getAttribute(HTML.Attribute.ACTION);
+			String method = (String)attrs.getAttribute(HTML.Attribute.METHOD);
+			HTMLForm form = new HTMLFormImpl(name, action, method);
+			return form;
+		}
+		System.err.printf("HTMLComponentFactory(%s): unknown", tag);
 		return null;
 	}
 }
