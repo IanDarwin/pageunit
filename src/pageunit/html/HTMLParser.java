@@ -23,6 +23,9 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public class HTMLParser {
 
+	
+
+
 	static class PPCallback extends HTMLEditorKit.ParserCallback {
 		
 		List<String> tags = new ArrayList<String>();
@@ -33,12 +36,22 @@ public class HTMLParser {
 				HTML.Tag.A,
 		};
 		
+		public boolean wantedTag(HTML.Tag aTag) {
+			HTML.Tag notWantedTags[] = {
+					
+			};
+			for (HTML.Tag tag : notWantedTags) {
+				if (aTag == tag) {
+					return false;
+				}
+			}
+			return true;
+		}
+		
 		public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 			
 			for (HTML.Tag t : wantedComplexTags) {
 				if (t==tag) {
-					if (t == HTML.Tag.A)
-						continue;
 					System.out.print("COMPLEX: ");
 					doTag(tag, attrs);
 				}
@@ -63,9 +76,10 @@ public class HTMLParser {
 		}
 		
 		public void doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
-			System.out.print(tag);
-			System.out.print(' ');
-			System.out.println("name=" + attrs.getAttribute(HTML.Attribute.NAME));
+			if (!wantedTag(tag))
+				return;
+			HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
+			System.out.print(comp);
 		}
 	}
 	
