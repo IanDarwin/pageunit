@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public interface HtmlAnchor extends HTMLComponent {
+public interface HTMLAnchor extends HTMLComponent {
 	
 	public abstract String getURL();
 }

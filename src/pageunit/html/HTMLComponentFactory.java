@@ -3,8 +3,11 @@ package pageunit.html;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML.Tag;
 
+/** Encapsulate all knowledge of how to create any HTMLComponent.
+ * 
+ * @author ian
+ */
 public class HTMLComponentFactory {
-	// rename HTMLElement to HTMLComponent
 
 	public static HTMLComponent create(Tag tag, MutableAttributeSet attrs) {
 		// XXX writeme

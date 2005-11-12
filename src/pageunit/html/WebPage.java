@@ -11,11 +11,11 @@ public interface WebPage extends HTMLComponent {
     public HTMLComponent getDocumentElement();
     public String getPageEncoding();
     public HTMLComponent createElement(String t);
-    public HtmlAnchor getAnchorByName(String t)       throws NoSuchElementException;
-    public HtmlAnchor getAnchorByHref(String t)       throws NoSuchElementException;
+    public HTMLAnchor getAnchorByName(String t)       throws NoSuchElementException;
+    public HTMLAnchor getAnchorByHref(String t)       throws NoSuchElementException;
     public java.util.List getAnchors();
-    public HtmlAnchor getFirstAnchorByText(String t)       throws NoSuchElementException;
-    public HtmlForm getFormByName(String t)       throws NoSuchElementException;
+    public HTMLAnchor getFirstAnchorByText(String t)       throws NoSuchElementException;
+    public HTMLForm getFormByName(String t)       throws NoSuchElementException;
     public java.util.List getForms();
     public java.net.URL getFullyQualifiedUrl(String t) throws java.net.MalformedURLException;
     public String getResolvedTarget(String t);
