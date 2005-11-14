@@ -1,0 +1,103 @@
+<project name="PageUnit: Unit test for web pages" 
+	default="regress" basedir=".">
+
+	<!-- $Id$ -->
+
+	<!-- other properties -->
+	<property name="src" value="src"/>
+	<property name="build" value="build"/>
+
+	<!-- Misc JAR files -->
+	<property name="servletapi.jar" value="lib/servletapi.jar"/>
+	
+	<!-- Targets -->
+	<property name="obj.jar" value="pageunit.jar"/>
+	<property name="src.jar" value="pageunit-src.jar"/>
+
+	<property name="deploy.dir" value="${user.home}/lib"/>
+	
+	<property tag="HEAD"/>
+	<property tag="R_01"/>
+
+	<target name="init">
+		<tstamp/> <!-- Set time stamp variables in case we need 'em-->
+		<mkdir dir="${build}"/> <!-- Ensure build directory exists -->
+	</target>
+
+	<target name="build" depends="build-core,build-regress"/>
+
+	<target name="build-core" depends="init">
+		<javac destdir="${build}" srcdir="${src}"
+			classpath="${servletapi.jar}:${mail.jar}"
+			debug="true" deprecation="true" fork="false">
+			<exclude name="regress/**"/>
+		</javac>
+	</target>
+
+	<target name="build-regress" depends="init">
+		<javac destdir="${build}" srcdir="${src}"
+			classpath="${build}:${junit.jar}"
+			debug="true" deprecation="true" fork="false">
+			<include name="regress/**"/>
+			<exclude name="p*/**"/>
+		</javac>
+	</target>
+
+	<target name="dist" depends="jar,src-jar"/>
+
+	<target name="jar" depends="build">
+		<mkdir dir="${build}/META-INF"/>
+		<copy file="darwintags.tld" todir="${build}/META-INF"/>
+		<jar jarfile="${build}/${obj.jar}" 
+			manifest="manifest.stub"
+			basedir="${build}" includes="META-INF/*,com/**/*.class,docs/**">
+		</jar>
+	</target>
+
+	<target name="src-jar" depends="build">
+		<jar jarfile="${build}/${src.jar}"
+			manifest="manifest.stub"
+			basedir="." includes="build.xml,src/**">
+		</jar>
+	</target>
+
+	<target name="deploy" depends="jar">
+		<copy file="${build}/${obj.jar}" todir="${deploy.dir}"/>
+	</target>
+
+
+	<!-- Simple Regression Tests -->
+	<target name="regress" depends="build">
+		<junit printsummary="yes" fork="no" haltonfailure="yes">
+				<classpath>
+						<pathelement location="${build}"/>
+						<pathelement location="${junit.jar}"/>
+				</classpath>
+				<formatter type="plain"/>
+				<test name="regress.AllTests"/>
+		</junit>
+
+	</target>
+
+	<target name="regress.layout" depends="build">
+		<echo           message="CircleLayoutTest"/>
+		<java className="regress.CircleLayoutTest" classpath="build"
+			fork="yes"/>
+		<echo           message="ColumnLayoutTest"/>
+		<java className="regress.ColumnLayoutTest" classpath="build"
+			fork="yes"/>
+		<echo           message="EntryLayoutTest"/>
+		<java className="regress.EntryLayoutTest" classpath="build"
+			fork="yes"/>
+		<echo           message="RelativeLayoutTest"/>
+		<java className="regress.RelativeLayoutTest" classpath="build"
+			fork="yes"/>
+	</target>
+
+	<target name="clean">
+		<delete file="${fileiotest.dat}"/>
+		<delete file="${fileiotest.dat}.bak"/>
+		<delete dir="build"/>
+		<delete dir="docs"/>
+	</target>
+</project>
