@@ -1,19 +1,20 @@
 package pageunit.html;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import pageunit.http.HTTPMethod;
 
-public class HTMLFormImpl extends HTMLComponentBase implements HTMLForm {
+public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 
 	String action;
 	HTTPMethod method;
-	List inputs;
+	List<HTMLInput> inputs = new ArrayList<HTMLInput>();
 	
 	public HTMLFormImpl(String name, String action, String method) {
 		super(name);
 		this.action = action;
-		this.method = HTTPMethod.valueOf(method);
+		this.method = HTTPMethod.valueOf(method.toUpperCase());
 	}
 
 	public HTTPMethod getMethod() {

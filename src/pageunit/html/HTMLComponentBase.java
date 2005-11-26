@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public abstract class HTMLComponentBase {
+public abstract class HTMLComponentBase implements HTMLComponent {
 
 	private String name;
 	private String body;
