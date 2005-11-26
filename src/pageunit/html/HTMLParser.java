@@ -1,13 +1,14 @@
 package pageunit.html;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.parser.ParserDelegator;
 
 /**
@@ -21,70 +22,96 @@ import javax.swing.text.html.parser.ParserDelegator;
  * @author ian
  * @version $Id$
  */
-public class HTMLParser {
+public class HTMLParser extends HTMLEditorKit.ParserCallback {
+		
+		private final HTMLContainer PAGE = new HTMLPageImpl("Outer Page");
 
-	static class PPCallback extends HTMLEditorKit.ParserCallback {
-		
-		List<String> tags = new ArrayList<String>();
-		
 		private HTML.Tag[] wantedComplexTags = {
 				HTML.Tag.HTML,
 				HTML.Tag.FORM,
 				HTML.Tag.A,
+				HTML.Tag.TITLE
 		};
 		
-		public boolean wantedTag(HTML.Tag aTag) {
-			HTML.Tag notWantedTags[] = {
-					
-			};
-			for (HTML.Tag tag : notWantedTags) {
-				if (aTag == tag) {
-					return false;
-				}
-			}
-			return true;
+		public HTMLParser() {
+			pushContainer(PAGE);
 		}
 		
+		// This variable and three methods implement a semi-opaque stack of HTML containers
+		private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
+		
+		void pushContainer(HTMLContainer newbie) {
+			containerStack.push(newbie);
+		}
+		
+		HTMLContainer popContainer() {
+			return containerStack.pop();
+		}
+		
+		HTMLContainer currentContainer() {
+			return containerStack.peek();
+		}
+		
+		@Override
 		public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 			
 			for (HTML.Tag t : wantedComplexTags) {
 				if (t==tag) {
 					System.out.print("COMPLEX: ");
-					doTag(tag, attrs);
+					HTMLComponent tmp = doTag(tag, attrs);
+					
+					currentContainer().addChild(tmp);
+					
+					if (tmp instanceof HTMLContainer) {
+						pushContainer((HTMLContainer)tmp);
+					}
 				}
 			}
 		}
 		
+		@Override
 		public void handleEndTag(HTML.Tag t, int pos) {
-			
+			if (HTMLComponentFactory.isContainerTag(t)) {
+				popContainer();
+			}
 		}
 		
+
 		private HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT
 		};
 		
+		@Override
 		public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 			for (HTML.Tag t : wantedSimpleTags) {
 				if (t == tag) {
 					System.out.print("SIMPLE: ");
-					doTag(tag, attrs);
+					currentContainer().addChild(doTag(tag, attrs));
 				}
 			}
 		}
 		
-		public void doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
-			if (!wantedTag(tag))
-				return;
+		public HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
 			HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
-			System.out.print(comp);
+			System.out.println(comp);
+			return comp;
 		}
-	}
+		
+		@Override
+		public void handleText(char[] data, int pos) {
+			System.out.println("TEXT: " + new String(data));
+		}
+
+		public HTMLContainer parse(Reader reader) throws IOException, HTMLParseException {
+			new ParserDelegator().parse(reader, this, true);
+			return PAGE;
+		}
 	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		HTMLEditorKit.ParserCallback callback = new PPCallback();
+		HTMLEditorKit.ParserCallback callback = new HTMLParser();
 		int n = 0;
 		for (String fileName : args) {
 			System.out.println("** START FILE: " + fileName);
@@ -94,4 +121,6 @@ public class HTMLParser {
 		}
 		System.out.printf("Parsed %d files%n", n);
 	}
+	
+
 }
