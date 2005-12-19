@@ -11,18 +11,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import pageunit.html.HTMLAnchor;
+import pageunit.html.HTMLForm;
+import pageunit.html.HTMLPage;
+import pageunit.http.WebClient;
+import pageunit.http.WebResponse;
+
 import junit.framework.TestCase;
 
-import org.apache.xerces.xni.XNIException;
-
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlInput;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 /**
  * Run the classes listed in tests.txt. This is set up as a JUnit "test case" not as a JUnit Test Runner,
@@ -47,9 +43,9 @@ public class TestRunner extends TestCase {
 
 	private WebClient session;
 	private WebResponse theResult = null;
-	private HtmlPage thePage = null;
-	private HtmlAnchor theLink = null;
-	private HtmlForm theForm = null;
+	private HTMLPage thePage = null;
+	private HTMLAnchor theLink = null;
+	private HTMLForm theForm = null;
 	private boolean debug;
 	private List<TestFilter> filters = new ArrayList<TestFilter>();
 	
@@ -357,13 +353,6 @@ public class TestRunner extends TestCase {
 			} catch (final NullPointerException e) {
 				// Should not happen: indicates logic or coding error in the framework or a plugin
 				e.printStackTrace();
-			} catch (final XNIException e) {
-				// Older Xerces XNIException has own getException(), not Java standard 
-				this.testFailed(line);
-				final Throwable exception = e.getException();
-				System.err.println("XERCES FAILURE: " + line + e.getMessage() + "--" + exception);
-				exception.printStackTrace();
-
 			} catch (final Throwable e) {
 				final Throwable cause = e.getCause();
 				this.testFailed(line);
@@ -388,7 +377,7 @@ public class TestRunner extends TestCase {
 		throw new IllegalArgumentException("Warning: invalid Debug setting in " + inputLine);	
 	}
 	
-	private void filterPage(final HtmlPage thePage, final WebResponse theResult) throws Exception {
+	private void filterPage(final HTMLPage thePage, final WebResponse theResult) throws Exception {
 		for (TestFilter filter : filters) {
 			filter.filterPage(thePage, theResult);
 		}

@@ -2,8 +2,8 @@ package pageunit.samples;
 
 import pageunit.TestFilter;
 
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import pageunit.http.WebResponse;
+import pageunit.html.HTMLPage;
 
 /**
  * WebTest filter that checks every page for $Source or $Id
@@ -14,7 +14,7 @@ public class CvsIdFilter implements TestFilter {
 	/* (non-Javadoc)
 	 * @see pageunit.TestFilter#filterPage(com.gargoylesoftware.htmlunit.html.HtmlPage, com.gargoylesoftware.htmlunit.WebResponse)
 	 */
-	public void filterPage(HtmlPage thePage, WebResponse theResult) throws Exception {
+	public void filterPage(HTMLPage thePage, WebResponse theResult) throws Exception {
 
 		String contentAsString = theResult.getContentAsString();
 		if (!(contentAsString.indexOf("$Source") > -1) && !(contentAsString.indexOf("$Id") > -1))  {

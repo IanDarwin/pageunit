@@ -10,10 +10,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpStatus;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import pageunit.http.WebClient;
+import pageunit.http.WebResponse;
+import pageunit.html.HTMLForm;
+import pageunit.html.HTMLPage;
 
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
@@ -53,7 +53,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HtmlPage getSimplePage(WebClient webClient,
+	public static HTMLPage getSimplePage(WebClient webClient,
 			String targetHost, int targetPort, String targetPage)
 			throws IOException {
 
@@ -74,8 +74,8 @@ public class TestUtils {
 	 * @param newLocation
 	 * @return
 	 */
-	public static HtmlPage getSimplePage(WebClient webClient, URL url) throws IOException {
-		final HtmlPage page = (HtmlPage) webClient.getPage(url);
+	public static HTMLPage getSimplePage(WebClient webClient, URL url) throws IOException {
+		final HTMLPage page = (HTMLPage) webClient.getPage(url);
 		System.out.println("Got to simple page: " + page.getWebResponse().getUrl());
 		
 		return page;
@@ -96,7 +96,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HtmlPage getProtectedPage(WebClient webClient,
+	public static HTMLPage getProtectedPage(WebClient webClient,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException {
@@ -109,7 +109,7 @@ public class TestUtils {
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
 		
 		// request protected page, and let HtmlUnit handle redirection here.
-		final HtmlPage page1 = (HtmlPage) webClient.getPage(url);	// Ask for one page, really get login page
+		final HTMLPage page1 = (HTMLPage) webClient.getPage(url);	// Ask for one page, really get login page
 		
 		if (debug) {
 				System.out.println("Protected Page get: " + page1.getTitleText());
@@ -120,12 +120,12 @@ public class TestUtils {
         	System.out.println("Protected Page Get status: " + statusCode);
         }
 
-		HtmlForm form = page1.getFormByName("loginForm");	// dependency on our form page
+		HTMLForm form = page1.getFormByName("loginForm");	// dependency on our form page
 
 		form.getInputByName("j_username").setValueAttribute(login);
 		form.getInputByName("j_password").setValueAttribute(pass);
 		
-		HtmlPage formResultsPage = (HtmlPage)form.submit();   // SEND THE LOGIN
+		HTMLPage formResultsPage = (HTMLPage)form.submit();   // SEND THE LOGIN
 		if (debug) {
 			System.out.println("Login return " + formResultsPage.getTitleText());
 		}

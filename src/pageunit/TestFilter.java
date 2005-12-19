@@ -1,7 +1,7 @@
 package pageunit;
 
-import com.gargoylesoftware.htmlunit.WebResponse;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import pageunit.http.WebResponse;
+import pageunit.html.HTMLPage;
 
 /**
  * Site-specific extension mechanism for WebTest package
@@ -9,5 +9,5 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
  */
 public interface TestFilter {
 
-		public void filterPage(HtmlPage thePage, WebResponse theResult) throws Exception;
+		public void filterPage(HTMLPage thePage, WebResponse theResult) throws Exception;
 }

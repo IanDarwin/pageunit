@@ -8,4 +8,5 @@ public interface WebResponse extends HttpServletResponse {
 	public int getStatus();
 	public Cookie[] getCookies();
 	public Cookie getCookie(String name);
+	public String getContentAsString();
 }
