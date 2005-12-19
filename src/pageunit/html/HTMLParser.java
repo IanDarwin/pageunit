@@ -95,7 +95,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			}
 		}
 		
-		public HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
+		private HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
 			HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
 			System.out.println(comp);
 			return comp;
@@ -127,5 +127,4 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 		System.out.printf("Parsed %d files%n", n);
 	}
-	
 }
