@@ -1,33 +1,48 @@
 package regress.html;
 
-import java.io.Reader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 
 import junit.framework.TestCase;
 import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLContainer;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLHTML;
+import pageunit.html.HTMLPage;
+import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 import pageunit.html.HTMLTitle;
 
 public class ParserTest extends TestCase {
-	/*
-	 * Test method for 'pageunit.html.HTMLParser.parse(Reader)'
-	 */
+	final String test1 = "<html><head><title>Foo</title></head><body>" +
+	"<form action='/foo' method='post'><input type='submit'/></form>" +
+	"<a href='/bar' name='froo'>Link <b>Text</b></a>";
+	
+	private HTMLPage page;
+	
+	public void setUp() throws IOException, HTMLParseException {
+		page = new HTMLParser().parse(new StringReader(test1));
+	}
+
 	public void testParse() throws Throwable {
-		String test1 = "<html><head><title>Foo</title></head><body>" +
-			"<form action='/foo' method='post'><input type='submit'/></form>" +
-			"<a href='/bar'>Link <b>Text</b></a>'";
-		Reader r = new StringReader(test1);
-		HTMLContainer cont = new HTMLParser().parse(r);
-		assertNotNull(cont);
-		List<HTMLComponent> topLevelItems = cont.getChildren();
+		assertNotNull(page);
+	}
+	
+	public void testPageChild() {
+		List<HTMLComponent> topLevelItems = page.getChildren();
 		assertEquals("Children of TOP", 1, topLevelItems.size());
-		HTMLHTML page = (HTMLHTML)topLevelItems.get(0);
-		assertTrue("child of HTML is title", page.getChildren().get(0) instanceof HTMLTitle);
-		HTMLForm form = (HTMLForm)page.getChildren().get(1);
+		HTMLHTML htmlTop = (HTMLHTML)topLevelItems.get(0);
+		assertTrue("child of HTML is title", htmlTop.getChildren().get(0) instanceof HTMLTitle);
+	}
+	
+	public void testForm() {
+		HTMLForm form = (HTMLForm)((HTMLHTML)page.getChildren().get(0)).getChildren().get(1);
 		assertEquals("this form has one child", 1, form.getChildren().size());
+	}
+	
+	public void testGetAnchors() {
+		assertNotNull("get anchor by href", page.getAnchorByURL("b.*r"));
+		assertNotNull("get anchor by name", page.getAnchorByName("oo"));
+		assertNotNull("get anchor by text", page.getAnchorByText("ext"));
 	}
 }

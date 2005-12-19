@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public class HTMLAnchorImpl extends HTMLComponentBase implements HTMLAnchor {
+public class HTMLAnchorImpl extends HTMLContainerBase implements HTMLAnchor {
 
 	private String href;
 	private String body;
@@ -20,6 +20,12 @@ public class HTMLAnchorImpl extends HTMLComponentBase implements HTMLAnchor {
 	
 	public void setBody(String body) {
 		this.body = body;
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+		"Anchor href='%s' name='%s' body='%s'", href, getName(), body);
 	}
 
 }

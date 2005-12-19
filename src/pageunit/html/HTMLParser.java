@@ -23,7 +23,7 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
-		private final HTMLContainer PAGE = new HTMLPageImpl("Outer Page");
+		private final HTMLPage PAGE = new HTMLPageImpl("Outer Page");
 
 		private HTML.Tag[] wantedComplexTags = {
 				HTML.Tag.HTML,
@@ -64,6 +64,12 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					if (tmp instanceof HTMLContainer) {
 						pushContainer((HTMLContainer)tmp);
 					}
+					if (tmp instanceof HTMLAnchor) {
+						PAGE.addAnchor((HTMLAnchor)tmp);
+					}
+					if (tmp instanceof HTMLForm) {
+						PAGE.addForm((HTMLForm)tmp);
+					}
 				}
 			}
 		}
@@ -75,7 +81,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			}
 		}
 		
-
 		private HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT
 		};
@@ -98,10 +103,12 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
 		@Override
 		public void handleText(char[] data, int pos) {
-			System.out.println("TEXT: " + new String(data));
+			final String bodyContent = new String(data);
+			System.out.println("TEXT: " + bodyContent);
+			currentContainer().setBody(bodyContent);
 		}
 
-		public HTMLContainer parse(Reader reader) throws IOException, HTMLParseException {
+		public HTMLPage parse(Reader reader) throws IOException, HTMLParseException {
 			new ParserDelegator().parse(reader, this, true);
 			return PAGE;
 		}
@@ -121,5 +128,4 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		System.out.printf("Parsed %d files%n", n);
 	}
 	
-
 }
