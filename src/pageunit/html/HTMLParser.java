@@ -76,7 +76,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
 		@Override
 		public void handleEndTag(HTML.Tag t, int pos) {
-			if (HTMLComponentFactory.isContainerTag(t)) {
+			if (t instanceof HTMLContainer) {
 				popContainer();
 			}
 		}

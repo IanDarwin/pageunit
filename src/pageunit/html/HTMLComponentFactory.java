@@ -45,14 +45,4 @@ public class HTMLComponentFactory {
 		return (String)attrs.getAttribute(attr_name);
 	}
 
-	public static boolean isContainerTag(Tag t) {
-		if (t == HTML.Tag.A)
-			return true;
-		if (t == HTML.Tag.FORM)
-			return true;
-		if (t == HTML.Tag.HTML)
-			return true;
-		return false;
-	}
-
 }
