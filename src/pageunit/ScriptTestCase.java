@@ -57,9 +57,9 @@ public class TestRunner extends TestCase {
 	 */
 	public ResultStat run(final String fileName) throws Exception {			
 
-		String login = TestUtils.getProperty("admin_login");
+		String login = TestUtils.getProperty("login");
 		assertNotNull("login", login);
-		String pass = TestUtils.getProperty("admin_passwd");
+		String pass = TestUtils.getProperty("password");
 		assertNotNull("pass", pass);
 		String host = TestUtils.getProperty("host");
 		assertNotNull("hostname", host);
