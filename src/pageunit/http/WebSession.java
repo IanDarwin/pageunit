@@ -6,8 +6,11 @@ import java.net.URL;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 
+import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLForm;
+import pageunit.html.HTMLInput;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
@@ -45,20 +48,20 @@ public class WebSession {
 		client.getHostConfiguration().setHost(
 				url.getHost(), url.getPort(), url.getProtocol());
 
-		GetMethod initialGet = new GetMethod(url.getPath());
-		initialGet.setFollowRedirects(false);
-		System.out.println("Initial request: " + initialGet);
+		GetMethod getter = new GetMethod(url.getPath());
+		getter.setFollowRedirects(false);
+		System.out.println("Initial request: " + getter);
 
-		int status = client.executeMethod(initialGet);
+		int status = client.executeMethod(getter);
 		if (status >= 400 && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
 
 		request = new WebRequest();
 		
-		byte[] responseBody = initialGet.getResponseBody();
+		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
-		initialGet.releaseConnection();	
+		getter.releaseConnection();	
 
 		response = new WebResponse();
 		
@@ -66,9 +69,52 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
-	public HTMLPage submitForm(HTMLForm form) {
-		// TODO 
-		return null;
+	/** XXX implement as
+	 * A thin wrapper around getPage().
+	 * @param theLink
+	 * @return
+	 */
+	public HTMLPage follow(HTMLAnchor theLink) {
+		throw new RuntimeException("follow(anchor) not written");
+	}
+	
+	/** Post an HTML Form
+	 * @param form
+	 * @return
+	 * @throws HTMLParseException
+	 * @throws IOException
+	 */
+	public HTMLPage submitForm(HTMLForm form) throws HTMLParseException, IOException {
+		String action = form.getAction();
+		
+		//client.getHostConfiguration().setHost(
+		//		url.getHost(), url.getPort(), url.getProtocol());
+
+		PostMethod poster = new PostMethod(action);
+		poster.setFollowRedirects(false);
+		System.out.println("Initial request: " + poster);
+
+		// XXX propagate the inputs().getValues()...
+		
+		int status = client.executeMethod(poster);
+		if (status >= 400 && throwExceptionOnFailingStatusCode) {
+			throw new IOException("Status code: " + status);
+		}
+
+		request = new WebRequest();
+		
+		byte[] responseBody = poster.getResponseBody();
+		System.out.println("Read body length was " + responseBody.length);
+		poster.releaseConnection();	
+
+		response = new WebResponse();
+		
+		responseText = new String(responseBody);
+		return new HTMLParser().parse(responseText);
+	}
+	
+	public HTMLPage submitForm(HTMLForm form, HTMLInput button) throws HTMLParseException, IOException {
+		throw new RuntimeException("submitForm(form, input) nryet");
 	}
 
 	public WebRequest getWebRequest() {
@@ -78,4 +124,6 @@ public class WebSession {
 	public WebResponse getWebResponse() {
 		return response;
 	}
+
+
 }

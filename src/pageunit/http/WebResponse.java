@@ -7,7 +7,7 @@ import javax.servlet.http.Cookie;
  * @author ian
  */
 public class WebResponse {
-	public String getHeader(String key) {
+	public String getHeaderValue(String key) {
 		return null;
 	}
 	public int getStatus() {

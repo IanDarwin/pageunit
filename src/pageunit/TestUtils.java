@@ -100,7 +100,7 @@ public class TestUtils {
 	 * @throws IOException
 	 * @throws HTMLParseException 
 	 */
-	public static HTMLPage getProtectedPage(WebSession webClient,
+	public static HTMLPage getProtectedPage(WebSession session,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException, HTMLParseException {
@@ -113,12 +113,12 @@ public class TestUtils {
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
 		
 		// request protected page, and let HtmlUnit handle redirection here.
-		final HTMLPage page1 = (HTMLPage) webClient.getPage(url);	// Ask for one page, really get login page
+		final HTMLPage page1 = (HTMLPage) session.getPage(url);	// Ask for one page, really get login page
 		
 		if (debug) {
 				System.out.println("Protected Page get: " + page1.getTitleText());
 		}
-		WebResponse interaction = webClient.getWebResponse();
+		WebResponse interaction = session.getWebResponse();
 		int statusCode = interaction.getStatus();
         if (debug) {
         	System.out.println("Protected Page Get status: " + statusCode);
@@ -129,13 +129,13 @@ public class TestUtils {
 		form.getInputByName("j_username").setValue(login);
 		form.getInputByName("j_password").setValue(pass);
 		
-		HTMLPage formResultsPage = (HTMLPage)webClient.submitForm(form);   // SEND THE LOGIN
+		HTMLPage formResultsPage = (HTMLPage)session.submitForm(form);   // SEND THE LOGIN
 		if (debug) {
 			System.out.println("Login return " + formResultsPage.getTitleText());
 		}
 
 		// Should be yet another redirect, back to original request page
-		WebResponse res2 = webClient.getWebResponse();
+		WebResponse res2 = session.getWebResponse();
 		statusCode = res2.getStatus();
 
 		return formResultsPage;	// HtmlUnit handles redirection for us
