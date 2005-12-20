@@ -2,6 +2,7 @@ package pageunit.html;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import pageunit.http.HTTPMethod;
 
@@ -33,11 +34,22 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 		return action;
 	}
 
-	public List getInputs() {
+	public List<HTMLInput> getInputs() {
 		return inputs;
 	}
 	
 	public void addInput(HTMLInput i) {
 		inputs.add(i);
+	}
+
+	public HTMLInput getInputByName(String regex) {
+		Pattern patt = Pattern.compile(regex);
+		for (HTMLInput i : inputs) {
+			if (regex.equals(i.getName()) ||
+				(patt.matcher(i.getName()).find())) {
+				return i;
+			}
+		}
+		return null;
 	}
 }

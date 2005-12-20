@@ -3,6 +3,7 @@ package pageunit.html;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Stack;
 
 import javax.swing.text.MutableAttributeSet;
@@ -18,106 +19,119 @@ import javax.swing.text.html.parser.ParserDelegator;
  * the article
  * <a href="http://java.sun.com/products/jfc/tsc/articles/bookmarks/">
  * The Swing HTML Parser</a> on Sun's JFC web site.
- * XXX TODO Optimize: don't require construction for each page!!!
+ * XXX TODO Optimize: don't require construction for each page!
+ * (Issue is that PAGE is used throughout, but don't want to make it static...).
  * @author ian
  * @version $Id$
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
-		private final HTMLPage PAGE = new HTMLPageImpl("Outer Page");
-
-		private HTML.Tag[] wantedComplexTags = {
-				HTML.Tag.HTML,
-				HTML.Tag.FORM,
-				HTML.Tag.INPUT,
-				HTML.Tag.A,
-				HTML.Tag.TITLE
-		};
+	private HTMLPage PAGE;
+	
+	private HTML.Tag[] wantedComplexTags = {
+			HTML.Tag.HTML,
+			HTML.Tag.FORM,
+			HTML.Tag.INPUT,
+			HTML.Tag.A,
+			HTML.Tag.TITLE
+	};
+	
+	private HTMLForm currentForm;
+	
+	public HTMLParser() {
+		PAGE = new HTMLPageImpl("Outer Page");
+		pushContainer(PAGE);
+	}
+	
+	// This variable and three methods implement a semi-opaque stack of HTML containers
+	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
+	
+	void pushContainer(HTMLContainer newbie) {
+		containerStack.push(newbie);
+	}
+	
+	HTMLContainer popContainer() {
+		return containerStack.pop();
+	}
+	
+	HTMLContainer currentContainer() {
+		return containerStack.peek();
+	}
+	
+	@Override
+	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 		
-		public HTMLParser() {
-			pushContainer(PAGE);
+		for (HTML.Tag t : wantedComplexTags) {
+			if (t==tag) {
+				System.out.print("COMPLEX: ");
+				HTMLComponent tmp = doTag(tag, attrs);
+				
+				currentContainer().addChild(tmp);
+				
+				if (tmp instanceof HTMLContainer) {
+					pushContainer((HTMLContainer)tmp);
+				}
+				
+				if (tmp instanceof HTMLAnchor) {
+					PAGE.addAnchor((HTMLAnchor)tmp);
+				}
+				if (tmp instanceof HTMLForm) {
+					currentForm = (HTMLForm)tmp;
+					PAGE.addForm(currentForm);
+				}
+				if (tmp instanceof HTMLInput && currentForm != null) {
+					HTMLFormImpl formImpl = (HTMLFormImpl)tmp;
+					formImpl.addInput((HTMLInput)tmp);
+				}
+				if (tmp instanceof HTMLTitle) {
+					((HTMLPageImpl)PAGE).setTitle((HTMLTitle)tmp);
+				}
+			}
 		}
-		
-		// This variable and three methods implement a semi-opaque stack of HTML containers
-		private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
-		
-		void pushContainer(HTMLContainer newbie) {
-			containerStack.push(newbie);
+	}
+	
+	@Override
+	public void handleEndTag(HTML.Tag t, int pos) {
+		if (t instanceof HTMLContainer) {
+			popContainer();
 		}
-		
-		HTMLContainer popContainer() {
-			return containerStack.pop();
-		}
-		
-		HTMLContainer currentContainer() {
-			return containerStack.peek();
-		}
-		
-		@Override
-		public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
+	}
+	
+	private HTML.Tag[] wantedSimpleTags = {
 			
-			for (HTML.Tag t : wantedComplexTags) {
-				if (t==tag) {
-					System.out.print("COMPLEX: ");
-					HTMLComponent tmp = doTag(tag, attrs);
-					
-					currentContainer().addChild(tmp);
-					
-					if (tmp instanceof HTMLContainer) {
-						pushContainer((HTMLContainer)tmp);
-					}
-					
-					if (tmp instanceof HTMLAnchor) {
-						PAGE.addAnchor((HTMLAnchor)tmp);
-					}
-					if (tmp instanceof HTMLForm) {
-						PAGE.addForm((HTMLForm)tmp);
-					}
-					if (tmp instanceof HTMLTitle) {
-						((HTMLPageImpl)PAGE).setTitle((HTMLTitle)tmp);
-					}
-				}
+	};
+	
+	@Override
+	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
+		for (HTML.Tag t : wantedSimpleTags) {
+			if (t == tag) {
+				System.out.print("SIMPLE: ");
+				currentContainer().addChild(doTag(tag, attrs));
 			}
 		}
-		
-		@Override
-		public void handleEndTag(HTML.Tag t, int pos) {
-			if (t instanceof HTMLContainer) {
-				popContainer();
-			}
-		}
-		
-		private HTML.Tag[] wantedSimpleTags = {
-			HTML.Tag.INPUT
-		};
-		
-		@Override
-		public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-			for (HTML.Tag t : wantedSimpleTags) {
-				if (t == tag) {
-					System.out.print("SIMPLE: ");
-					currentContainer().addChild(doTag(tag, attrs));
-				}
-			}
-		}
-		
-		private HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
-			HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
-			System.out.println(comp);
-			return comp;
-		}
-		
-		@Override
-		public void handleText(char[] data, int pos) {
-			final String bodyContent = new String(data);
-			System.out.println("TEXT: " + bodyContent);
-			currentContainer().setBody(bodyContent);
-		}
-
-		public HTMLPage parse(Reader reader) throws IOException, HTMLParseException {
-			new ParserDelegator().parse(reader, this, true);
-			return PAGE;
-		}
+	}
+	
+	private HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
+		HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
+		System.out.println(comp);
+		return comp;
+	}
+	
+	@Override
+	public void handleText(char[] data, int pos) {
+		final String bodyContent = new String(data);
+		System.out.println("TEXT: " + bodyContent);
+		currentContainer().setBody(bodyContent);
+	}
+	
+	public HTMLPage parse(Reader reader) throws IOException, HTMLParseException {
+		new ParserDelegator().parse(reader, this, true);
+		return PAGE;
+	}
+	
+	public HTMLPage parse(String s) throws IOException, HTMLParseException {
+		return parse(new StringReader(s));
+	}
 	
 	/**
 	 * @param args

@@ -1,12 +1,29 @@
 package pageunit.http;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
 
-public interface WebResponse extends HttpServletResponse {
-	public String getHeader(String key);
-	public int getStatus();
-	public Cookie[] getCookies();
-	public Cookie getCookie(String name);
-	public String getContentAsString();
+/**
+ * Like an HttpServletResponse but lighter.
+ * @author ian
+ */
+public class WebResponse {
+	public String getHeader(String key) {
+		return null;
+	}
+	public int getStatus() {
+		return 200;
+	}
+	public Cookie[] getCookies() {
+		return null;
+	}
+	public Cookie getCookie(String name) {
+		return null;
+	}
+	public String getContentAsString() {
+		return null;
+	}
+	public String getUrl() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

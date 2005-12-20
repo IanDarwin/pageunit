@@ -1,9 +1,19 @@
 package pageunit.http;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface WebRequest extends HttpServletRequest {
-	public Cookie getCookie(String name);
-	public void setHeader(String name, String value);
+import javax.servlet.http.Cookie;
+
+/** Similar to an HttpServletRequest, but lighter */
+public class WebRequest {
+	
+	private Map<String, String> headerMap = new HashMap<String,String>();
+
+	public Cookie getCookie(String name) {
+		return null;
+	}
+	public void setHeader(String name, String value) {
+		headerMap .put(name, value);
+	}
 }

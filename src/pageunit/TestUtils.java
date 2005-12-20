@@ -14,6 +14,7 @@ import pageunit.http.WebSession;
 import pageunit.http.WebResponse;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLPage;
+import pageunit.html.HTMLParseException;
 
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
@@ -52,10 +53,11 @@ public class TestUtils {
 	 *            The pathname part of the URL
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
+	 * @throws HTMLParseException 
 	 */
 	public static HTMLPage getSimplePage(WebSession webClient,
 			String targetHost, int targetPort, String targetPage)
-			throws IOException {
+			throws IOException, HTMLParseException {
 
 		if (!targetPage.startsWith("/")) {
 			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
@@ -73,8 +75,9 @@ public class TestUtils {
 	 * @param webclient
 	 * @param newLocation
 	 * @return
+	 * @throws HTMLParseException 
 	 */
-	public static HTMLPage getSimplePage(WebSession session, URL url) throws IOException {
+	public static HTMLPage getSimplePage(WebSession session, URL url) throws IOException, HTMLParseException {
 		final HTMLPage page = (HTMLPage) session.getPage(url);
 		System.out.println("Got to simple page: " + session.getWebResponse().getUrl());
 		
@@ -95,11 +98,12 @@ public class TestUtils {
 	 *            The pathname part of the URL
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
+	 * @throws HTMLParseException 
 	 */
 	public static HTMLPage getProtectedPage(WebSession webClient,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
-			final String pass) throws IOException {
+			final String pass) throws IOException, HTMLParseException {
 		
 		if (!targetPage.startsWith("/")) {
 			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
@@ -114,25 +118,25 @@ public class TestUtils {
 		if (debug) {
 				System.out.println("Protected Page get: " + page1.getTitleText());
 		}
-		WebResponse interaction = page1.getWebResponse();
-		int statusCode = interaction.getStatusCode();
+		WebResponse interaction = webClient.getWebResponse();
+		int statusCode = interaction.getStatus();
         if (debug) {
         	System.out.println("Protected Page Get status: " + statusCode);
         }
 
 		HTMLForm form = page1.getFormByName("loginForm");	// dependency on our form page
 
-		form.getInputByName("j_username").setValueAttribute(login);
-		form.getInputByName("j_password").setValueAttribute(pass);
+		form.getInputByName("j_username").setValue(login);
+		form.getInputByName("j_password").setValue(pass);
 		
-		HTMLPage formResultsPage = (HTMLPage)form.submit();   // SEND THE LOGIN
+		HTMLPage formResultsPage = (HTMLPage)webClient.submitForm(form);   // SEND THE LOGIN
 		if (debug) {
 			System.out.println("Login return " + formResultsPage.getTitleText());
 		}
 
 		// Should be yet another redirect, back to original request page
-		WebResponse res2 = formResultsPage.getWebResponse();
-		statusCode = res2.getStatusCode();
+		WebResponse res2 = webClient.getWebResponse();
+		statusCode = res2.getStatus();
 
 		return formResultsPage;	// HtmlUnit handles redirection for us
 	}

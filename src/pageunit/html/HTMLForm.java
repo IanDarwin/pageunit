@@ -4,5 +4,6 @@ import java.util.List;
 
 public interface HTMLForm extends HTMLContainer {
 	public abstract String getAction();
-	public abstract List getInputs();
+	public abstract List<HTMLInput> getInputs();
+	public HTMLInput getInputByName(String regex);
 }
