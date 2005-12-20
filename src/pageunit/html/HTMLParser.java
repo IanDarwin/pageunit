@@ -18,6 +18,7 @@ import javax.swing.text.html.parser.ParserDelegator;
  * the article
  * <a href="http://java.sun.com/products/jfc/tsc/articles/bookmarks/">
  * The Swing HTML Parser</a> on Sun's JFC web site.
+ * XXX TODO Optimize: don't require construction for each page!!!
  * @author ian
  * @version $Id$
  */
@@ -28,6 +29,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		private HTML.Tag[] wantedComplexTags = {
 				HTML.Tag.HTML,
 				HTML.Tag.FORM,
+				HTML.Tag.INPUT,
 				HTML.Tag.A,
 				HTML.Tag.TITLE
 		};
@@ -64,11 +66,15 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					if (tmp instanceof HTMLContainer) {
 						pushContainer((HTMLContainer)tmp);
 					}
+					
 					if (tmp instanceof HTMLAnchor) {
 						PAGE.addAnchor((HTMLAnchor)tmp);
 					}
 					if (tmp instanceof HTMLForm) {
 						PAGE.addForm((HTMLForm)tmp);
+					}
+					if (tmp instanceof HTMLTitle) {
+						((HTMLPageImpl)PAGE).setTitle((HTMLTitle)tmp);
 					}
 				}
 			}

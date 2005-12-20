@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLPage;
-import pageunit.http.WebClient;
+import pageunit.http.WebSession;
 import pageunit.http.WebResponse;
 
 import junit.framework.TestCase;
@@ -41,7 +41,7 @@ public class TestRunner extends TestCase {
 		return run(PageUnit.TESTS_FILE);
 	}
 
-	private WebClient session;
+	private WebSession session;
 	private WebResponse theResult = null;
 	private HTMLPage thePage = null;
 	private HTMLAnchor theLink = null;
@@ -70,7 +70,7 @@ public class TestRunner extends TestCase {
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
 
-		session = new WebClient();
+		session = new WebSession();
 
 		LineNumberReader is = new LineNumberReader(new FileReader(fileName));
 		String line;
@@ -140,7 +140,7 @@ public class TestRunner extends TestCase {
 				continue;
 				
 			case 'N':	// start new session
-				session = new WebClient();
+				session = new WebSession();
 				session.setThrowExceptionOnFailingStatusCode(false);
 				theLink = null;
 				continue;
@@ -271,7 +271,7 @@ public class TestRunner extends TestCase {
 				case 'G':	// Go to link
 					// PreCondition: theLink has been set by the 'L' case above.
 					assertNotNull("found link before gotoLink", theLink);
-					thePage = (HtmlPage)theLink.click();
+					thePage = (HTMLPage)theLink.click();
 					
 					assertEquals("go to link response code", HTTP_STATUS_OK, thePage.getWebResponse().getStatusCode());
 					break;
@@ -423,7 +423,7 @@ public class TestRunner extends TestCase {
 		
 		if (session == null) {
 			System.err.println("Warning: no Session before Get Unprotected Page");
-			session = new WebClient();
+			session = new WebSession();
 		}
 	}
 	

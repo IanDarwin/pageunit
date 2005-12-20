@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public class HTMLInputImpl extends HTMLComponentBase implements HTMLInput {
+public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 
 	private Type type;
 	private String value;

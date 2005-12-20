@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpStatus;
 
-import pageunit.http.WebClient;
+import pageunit.http.WebSession;
 import pageunit.http.WebResponse;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLPage;
@@ -53,7 +53,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HTMLPage getSimplePage(WebClient webClient,
+	public static HTMLPage getSimplePage(WebSession webClient,
 			String targetHost, int targetPort, String targetPage)
 			throws IOException {
 
@@ -74,9 +74,9 @@ public class TestUtils {
 	 * @param newLocation
 	 * @return
 	 */
-	public static HTMLPage getSimplePage(WebClient webClient, URL url) throws IOException {
-		final HTMLPage page = (HTMLPage) webClient.getPage(url);
-		System.out.println("Got to simple page: " + page.getWebResponse().getUrl());
+	public static HTMLPage getSimplePage(WebSession session, URL url) throws IOException {
+		final HTMLPage page = (HTMLPage) session.getPage(url);
+		System.out.println("Got to simple page: " + session.getWebResponse().getUrl());
 		
 		return page;
 	}
@@ -96,7 +96,7 @@ public class TestUtils {
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException
 	 */
-	public static HTMLPage getProtectedPage(WebClient webClient,
+	public static HTMLPage getProtectedPage(WebSession webClient,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException {
@@ -149,6 +149,15 @@ public class TestUtils {
 				|| (statusCode == HttpStatus.SC_TEMPORARY_REDIRECT);
 	}
 
+	public static boolean isErrorCode(int statusCode) {
+		int group = statusCode / 100;
+		switch(group) {
+		case 4: case 5:
+			return true;
+		default:
+			return false;
+		}
+	}
 	/** Test the input against a pattern.
 	 * @param sb The input sequence
 	 * @param expect The string (which can be a Java 1.4 regex).

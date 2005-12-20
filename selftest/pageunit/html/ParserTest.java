@@ -36,13 +36,18 @@ public class ParserTest extends TestCase {
 	}
 	
 	public void testForm() {
-		HTMLForm form = (HTMLForm)((HTMLHTML)page.getChildren().get(0)).getChildren().get(1);
-		assertTrue("this form has child(ren)", form.getChildren().size() >= 1);
+		HTMLForm form = page.getFormByURL("/foo");
+		assertNotNull("find form in page", form);
+		assertTrue("form has inputs", form.getChildren().size() >= 1);
 	}
 	
 	public void testGetAnchors() {
 		assertNotNull("get anchor by href", page.getAnchorByURL("b.*r"));
 		assertNotNull("get anchor by name", page.getAnchorByName("oo"));
 		assertNotNull("get anchor by text", page.getAnchorByText("ext"));
+	}
+	
+	public void testGetTitle() {
+		assertEquals("getTitle", "Foo", page.getTitleText());
 	}
 }

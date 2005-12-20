@@ -6,8 +6,14 @@ import java.util.regex.Pattern;
 
 public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 
+	private HTMLTitle title;
+	
 	public HTMLPageImpl(String name) {
 		super(name);
+	}
+	
+	public void setTitle(HTMLTitle t) {
+		this.title = t;
 	}
 	
 	private List<HTMLAnchor> anchors = new ArrayList<HTMLAnchor>();
@@ -74,5 +80,9 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 
 	public List<HTMLForm> getForms() {
 		return forms;
+	}
+
+	public String getTitleText() {
+		return title.getBody();
 	}
 }

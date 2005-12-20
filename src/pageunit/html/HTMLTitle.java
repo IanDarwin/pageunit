@@ -1,5 +1,5 @@
 package pageunit.html;
 
-public interface HTMLTitle extends HTMLComponent {
+public interface HTMLTitle extends HTMLContainer {
 
 }

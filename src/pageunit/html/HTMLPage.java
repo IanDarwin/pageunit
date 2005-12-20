@@ -14,4 +14,6 @@ public interface HTMLPage extends HTMLContainer {
 	public HTMLForm getFormByName(String regex);
 	public HTMLForm getFormByURL(String regex);
 	public List<HTMLForm> getForms();
+	
+	public String getTitleText();
 }
