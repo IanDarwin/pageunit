@@ -48,9 +48,8 @@ U /LogoutServlet
 P /view/PersonList.jsp
 M Person List
 F pageForm
-# XXX Need to change these to match using indexOf, not getInputByName.
-R htmlPageTopContainer_pageForm_box1_displaybox1_firstName=Ian
-R htmlPageTopContainer_pageForm_box1_displaybox1_lastName=Darwin
+R firstName=Ian
+R lastName=Darwin
 #
 S htmlPageTopContainer_pageForm_box1_displaybox1_search
 #T title Person List
