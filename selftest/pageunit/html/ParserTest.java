@@ -14,14 +14,14 @@ import pageunit.html.HTMLParser;
 import pageunit.html.HTMLTitle;
 
 public class ParserTest extends TestCase {
-	final String test1 = "<html><head><title>Foo</title></head><body>" +
-	"<form action='/foo' method='post'><input type='submit'/></form>" +
+	final String testData = "<html><head><title>Foo</title></head><body>" +
+	"<form action='/foo' method='post'><input type='submit' name='submit'/></form>" +
 	"<a href='/bar' name='froo'>Link <b>Text</b></a>";
 	
 	private HTMLPage page;
 	
 	public void setUp() throws IOException, HTMLParseException {
-		page = new HTMLParser().parse(new StringReader(test1));
+		page = new HTMLParser().parse(new StringReader(testData));
 	}
 
 	public void testParse() throws Throwable {
@@ -39,6 +39,7 @@ public class ParserTest extends TestCase {
 		HTMLForm form = page.getFormByURL("/foo");
 		assertNotNull("find form in page", form);
 		assertTrue("form has inputs", form.getChildren().size() >= 1);
+		assertNotNull("get input by name", form.getInputByName("submit"));
 	}
 	
 	public void testGetAnchors() {
