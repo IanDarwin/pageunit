@@ -3,6 +3,7 @@ package pageunit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -24,13 +25,23 @@ import pageunit.html.HTMLParseException;
 public class TestUtils {
 	
 	private static final String PAGEUNIT_PROPERTIES_FILENAME = ".pageunit.properties";
+	private static final String DEFAULT_PROTO = "http";
+	private static final int DEFAULT_PORT = 80;
+	private static final String DEFAULT_PATH = "/";
+	
+	/** A Standard Properties mechanism: the following props are expected:<br/>
+	 * <pre>host=host.dom</pre>
+	 * <p>The following properties are optional:<br/>
+	 * <pre>port=8080 # defaults to 80
+	 * login=myName
+	 * password=myPassword</pre>
+	 */
 	private static Properties props  = new Properties();
 	private static boolean debug;
 	
 	static {
 		String home = System.getProperty("user.home");
 		String propsFileName = home + File.separator + PAGEUNIT_PROPERTIES_FILENAME;
-		
 		try {
 			props.load(new FileInputStream(propsFileName));
 		} catch (IOException ex) {
@@ -154,9 +165,9 @@ public class TestUtils {
 	}
 
 	public static boolean isErrorCode(int statusCode) {
-		int group = statusCode / 100;
-		switch(group) {
-		case 4: case 5:
+		switch((statusCode / 100)) {
+		case 4:
+		case 5:
 			return true;
 		default:
 			return false;
@@ -173,29 +184,31 @@ public class TestUtils {
 	}	
 
 	
-	/** Retrieve a property, either from the System Properties (consulted first, to allow overriding on the command line)
+	/** Retrieve a property, either from the System Properties
+	 * (consulted first, to allow overriding via command line -D)
 	 * or in the user's property file (${user.home} + TCPTEST_PROPERTIES_FILENAME);
-	 * @param property the key to look up
+	 * @param key the key to look up
 	 * @return The value corresponding to the given key.
 	 */
-	public static String getProperty(String property) {
-		if (System.getProperty(property) != null)
-			return System.getProperty(property);
-		String s = props.getProperty(property);
-		return s;
+	public static String getProperty(String key) {
+		if (System.getProperty(key) != null)
+			return System.getProperty(key);
+		return props.getProperty(key);
+	}
+	
+	public static int getIntProperty(String key) {
+		String val = getProperty(key);
+		if (val == null && "port".equals(key)) {
+			return 80;
+		}
+		if (val == null) {
+			throw new IllegalArgumentException(
+				"getIntProperty: " + key + " does not exist");
+		}
+		return Integer.parseInt(val);
 	}
 
-	/**
-	 * @param string
-	 * @return
-	 */
-	public static int getIntProperty(String string) {
-		String intStr = getProperty(string);
-		if (intStr == null) {
-			throw new IllegalArgumentException("getIntProperty: " + string + " does not exist");
-		}
-		return Integer.parseInt(intStr);
-	}
+
 	
 	/**
 	 * @return Returns the debug level.
@@ -210,7 +223,36 @@ public class TestUtils {
 		TestUtils.debug = debug;
 	}
 
+	/** Convert partial URLs to full URLS, providing defaults
+	 * from getProperties() and then from baked-in defaults.
+	 * @param u
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	public static URL completeURL(URL u) throws MalformedURLException {
+		String prot = u.getProtocol();
+		if (prot == null)
+			prot = DEFAULT_PROTO;
+		String host = u.getHost();
+		if (host == null)
+			host = getProperty("host");
+		int port = u.getPort();
+		if (port == -1)
+			port = getIntProperty("port");
+		if (port /* still */ == -1) 
+			port = DEFAULT_PORT;
+		String path = u.getPath();
+		if (path == null)
+			path = DEFAULT_PATH;
+		return new URL(prot, host, port, path);
+	}
 
-
+	public static URL completeURL(String u) {
+		try {
+			return completeURL(new URL(u));
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("Invalid URL " + u);
+		}
+	}
 
 }
