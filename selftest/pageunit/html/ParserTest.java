@@ -14,7 +14,7 @@ import pageunit.html.HTMLParser;
 import pageunit.html.HTMLTitle;
 
 public class ParserTest extends TestCase {
-	final String testData = "<html><head><title>Foo</title></head><body>" +
+	final String testData = "<html><head><title>Fool</title></head><body>" +
 	"<form action='/foo' method='post'><input type='submit' name='submit'/></form>" +
 	"<a href='/bar' name='froo'>Link <b>Text</b></a>";
 	
@@ -49,6 +49,6 @@ public class ParserTest extends TestCase {
 	}
 	
 	public void testGetTitle() {
-		assertEquals("getTitle", "Foo", page.getTitleText());
+		assertEquals("getTitle", "Fool", page.getTitleText());
 	}
 }
