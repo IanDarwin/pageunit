@@ -8,6 +8,10 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 
 	private HTMLTitle title;
 	
+	private List<HTMLAnchor> anchors = new ArrayList<HTMLAnchor>();
+
+	private List<HTMLForm> forms = new ArrayList<HTMLForm>();
+	
 	public HTMLPageImpl(String name) {
 		super(name);
 	}
@@ -15,8 +19,6 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	public void setTitle(HTMLTitle t) {
 		this.title = t;
 	}
-	
-	private List<HTMLAnchor> anchors = new ArrayList<HTMLAnchor>();
 	
 	public void addAnchor(HTMLAnchor a) {
 		anchors.add(a);
@@ -54,7 +56,6 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 		return anchors;
 	}
 
-	private List<HTMLForm> forms = new ArrayList<HTMLForm>();
 
 	public void addForm(HTMLForm f) {
 		forms.add(f);
@@ -83,6 +84,8 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public String getTitleText() {
+		if (title == null)
+			return null;
 		return title.getBody();
 	}
 }
