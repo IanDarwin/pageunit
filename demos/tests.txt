@@ -51,7 +51,7 @@ F pageForm
 R firstName=Ian
 R lastName=Darwin
 #
-S htmlPageTopContainer_pageForm_box1_displaybox1_search
+S displaybox1_search
 #T title Person List
 #M Ian Darwin
 #L Ian Darwin
