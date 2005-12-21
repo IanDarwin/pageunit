@@ -97,7 +97,7 @@ public class WebSession {
 	 * @throws HTMLParseException
 	 * @throws IOException
 	 */
-	public HTMLPage submitForm(HTMLForm form) throws HTMLParseException, IOException {
+	public HTMLPage submitForm(HTMLForm form, HTMLInput button) throws HTMLParseException, IOException {
 		String action = form.getAction();
 		
 		if (!action.contains("/")) {
@@ -107,6 +107,9 @@ public class WebSession {
 		poster.setFollowRedirects(false);
 		System.out.println("Initial request: " + poster);
 
+		if (button != null) {
+			// XXX need to do something for this case...
+		}
 		// propagate the inputs().getValues()...
 		List<HTMLInput> inputs = form.getInputs();
 		final int numInputs = inputs.size();
@@ -134,8 +137,8 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
-	public HTMLPage submitForm(HTMLForm form, HTMLInput button) throws HTMLParseException, IOException {
-		throw new RuntimeException("submitForm(form, input) nryet");
+	public HTMLPage submitForm(HTMLForm form) throws HTMLParseException, IOException {
+		return submitForm(form, null);
 	}
 
 	public WebRequest getWebRequest() {
