@@ -137,9 +137,16 @@ public class TestRunner extends TestCase {
 				host = restOfLine.trim();
 				continue;
 				
-			case 'O':	// pOrt number
+			case 'O':	// hard-code pOrt number
 				port = Integer.parseInt(restOfLine.trim());
 				continue;
+				
+			case 'A':	// As user [pw]
+				String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
+				login = atmp[0];
+				if (atmp[1] != null) {
+					pass = atmp[1];
+				}
 				
 			case 'N':	// start new session
 				session = new WebSession();
@@ -204,7 +211,7 @@ public class TestRunner extends TestCase {
 					
 				case 'T':	// page contains tag with text (in bodytext or attribute value)
 					// PreCondition: theResult has been set by the U or P code above
-					assertNotNull("Invalid test.txt: requested txt before getting page", theResult);
+					assertNotNull("Requested txt before getting page", theResult);
 					
 					String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
 					String tagType = ttmp[0];
@@ -236,9 +243,7 @@ public class TestRunner extends TestCase {
 					// PreCondition: theResult has been set by the U or P code above
 					String linkURL = restOfLine;
 					theLink = null;
-					Iterator<HTMLAnchor> iter = thePage.getAnchors().iterator();
-					while (iter.hasNext()) {
-						HTMLAnchor oneLink = iter.next();
+					for (HTMLAnchor oneLink : thePage.getAnchors()) {
 						
 						// Check in the Name attribute, if any
 						String n = oneLink.getName();
@@ -362,19 +367,7 @@ public class TestRunner extends TestCase {
 		return new ResultStat(nTests, nSucceeded, nFailures);
 	}
 
-	/**
-	 * Get a Boolean from an input line.
-	 * @param inputLine
-	 */
-	private boolean getBoolean(final String inputLine) {
-		if ("on".equals(inputLine) || inputLine.startsWith("t")) {
-			return true;
-		} else if ("off".equals(inputLine) || inputLine.startsWith("f"))	{
-			return false;
-		}
-		throw new IllegalArgumentException("Warning: invalid Debug setting in " + inputLine);	
-	}
-	
+
 	private void filterPage(final HTMLPage thePage, final WebResponse theResult) throws Exception {
 		for (TestFilter filter : filters) {
 			filter.filterPage(thePage, theResult);
@@ -430,6 +423,22 @@ public class TestRunner extends TestCase {
 		// assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
+	// Various "parsing" methods - consolidated here, all made
+	// public for ease of JUnit...
+	
+	/**
+	 * Get a Boolean from an input line.
+	 * @param input
+	 */
+	public static boolean getBoolean(final String input) {
+		if ("on".equals(input) || "t".equals(input) || "true".equals(input)) {
+			return true;
+		} else if ("off".equals(input) || "false".equals(input)) {
+			return false;
+		}
+		throw new IllegalArgumentException("Warning: invalid Debug setting in " + input);	
+	}
+	
 	/**
 	 * Split the rest of the line into a tag and the rest of the line, based on delim
 	 * @param wordDescription a short description of what you are looking for, e.g., "tag" or "name" or ...
@@ -437,12 +446,22 @@ public class TestRunner extends TestCase {
 	 * @param delim A character such as ' ' or '=' to split the line on.
 	 * @return String[2] containing the tag and the rest of the line
 	 */
-	private String[] getTwoArgs(String wordDescription, String lineAfterCommand, char delim) {
+	public static String[] getTwoArgs(String wordDescription, String lineAfterCommand, char delim) {
+		String[] res = getOneOrTwoArgs(wordDescription, lineAfterCommand, delim);
+		assertTrue(wordDescription + " in line" + lineAfterCommand, res[1] != null && res[1].length() > 0);
+		return res;
+	}
+	
+	public static String[] getOneOrTwoArgs(String wordDescription, String lineAfterCommand, char delim) {
 		int i = lineAfterCommand.indexOf(delim);
-		assertTrue(wordDescription + " in line", i > 0);
-		String verb = lineAfterCommand.substring(0, i);
-		String args = lineAfterCommand.substring(i + 1);
-		return new String[] { verb, args };
+		if (i >= 0) {
+			String verb = lineAfterCommand.substring(0, i);
+			String args = lineAfterCommand.substring(i + 1);
+			return new String[] { verb, args };
+		} else {
+			return new String[] { lineAfterCommand, null };
+		}
+		
 	}
 	/**
 	 * Returns true if debug is enabled.
