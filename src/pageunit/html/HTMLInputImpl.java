@@ -20,4 +20,10 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 	public void setValue(String value) {
 		this.value = value;
 	}
+
+	@Override
+	public String toString() {		
+		return String.format(
+			"<input type=%s name=%s value=%s>", type, getName(), value);
+	}
 }

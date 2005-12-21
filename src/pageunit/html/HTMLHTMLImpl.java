@@ -6,4 +6,9 @@ public class HTMLHTMLImpl extends HTMLContainerBase implements HTMLHTML {
 		super(name);
 	}
 
+	@Override
+	public String toString() {		
+		return "<html>";
+	}
+
 }

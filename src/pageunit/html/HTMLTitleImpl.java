@@ -6,4 +6,10 @@ public class HTMLTitleImpl extends HTMLContainerBase implements HTMLTitle {
 		super(name);
 	}
 
+	@Override
+	public String toString() {		
+		return String.format(
+			"<title>%s</title>", getBody());
+	}
+
 }

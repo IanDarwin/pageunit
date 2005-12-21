@@ -55,4 +55,11 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 		}
 		return null;
 	}
+	
+	@Override
+	public String toString() {		
+		return String.format(
+			"<form method=%s action=%s name=%s>", method, action, getName());
+	}
+
 }
