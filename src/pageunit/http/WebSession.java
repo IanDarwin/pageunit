@@ -8,6 +8,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import pageunit.TestUtils;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLInput;
@@ -32,6 +33,12 @@ public class WebSession {
 		client = new HttpClient();
 	}
 
+	
+	/** If this is set to true, 400/500 errors will throw an exception;
+	 * if false (the default), errors simply return and the user must 
+	 * check with getStatus().
+	 * @param b
+	 */
 	public void setThrowExceptionOnFailingStatusCode(boolean b) {
 		throwExceptionOnFailingStatusCode = b;
 	}
@@ -69,13 +76,17 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
-	/** XXX implement as
-	 * A thin wrapper around getPage().
+	/**
+	 * A thin wrapper around getPage(): GET the page linked
+	 * to an anchor imbedded in a page.
 	 * @param theLink
 	 * @return
+	 * @throws HTMLParseException 
+	 * @throws IOException 
 	 */
-	public HTMLPage follow(HTMLAnchor theLink) {
-		throw new RuntimeException("follow(anchor) not written");
+	public HTMLPage follow(HTMLAnchor theLink) throws IOException, HTMLParseException {
+		URL u = TestUtils.completeURL(theLink.getURL());
+		return getPage(u);
 	}
 	
 	/** Post an HTML Form
