@@ -308,13 +308,9 @@ public class TestRunner extends TestCase {
 					if (debug) {
 						System.err.println("Name=" + attrName + "; value=" + attrValue);
 					}
-					Iterator inputs = theForm.getChildren().iterator();
-					while (inputs.hasNext()) {
-						Object element = (Object) inputs.next();
-						System.out.println("LIST CONTAINS " + element);
-					}
+					
 					HTMLInput theButton = theForm.getInputByName(attrName);
-					System.out.println("GETTING IT EXPLICITLY --> " + theButton);
+					assertNotNull("get Button", theButton);
 					theButton.setValue(attrValue);
 					
 					break;
