@@ -26,14 +26,17 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
-	private HTMLPage PAGE;
+	private final HTMLPage PAGE;
 	
-	private HTML.Tag[] wantedComplexTags = {
+	private final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
 			HTML.Tag.FORM,
-			HTML.Tag.INPUT,
+			HTML.Tag.INPUT,	// MUST appear in both lists, sorry.
 			HTML.Tag.A,
 			HTML.Tag.TITLE
+	};
+	private HTML.Tag[] wantedSimpleTags = {
+			HTML.Tag.INPUT,	// Input is treated as simple tag!!
 	};
 	
 	private HTMLForm currentForm;
@@ -45,6 +48,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
+
+	private boolean debug;
 	
 	void pushContainer(HTMLContainer newbie) {
 		containerStack.push(newbie);
@@ -60,7 +65,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-		
+		if (debug) {
+			System.out.println("StartTag: " + tag);
+		}
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
 				System.out.print("COMPLEX: ");
@@ -80,8 +87,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					PAGE.addForm(currentForm);
 				}
 				if (tmp instanceof HTMLInput && currentForm != null) {
-					HTMLFormImpl formImpl = (HTMLFormImpl)tmp;
-					formImpl.addInput((HTMLInput)tmp);
+					((HTMLFormImpl)currentForm).addInput((HTMLInput)tmp);
 				}
 				if (tmp instanceof HTMLTitle) {
 					((HTMLPageImpl)PAGE).setTitle((HTMLTitle)tmp);
@@ -97,16 +103,17 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 	}
 	
-	private HTML.Tag[] wantedSimpleTags = {
-			
-	};
-	
 	@Override
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 		for (HTML.Tag t : wantedSimpleTags) {
 			if (t == tag) {
-				System.out.print("SIMPLE: ");
-				currentContainer().addChild(doTag(tag, attrs));
+				if (HTML.Tag.INPUT == t) {
+					// Logic for Input tag fits better in HandleStartTag.
+					handleStartTag(tag, attrs, pos);
+				} else {
+					System.out.print("SIMPLE: ");
+					currentContainer().addChild(doTag(tag, attrs));
+				}
 			}
 		}
 	}
@@ -120,6 +127,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	@Override
 	public void handleText(char[] data, int pos) {
 		final String bodyContent = new String(data);
+		if (">".equals(bodyContent))
+			return;	// A glitch in the parser causes this with abbreviated tags.
 		System.out.println("TEXT: " + bodyContent);
 		currentContainer().setBody(bodyContent);
 	}
