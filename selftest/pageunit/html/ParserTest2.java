@@ -44,5 +44,6 @@ public class ParserTest2 extends TestCase {
 		assertNotNull("get name field", username);
 		HTMLInput passwd = form.getInputByName("user_pw");
 		assertNotNull("get pw field", passwd);
+		assertNull(page.getTitleText());
 	}
 }
