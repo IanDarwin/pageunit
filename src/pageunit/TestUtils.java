@@ -123,7 +123,7 @@ public class TestUtils {
 
 		final URL url = new URL("http", targetHost, targetPort, targetPage);
 		
-		// request protected page, and let HtmlUnit handle redirection here.
+		// request protected page, and let WebSession handle redirection here.
 		final HTMLPage page1 = (HTMLPage) session.getPage(url);	// Ask for one page, really get login page
 		
 		if (debug) {

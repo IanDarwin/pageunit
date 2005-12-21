@@ -2,9 +2,11 @@ package pageunit.http;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
@@ -69,10 +71,10 @@ public class WebSession {
 		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
 		getter.releaseConnection();	
-
-		response = new WebResponse();
 		
 		responseText = new String(responseBody);
+
+		response = new WebResponse(responseText, url.toString());
 		return new HTMLParser().parse(responseText);
 	}
 	
@@ -98,17 +100,25 @@ public class WebSession {
 	public HTMLPage submitForm(HTMLForm form) throws HTMLParseException, IOException {
 		String action = form.getAction();
 		
-		//client.getHostConfiguration().setHost(
-		//		url.getHost(), url.getPort(), url.getProtocol());
-
+		if (!action.contains("/")) {
+			action = "/" + action;	// XXX lame
+		}
 		PostMethod poster = new PostMethod(action);
 		poster.setFollowRedirects(false);
 		System.out.println("Initial request: " + poster);
 
-		// XXX propagate the inputs().getValues()...
+		// propagate the inputs().getValues()...
+		List<HTMLInput> inputs = form.getInputs();
+		final int numInputs = inputs.size();
+		NameValuePair[] data = new NameValuePair[numInputs];
+		for (int i = 0; i < numInputs; i++) {
+			HTMLInput input = inputs.get(i);
+			data[i] = new NameValuePair(input.getName(), input.getValue());
+		}
+        poster.setRequestBody(data);
 		
 		int status = client.executeMethod(poster);
-		if (status >= 400 && throwExceptionOnFailingStatusCode) {
+		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
 
@@ -117,10 +127,10 @@ public class WebSession {
 		byte[] responseBody = poster.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
 		poster.releaseConnection();	
-
-		response = new WebResponse();
-		
 		responseText = new String(responseBody);
+
+		response = new WebResponse(responseText, action);
+		
 		return new HTMLParser().parse(responseText);
 	}
 	

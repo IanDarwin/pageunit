@@ -45,8 +45,11 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	public HTMLInput getInputByName(String regex) {
 		Pattern patt = Pattern.compile(regex);
 		for (HTMLInput i : inputs) {
-			if (regex.equals(i.getName()) ||
-				(patt.matcher(i.getName()).find())) {
+			final String linksName = i.getName();
+			if (linksName == null)
+				continue;
+			if (regex.equals(linksName) ||
+				(patt.matcher(linksName).find())) {
 				return i;
 			}
 		}

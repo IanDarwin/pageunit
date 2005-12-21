@@ -7,6 +7,14 @@ import javax.servlet.http.Cookie;
  * @author ian
  */
 public class WebResponse {
+	String bodyContent;
+	String url;
+
+	
+	public WebResponse(String bodyContent, String url) {
+		this.bodyContent = bodyContent;
+		this.url = url;
+	}
 	public String getHeaderValue(String key) {
 		return null;
 	}
@@ -20,10 +28,13 @@ public class WebResponse {
 		return null;
 	}
 	public String getContentAsString() {
-		return null;
+		return bodyContent;
 	}
 	public String getUrl() {
-		// TODO Auto-generated method stub
-		return null;
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 }

@@ -47,8 +47,9 @@ public class PageUnit {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
 				r = t.run(f.getAbsolutePath()).add(r);
-			} else
-				System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
+			} else {
+				//System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
+			}
 		} else if (f.isDirectory()) {
 			loopThrough(f);
 		} else {
