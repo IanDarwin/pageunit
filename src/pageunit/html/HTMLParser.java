@@ -124,7 +124,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	private HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
 		HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
-		System.out.println(comp);
+		if (debug) {
+			System.out.println(comp);
+		}
 		return comp;
 	}
 	
