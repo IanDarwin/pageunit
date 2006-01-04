@@ -8,8 +8,6 @@
 	<classpathentry kind="lib" path="lib/commons-io-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/js-1.6R1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/nekohtml-0.9.4.jar"/>
-	<classpathentry kind="lib" path="lib/xmlParserAPIs-2.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections-3.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.0.jar"/>
 	<classpathentry kind="lib" path="lib/servletapi.jar"/>
