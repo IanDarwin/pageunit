@@ -14,6 +14,9 @@ public class WebRequest {
 		return null;
 	}
 	public void setHeader(String name, String value) {
-		headerMap .put(name, value);
+		headerMap.put(name, value);
+	}
+	public String getHeader(String name) {
+		return headerMap.get(name);
 	}
 }
