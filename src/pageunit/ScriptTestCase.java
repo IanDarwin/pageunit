@@ -204,6 +204,10 @@ public class TestRunner extends TestCase {
 					theLink = null;
 					assertNotNull("Invalid test.txt: requested txt before getting page", thePage);
 					theResult = session.getWebResponse();
+					if (theResult == null) { 
+						System.err.println("M ignored because page is null");
+						break;
+					}
 					String contentAsString = theResult.getContentAsString();
 					assertTrue("page contains text <" + restOfLine + ">", 
 							TestUtils.checkResultForPattern(contentAsString, restOfLine));
