@@ -70,7 +70,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
-				System.out.print("COMPLEX: ");
+				if (debug) {
+					System.out.print("COMPLEX: ");
+				}
 				HTMLComponent tmp = doTag(tag, attrs);
 				
 				currentContainer().addChild(tmp);
@@ -111,7 +113,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					// Logic for Input tag fits better in HandleStartTag.
 					handleStartTag(tag, attrs, pos);
 				} else {
-					System.out.print("SIMPLE: ");
+					if (debug) {
+						System.out.print("SIMPLE: ");
+					}
 					currentContainer().addChild(doTag(tag, attrs));
 				}
 			}
@@ -129,7 +133,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		final String bodyContent = new String(data);
 		if (">".equals(bodyContent))
 			return;	// A glitch in the parser causes this with abbreviated tags.
-		System.out.println("TEXT: " + bodyContent);
+		if (debug) {
+			System.out.println("TEXT: " + bodyContent);
+		}
 		currentContainer().setBody(bodyContent);
 	}
 	
