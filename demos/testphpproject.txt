@@ -2,8 +2,6 @@
 # TCP Test Suite Driver
 # $Id$
 
-# Input language described in docs/pageunit.html
-
 H calendar.phenogenomics.ca
 O 80
 A ian
