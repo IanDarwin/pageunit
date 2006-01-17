@@ -13,7 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
+import pageunit.html.HTMLForm;
+import pageunit.html.HTMLIMG;
 import pageunit.html.HTMLParseException;
 
 /** A simple HTML Link Checker. 
@@ -83,7 +86,16 @@ public class LinkChecker {
 			for (HTMLComponent tag : urlTags) {
 				System.out.printf("TAG %s%n", tag);
 						
-				String href = extractHREF(tag.toString());
+				String href = null;
+				if (tag instanceof HTMLAnchor) {
+					href = ((HTMLAnchor)tag).getURL();
+				}
+				if (tag instanceof HTMLForm) {
+					href = ((HTMLForm)tag).getAction();
+				}
+				if (tag instanceof HTMLIMG) {
+					href = ((HTMLIMG)tag).getSrc();
+				}				
 
 				for (int j=0; j<indent; j++)
 					System.out.println("\t");
@@ -94,7 +106,10 @@ public class LinkChecker {
 					System.out.println(" null? !!\n");
 					continue;
 				}
-				if (href.startsWith("mailto:")) {
+
+				URL hrefURL = new URL(rootURL, href);
+
+				if (hrefURL.getProtocol().equals("mailto:")) {
 					System.out.println(href + " -- not checking\n");
 					continue;
 				}
@@ -105,11 +120,7 @@ public class LinkChecker {
 					continue; 
 				}
 
-				URL hrefURL = new URL(rootURL, href);
-
 				// TRY THE URL.
-				// (don't combine previous System.out.println with this one,
-				// since this one can throw an exception)
 				System.out.println(checkOneLine(hrefURL));
 
 				// There should be an option to control whether to
@@ -143,16 +154,16 @@ public class LinkChecker {
 				}
 			}
 		} catch (IOException e) {
-			System.err.println("Error: (" + e +")");
+			System.err.println("IO Error: (" + e +")");
 		} catch (HTMLParseException e) {
-			// TODO Auto-generated catch block
+			System.err.println("HTML Parse Exception:");
 			e.printStackTrace();
 		}
 	}
 
 	/** Check one link, given its DocumentBase and the tag */
 	public static String checkOneLine(URL linkURL) {
-		System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
+		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
 			// Open it; if the open fails we'll likely throw an exception
 			URLConnection luf = linkURL.openConnection();

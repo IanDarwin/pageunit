@@ -38,9 +38,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-		if (debug) {
-			System.out.println("StartTag: " + tag);
-		}
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
 				if (debug) {
@@ -54,7 +51,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			}
 		}
 	}
-	
 	
 	public synchronized List<HTMLComponent> parse(Reader reader) throws IOException, HTMLParseException {
 		new ParserDelegator().parse(reader, this, true);
