@@ -39,10 +39,6 @@ public class TestRunner extends TestCase {
 	private int nTests;
 	private int nSucceeded;
 	private int nFailures;
-	
-	public ResultStat testAllTests() throws Exception {
-		return run(PageUnit.TESTS_FILE);
-	}
 
 	private WebSession session;
 	private WebResponse theResult = null;
@@ -51,10 +47,17 @@ public class TestRunner extends TestCase {
 	private HTMLForm theForm = null;
 	private boolean debug;
 	private List<TestFilter> filterList = new ArrayList<TestFilter>();
-	VariableMap variables = new VariableMap();
-	
+	private VariableMap variables = new VariableMap();
 	private File curDir;
 
+	
+	/** Run this test with default test file, for use in JUnit.
+	 * @return The results of all tests.
+	 * @throws Exception If a first-half test blows up.
+	 */
+	public ResultStat testAllTests() throws Exception {
+		return run(PageUnit.TESTS_FILE);
+	}
 	
 	/** Run ALL the tests in the named test file.
 	 * @param fileName the test script file name.
@@ -92,7 +95,7 @@ public class TestRunner extends TestCase {
 
 		String line;
 		
-		
+		readLoop:
 		while ((line = r.readLine()) != null) {	// MAIN LOOP PER LINE
 			if (line.length() == 0) {
 				System.out.println();
@@ -117,9 +120,9 @@ public class TestRunner extends TestCase {
 			if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
 				continue;
 			}
-			System.out.println("--> " + restOfLine) ;
 			String page;
 			
+			// First-half testing: Exceptions thrown here are fatal to the remainder of this FILE.
 			// Handle declarative (non-test) requests here.
 			// Each case ends with continue, to next iteration of main loop.
 			switch(c) {
@@ -198,10 +201,11 @@ public class TestRunner extends TestCase {
 				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
 				stars();
 				report();
-				continue;				
+				break readLoop;				
 			}
 			
-			// Handle actual tests here; each case ends with break.
+			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
+			// Handle most "actual" tests here; each case ends with break.
 			try {
 				System.out.println("TestRunner.run(): Starting 2nd Half Switch");
 				this.testStarted(line);
@@ -404,7 +408,7 @@ public class TestRunner extends TestCase {
 						" (" + e + ':' + cause + ")");
 			} // end of try
 			stars();
-			System.out.printf("** END OF FILE %s **", thisFileName);
+			System.out.printf("** END OF FILE %s **%n", thisFileName);
 			stars();
 		} // end of while readLine loop
 		r.close();
