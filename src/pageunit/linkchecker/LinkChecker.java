@@ -9,15 +9,15 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLIMG;
 import pageunit.html.HTMLParseException;
+import sun.net.URLCanonicalizer;
 
 /** A simple HTML Link Checker. 
  * Needs Properties to set depth, URLs to check. etc.
@@ -33,8 +33,7 @@ import pageunit.html.HTMLParseException;
 public class LinkChecker {
 
 	protected static int indent = 0;
-	protected static Map<String,Object> urlCache = new HashMap<String,Object>();
-	private final static Object BEEN_THERE_DONE_THAT = new Object();
+	protected final static List<String> cache = new ArrayList<String>();
   
 	/** Start checking, given a URL by name.
 	 * Calls checkLink to check each link.
@@ -46,10 +45,6 @@ public class LinkChecker {
 			System.out.println("checkOut(null) isn't very useful");
 			return;
 		}
-		if (urlCache.get(rootURLString) == BEEN_THERE_DONE_THAT) {
-			return;	// already visited
-		}
-		urlCache.put(rootURLString, BEEN_THERE_DONE_THAT);
 
 		// Open the root URL for reading. May be a filename or a real URL.
 		try {
@@ -114,7 +109,7 @@ public class LinkChecker {
 					continue;
 				}
 
-				if (href.startsWith("..") || href.startsWith("#")) {
+				if (href.equals("/") || href.startsWith("..") || href.startsWith("#")) {
 					System.out.println(href + " -- not checking\n");
 					// nothing doing!
 					continue; 
@@ -161,10 +156,18 @@ public class LinkChecker {
 		}
 	}
 
+	private static URLCanonicalizer uc = new URLCanonicalizer();
+	
 	/** Check one link, given its DocumentBase and the tag */
 	public static String checkOneLine(URL linkURL) {
 		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
+			final String canonURLString = uc.canonicalize(linkURL.toString());
+			if (cache.contains(canonURLString)) 
+				return null;			
+			cache.add(canonURLString);
+			linkURL = new URL(canonURLString);
+
 			// Open it; if the open fails we'll likely throw an exception
 			URLConnection luf = linkURL.openConnection();
 			if (linkURL.getProtocol().equals("http")) {
@@ -188,41 +191,4 @@ public class LinkChecker {
 			return "DEAD";
 		}
     }
- 
-	/** Extract the URL from <sometag attrs HREF="http://foo/bar" attrs ...> 
-	 * We presume that the HREF is correctly quoted!!!!!
-	 * TODO: Handle Applets.
-	 */
-	public static String extractHREF(String tag) throws MalformedURLException {
-		String caseTag = tag.toLowerCase(), attrib;
-		int p1, p2, p3, p4;
-
-		if (caseTag.startsWith("<a") && 
-			Character.isWhitespace(caseTag.charAt(2))) {
-			attrib = "href";		// A
-		} else if (caseTag.startsWith("<applet ")){
-			attrib = "code";
-		} else
-			attrib = "src";			// image, frame
-		// XXX refactor to use 1.5 enum here
-		if (attrib.equals("href") && caseTag.indexOf("name") != -1) {
-			return null;		// silently ignore <a name=...>
-		}
-		p1 = caseTag.indexOf(attrib);
-		if (p1 < 0) {
-			throw new MalformedURLException("Can't find " + attrib + " in " + tag);
-		}
-		p2 = tag.indexOf ("=", p1);
-
-		// This fails to handle unquoted href, which some dinosaurs insist
-		// on using, saying the parser can sort it out. Phhhhhhhht!!!!
-		// XXX should handle single-quoted hrefs here
-		p3 = tag.indexOf("\"", p2);
-		p4 = tag.indexOf("\"", p3+1);
-		if (p3 < 0 || p4 < 0) {
-			throw new MalformedURLException("Invalid " + attrib + " in " + tag);
-		}
-		String href = tag.substring(p3+1, p4);
-		return href;
-	}
-}
+ }
