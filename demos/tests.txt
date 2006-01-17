@@ -11,7 +11,7 @@ X pageunit.NullTestFilter
 X pageunit.samples.CvsIdFilter
 
 = test1 My New value
-E Variable test1 is set to ${test1}
+E Variable test1 has been set to ${test1}
 
 # Test redirections
 < inner.test
