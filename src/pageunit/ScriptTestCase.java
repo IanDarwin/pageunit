@@ -23,6 +23,7 @@ import pageunit.html.HTMLInput;
 import pageunit.html.HTMLPage;
 import pageunit.http.WebResponse;
 import pageunit.http.WebSession;
+import pageunit.linkchecker.LinkChecker;
 
 import com.darwinsys.util.VariableMap;
 
@@ -120,6 +121,7 @@ public class TestRunner extends TestCase {
 			if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
 				continue;
 			}
+			restOfLine = variables.substVars(restOfLine);
 			String page;
 			
 			// First-half testing: Exceptions thrown here are fatal to the remainder of this FILE.
@@ -135,7 +137,7 @@ public class TestRunner extends TestCase {
 				continue;
 				
 			case 'E':	// echo
-				System.out.println(variables.substVars(restOfLine));
+				System.out.println(restOfLine);
 				continue;
 				
 			case 'X':	// XTENTION or PLUG-IN
@@ -207,7 +209,7 @@ public class TestRunner extends TestCase {
 			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
 			// Handle most "actual" tests here; each case ends with break.
 			try {
-				System.out.println("TestRunner.run(): Starting 2nd Half Switch");
+				//System.out.println("TestRunner.run(): Starting 2nd Half Switch");
 				this.testStarted(line);
 				switch (c) {
 				
@@ -364,7 +366,7 @@ public class TestRunner extends TestCase {
 					
 					break;
 					
-				case 'S':
+				case 'S':	// SUBMIT
 					assertNotNull("Form found before submit", theForm);
 					
 					String submitValue = restOfLine;
@@ -390,7 +392,12 @@ public class TestRunner extends TestCase {
 						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
 					}				
 					
-					break;				
+					break;	
+					
+				case 'V':	// Verify (Link Checker)
+					System.out.printf("LinkChecker: %s%n", restOfLine);
+					LinkChecker.checkStartingAt(restOfLine);
+					break;
 					
 				default:
 					fail("Unknown request: " + line);
@@ -407,10 +414,12 @@ public class TestRunner extends TestCase {
 						"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
 						" (" + e + ':' + cause + ")");
 			} // end of try
-			stars();
-			System.out.printf("** END OF FILE %s **%n", thisFileName);
-			stars();
 		} // end of while readLine loop
+		
+		stars();
+		System.out.printf("** END OF FILE %s **%n", thisFileName);
+		stars();
+
 		r.close();
 
 		return new ResultStat(nTests, nSucceeded, nFailures);

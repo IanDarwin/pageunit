@@ -8,7 +8,6 @@ N
 
 # Apply site-specific filter (at our site we require a CVS identifier in every page)
 X pageunit.NullTestFilter
-X pageunit.samples.CvsIdFilter
 
 = test1 My New value
 E Variable test1 has been set to ${test1}
