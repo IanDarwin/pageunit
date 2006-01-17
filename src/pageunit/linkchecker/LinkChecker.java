@@ -151,7 +151,8 @@ public class LinkChecker {
 		}
     }
 	
-	public static synchronized boolean cacheHit(String s) {
+	/** Simple cache manager */
+	private static synchronized boolean cacheHit(String s) {
 		if (cache.contains(s)) 
 			return true;			
 		cache.add(s);
