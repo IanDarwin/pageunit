@@ -3,6 +3,7 @@ package pageunit.linkchecker;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.text.MutableAttributeSet;
@@ -28,12 +29,12 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	};
 	
 	// XXX static, but returned from synchronized instance method...
-	private static List<HTMLComponent> currentForm;
+	private static List<HTMLComponent> pageElements = new ArrayList<HTMLComponent>();
 	
 	public HTMLParser() {
 	}
 	
-	private boolean debug;
+	private boolean debug =  true;
 		
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
@@ -49,7 +50,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (debug) {
 					System.out.println(comp);
 				}
-				currentForm.add(comp);				
+				pageElements.add(comp);				
 			}
 		}
 	}
@@ -57,7 +58,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	public synchronized List<HTMLComponent> parse(Reader reader) throws IOException, HTMLParseException {
 		new ParserDelegator().parse(reader, this, true);
-		return null; // XXX;
+		return pageElements;
 	}
 	
 	public synchronized List<HTMLComponent> parse(String s) throws IOException, HTMLParseException {

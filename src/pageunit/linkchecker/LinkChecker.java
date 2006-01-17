@@ -3,6 +3,7 @@ package pageunit.linkchecker;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -78,7 +79,7 @@ public class LinkChecker {
 		}
 
 		try {
-			List<HTMLComponent> urlTags = new HTMLParser().parse((String)rootURL.getContent());
+			List<HTMLComponent> urlTags = new HTMLParser().parse(new InputStreamReader((InputStream)rootURL.getContent()));
 			for (HTMLComponent tag : urlTags) {
 				System.out.printf("TAG %s%n", tag);
 						
