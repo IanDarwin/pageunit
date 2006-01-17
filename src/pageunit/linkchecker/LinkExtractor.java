@@ -19,7 +19,7 @@ import pageunit.html.HTMLParseException;
  * Build a list of elements that can be checked.
  * @version $Id$
  */
-public class HTMLParser extends HTMLEditorKit.ParserCallback {
+public class LinkExtractor extends HTMLEditorKit.ParserCallback {
 		
 	private static final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.FORM,
@@ -31,19 +31,19 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	// XXX static, but returned from synchronized instance method...
 	private static List<HTMLComponent> pageElements = new ArrayList<HTMLComponent>();
 	
-	public HTMLParser() {
+	public LinkExtractor() {
 	}
 	
 	private boolean debug;
 		
 	@Override
-	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-		for (HTML.Tag t : wantedComplexTags) {
-			if (t==tag) {
+	public void handleStartTag(HTML.Tag foundTag, MutableAttributeSet attrs, int pos) {
+		for (HTML.Tag wantedTag : wantedComplexTags) {
+			if (wantedTag==foundTag) {
 				if (debug) {
 					System.out.print("COMPLEX: ");
 				}
-				HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
+				HTMLComponent comp = HTMLComponentFactory.create(foundTag, attrs);
 				if (debug) {
 					System.out.println(comp);
 				}
