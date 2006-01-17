@@ -34,6 +34,7 @@ public class PageUnit {
 			System.out.println(r);
 		} catch (Exception e) {
 			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
+			e.printStackTrace();
 		}
 	}
 
