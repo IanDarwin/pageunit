@@ -55,7 +55,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	URLCanonicalizer uc = new URLCanonicalizer();
 
-	
 	public synchronized List<HTMLComponent> parse(Reader reader) throws IOException, HTMLParseException {
 		new ParserDelegator().parse(reader, this, true);
 		return pageElements;

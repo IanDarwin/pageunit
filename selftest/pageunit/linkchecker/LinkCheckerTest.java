@@ -11,7 +11,7 @@ public class LinkCheckerTest extends TestCase {
 	}
 	public void testSite() throws Exception {
 		System.out.println("LinkCheckerTest.testSite() starting");
-		LinkChecker.checkStartingAt(new URL("http://www.darwinsys.com/java"));
+		LinkChecker.checkStartingAt(new URL("http://www.phenogenomics.ca/"));
 		System.out.println("LinkCheckerTest.testSite() done");
 
 	}
