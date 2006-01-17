@@ -14,7 +14,6 @@ import javax.swing.text.html.parser.ParserDelegator;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLComponentFactory;
 import pageunit.html.HTMLParseException;
-import sun.net.URLCanonicalizer;
 
 /**
  * Build a list of elements that can be checked.
@@ -53,8 +52,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 	}
 	
-	URLCanonicalizer uc = new URLCanonicalizer();
-
 	public synchronized List<HTMLComponent> parse(Reader reader) throws IOException, HTMLParseException {
 		new ParserDelegator().parse(reader, this, true);
 		return pageElements;
