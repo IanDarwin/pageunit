@@ -49,16 +49,12 @@ public class LinkChecker {
 			// If not a valid URL, try again as a file.
 			rootURL = new File(rootURLString).toURL();
 		}		
-		checkStartingAt(rootURL);		
-	}
-	
-	public synchronized static void checkStartingAt(URL rootURL) throws IOException {
 		System.out.printf("LinkChecker.checkStartingAt(%s)%n", rootURL);
 		
 		try {
 			List<HTMLComponent> urlTags = new LinkExtractor().parse(new InputStreamReader((InputStream)rootURL.getContent()));
 			for (HTMLComponent tag : urlTags) {
-				System.out.printf("TAG %s%n", tag);
+				// System.out.printf("TAG %s%n", tag);
 						
 				String href = null;
 				if (tag instanceof HTMLAnchor) {
@@ -70,46 +66,44 @@ public class LinkChecker {
 				if (tag instanceof HTMLIMG) {
 					href = ((HTMLIMG)tag).getSrc();
 				}				
-
+		
 				for (int j=0; j<indent; j++)
 					System.out.println("\t");
-				System.out.println(href + " -- ");
-
+				System.out.print(href + " -- ");
+		
 				// Can't really validate these!
 				if (href == null) {
 					System.out.println(" null? !!\n");
 					continue;
 				}
-
+		
 				if (href.equals("/") || href.startsWith("..") || href.startsWith("#")) {
-					System.out.println(href + " -- not checking\n");
+					System.out.println(href + " -- not checking");
 					// nothing doing!
 					continue; 
 				}
 				
 				URL hrefURL = new URL(rootURL, href);
-
+		
 				if (hrefURL.getProtocol().equals("mailto:")) {
-					System.out.println(href + " -- not checking\n");
+					System.out.println(href + " -- not checking");
 					continue;
 				}
-
-			// Now see if the URL is off-site.
+		
+				// Now see if the URL is off-site.
 				if (!hrefURL.getHost().equals(rootURL.getHost())) {
-					System.out.println("-- OFFSITE -- not following\n");
+					System.out.println("-- OFFSITE -- not following");
 					continue;
 				}
-
+		
 				// CHECK THE URL.
 				System.out.println(checkOneLink(hrefURL));
-	
+		
 				// If a directory, assume HTML or something under it will work.
 				if (href.endsWith("/")) {
 						++indent;
-						if (href.indexOf(':') != -1)
+						if (href.indexOf(':') != -1) {
 							checkStartingAt(href);			// RECURSE
-						else {
-							checkStartingAt(new URL(rootURL, href));		// RECURSE
 						}
 						--indent;
 				}
@@ -119,9 +113,9 @@ public class LinkChecker {
 		} catch (HTMLParseException e) {
 			System.err.println("HTML Parse Exception:");
 			e.printStackTrace();
-		}
+		}		
 	}
-
+	
 	private static URLCanonicalizer uc = new URLCanonicalizer();
 	
 	/** Check one link, given its DocumentBase and the tag */
@@ -138,10 +132,9 @@ public class LinkChecker {
 			URLConnection luf = linkURL.openConnection();
 			if (linkURL.getProtocol().equals("http")) {
 				HttpURLConnection huf = (HttpURLConnection)luf;
-				String s = huf.getResponseCode() + " " + huf.getResponseMessage();
 				if (huf.getResponseCode() == -1)
 					return "Server error: bad HTTP response";
-				return s;
+				return huf.getResponseCode() + " " + huf.getResponseMessage();
 			} else if (linkURL.getProtocol().equals("file")) {
 				InputStream is = luf.getInputStream();
 				is.close();
