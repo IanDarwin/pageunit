@@ -14,8 +14,6 @@ X pageunit.samples.CvsIdFilter
 E Variable test1 is set to ${test1}
 
 # Test redirections
-< /dev/null
-
 < inner.test
 
 # Ensure that logout is harmless when you're not logged in.
