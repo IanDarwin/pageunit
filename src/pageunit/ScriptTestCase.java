@@ -1,5 +1,7 @@
 package pageunit;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.net.URISyntaxException;
@@ -21,8 +23,6 @@ import pageunit.html.HTMLInput;
 import pageunit.html.HTMLPage;
 import pageunit.http.WebResponse;
 import pageunit.http.WebSession;
-import pageunit.io.FileStack;
-import pageunit.io.InputFile;
 
 import com.darwinsys.util.VariableMap;
 
@@ -52,8 +52,9 @@ public class TestRunner extends TestCase {
 	private boolean debug;
 	private List<TestFilter> filterList = new ArrayList<TestFilter>();
 	VariableMap variables = new VariableMap();
+	
+	private File curDir;
 
-	FileStack files = new FileStack();
 	
 	/** Run ALL the tests in the named test file.
 	 * @param fileName the test script file name.
@@ -68,28 +69,30 @@ public class TestRunner extends TestCase {
 		variables.setVar("HOST", TestUtils.getProperty("host"));
 		variables.setVar("PORT", TestUtils.getProperty("port"));
 		
-		files.reset();
-		files.pushInputFile(thisFileName);
+		File f = new File(thisFileName);
+		if (f.isAbsolute()) {
+			curDir = f.getParentFile();
+		} else {
+			if (curDir != null) {
+				f = new File(curDir, thisFileName);
+			} else {
+				System.err.printf("File %s has no directory parent", thisFileName);
+			}
+		}
+		LineNumberReader r = new LineNumberReader(new FileReader(f));
 		
 		System.out.println("*****************************************************************");
 		System.out.println("PageUnit $Version$");
 		System.out.println("Test run with default URL http://" + variables.getVar("HOST") + ":" + variables.getVar("PORT"));
-		System.out.println("Input test file: " + files.getFileName());
+		System.out.println("Input test file: " + thisFileName);
 		System.out.println("Run at " + new Date());
 		System.out.println("*****************************************************************");
 
 		session = new WebSession();
 
-		InputFile inf = files.peekInputFile();
-
-		do {		
-			// This will happen once per file in the input stack plus once
-			// per "<" file inclusion.
-			LineNumberReader r = inf.getReader();
-			
 			String line;
 			
-			mainLoop:
+
 			while ((line = r.readLine()) != null) {	// MAIN LOOP PER LINE
 				if (line.length() == 0) {
 					System.out.println();
@@ -121,9 +124,8 @@ public class TestRunner extends TestCase {
 				// Each case ends with continue, to next iteration of main loop.
 				switch(c) {
 				case '<':	// File Inclusion
-					inf = files.pushInputFile(restOfLine);
-					r = inf.getReader(); // will loop through input file
-					continue mainLoop;
+					run(restOfLine);
+					continue;
 				case '=':	// Set Variable
 					String[] args = getTwoArgs("variable", restOfLine, ' ');
 					variables.setVar(args[0], args[1]);
@@ -201,6 +203,7 @@ public class TestRunner extends TestCase {
 				
 				// Handle actual tests here; each case ends with break.
 				try {
+					System.out.println("TestRunner.run(): Starting 2nd Half Switch");
 					this.testStarted(line);
 					switch (c) {
 					
@@ -397,17 +400,12 @@ public class TestRunner extends TestCase {
 					final Throwable cause = e.getCause();
 					this.testFailed(line);
 					System.err.println(
-							"FAILURE: " + files.getFileName() + ":" + r.getLineNumber() + 
+							"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
 							" (" + e + ':' + cause + ")");
 				} // end of try
 				System.out.println("1");
 			} // end of while readLine loop
-			System.out.println("EOF on " +  inf);
-			// inf.close();
-		} while ((inf = files.popInputFile()) != null); // end of "do while" loop.
-		
-		// More All Done
-		files.reset();	// will print on stderr if any leftovers
+			r.close();
 
 		return new ResultStat(nTests, nSucceeded, nFailures);
 	}
