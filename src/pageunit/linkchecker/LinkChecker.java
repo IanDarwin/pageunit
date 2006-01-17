@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pageunit.html.HTMLComponent;
+import pageunit.html.HTMLParseException;
+
 /** A simple HTML Link Checker. 
  * Needs Properties to set depth, URLs to check. etc.
  * Responses not adequate; need to check at least for 404-type errors!
@@ -27,7 +30,6 @@ public class LinkChecker {
 
 	protected static int indent = 0;
 	protected static Map<String,Object> urlCache = new HashMap<String,Object>();
-	private static GetURLs urlGetter;
 	private final static Object BEEN_THERE_DONE_THAT = new Object();
   
 	/** Start checking, given a URL by name.
@@ -62,9 +64,7 @@ public class LinkChecker {
 	
 	public synchronized static void checkStartingAt(URL rootURL) throws IOException {
 		System.out.printf("LinkChecker.checkStartingAt(%s)%n", rootURL);
-		// Either way, now try to open it.
-		urlGetter = new GetURLs(rootURL);
-
+		
 		String rootURLString = rootURL.toString();
 		// If we're still here, the root URL given is OK.
 		// Next we make up a "directory" URL from it.
@@ -78,9 +78,8 @@ public class LinkChecker {
 		}
 
 		try {
-			urlGetter.getReader().setWantedTags(GetURLs.wantTags);
-			List<Element> urlTags = urlGetter.getReader().readTags();
-			for (Element tag : urlTags) {
+			List<HTMLComponent> urlTags = new HTMLParser().parse((String)rootURL.getContent());
+			for (HTMLComponent tag : urlTags) {
 				System.out.printf("TAG %s%n", tag);
 						
 				String href = extractHREF(tag.toString());
@@ -142,9 +141,11 @@ public class LinkChecker {
 						--indent;
 				}
 			}
-			urlGetter.close();
 		} catch (IOException e) {
 			System.err.println("Error: (" + e +")");
+		} catch (HTMLParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

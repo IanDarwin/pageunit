@@ -25,6 +25,10 @@ public class HTMLComponentFactory {
 			String method = getAttribute(HTML.Attribute.METHOD, attrs);
 			return new HTMLFormImpl(name, action, method);
 		}
+		if (tag == HTML.Tag.IMG) {
+			String src = getAttribute(HTML.Attribute.SRC, attrs);
+			return new HTMLIMGImpl(name, src);
+		}
 		if (tag == HTML.Tag.INPUT) {
 			String type = getAttribute(HTML.Attribute.TYPE, attrs);
 			String value = getAttribute(HTML.Attribute.VALUE, attrs);
