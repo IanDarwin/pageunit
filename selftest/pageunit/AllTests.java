@@ -5,7 +5,6 @@ import junit.framework.TestSuite;
 import regress.html.HTMLComponentFactoryTest;
 import regress.html.ParserTest;
 import regress.html.ParserTest2;
-import regress.io.FileStackTest;
 
 public class AllTests {
 
@@ -18,7 +17,6 @@ public class AllTests {
 		suite.addTestSuite(HTMLComponentFactoryTest.class);
 		suite.addTestSuite(ParserTest.class);
 		suite.addTestSuite(ParserTest2.class);
-		suite.addTestSuite(FileStackTest.class);
 		//$JUnit-END$
 		return suite;
 	}
