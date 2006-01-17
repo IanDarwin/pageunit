@@ -58,7 +58,7 @@ public class LinkChecker {
 			return;
 		}
 		checkStartingAt(rootURL);		
-		}
+	}
 	
 	public synchronized static void checkStartingAt(URL rootURL) throws IOException {
 		System.out.printf("LinkChecker.checkStartingAt(%s)%n", rootURL);
@@ -78,8 +78,8 @@ public class LinkChecker {
 		}
 
 		try {
-			urlGetter.reader.setWantedTags(GetURLs.wantTags);
-			List<Element> urlTags = urlGetter.reader.readTags();
+			urlGetter.getReader().setWantedTags(GetURLs.wantTags);
+			List<Element> urlTags = urlGetter.getReader().readTags();
 			for (Element tag : urlTags) {
 				System.out.printf("TAG %s%n", tag);
 						
@@ -110,7 +110,7 @@ public class LinkChecker {
 				// TRY THE URL.
 				// (don't combine previous System.out.println with this one,
 				// since this one can throw an exception)
-				System.out.println(checkLink(hrefURL));
+				System.out.println(checkOneLine(hrefURL));
 
 				// There should be an option to control whether to
 				// "try the url" first and then see if off-site, or
@@ -149,7 +149,7 @@ public class LinkChecker {
 	}
 
 	/** Check one link, given its DocumentBase and the tag */
-	public static String checkLink(URL linkURL) {
+	public static String checkOneLine(URL linkURL) {
 		System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
 			// Open it; if the open fails we'll likely throw an exception
