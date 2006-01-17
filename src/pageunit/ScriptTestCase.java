@@ -81,333 +81,342 @@ public class TestRunner extends TestCase {
 		}
 		LineNumberReader r = new LineNumberReader(new FileReader(f));
 		
-		System.out.println("*****************************************************************");
+		stars();
 		System.out.println("PageUnit $Version$");
 		System.out.println("Test run with default URL http://" + variables.getVar("HOST") + ":" + variables.getVar("PORT"));
 		System.out.println("Input test file: " + thisFileName);
 		System.out.println("Run at " + new Date());
-		System.out.println("*****************************************************************");
+		stars();
 
 		session = new WebSession();
 
-			String line;
+		String line;
+		
+		
+		while ((line = r.readLine()) != null) {	// MAIN LOOP PER LINE
+			if (line.length() == 0) {
+				System.out.println();
+				continue;
+			}
+			if (line.charAt(0) == '#') {
+				System.out.println(line);
+				continue;
+			}
+			System.out.println("CMD: " + line);
 			
-
-			while ((line = r.readLine()) != null) {	// MAIN LOOP PER LINE
-				if (line.length() == 0) {
-					System.out.println();
-					continue;
-				}
-				if (line.charAt(0) == '#') {
-					System.out.println(line);
-					continue;
-				}
-				System.out.println("CMD: " + line);
+			StringTokenizer st = new StringTokenizer(line);
+			if (st.countTokens() < 1) {
+				throw new IOException("invalid line " + line);
+			}
+			String cmd = st.nextToken();
+			if (cmd.length() != 1) {
+				throw new IOException("invalid command in line " + line);
+			}
+			char c = cmd.charAt(0);
+			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
+			if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
+				continue;
+			}
+			System.out.println("--> " + restOfLine) ;
+			String page;
+			
+			// Handle declarative (non-test) requests here.
+			// Each case ends with continue, to next iteration of main loop.
+			switch(c) {
+			case '<':	// File Inclusion
+				run(restOfLine);
+				continue;
+			case '=':	// Set Variable
+				String[] args = getTwoArgs("variable", restOfLine, ' ');
+				variables.setVar(args[0], args[1]);
+				continue;
 				
-				StringTokenizer st = new StringTokenizer(line);
-				if (st.countTokens() < 1) {
-					throw new IOException("invalid line " + line);
-				}
-				String cmd = st.nextToken();
-				if (cmd.length() != 1) {
-					throw new IOException("invalid command in line " + line);
-				}
-				char c = cmd.charAt(0);
-				String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
-				if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
-					continue;
-				}
-				System.out.println("--> " + restOfLine) ;
-				String page;
+			case 'E':	// echo
+				System.out.println(variables.substVars(restOfLine));
+				continue;
 				
-				// Handle declarative (non-test) requests here.
-				// Each case ends with continue, to next iteration of main loop.
-				switch(c) {
-				case '<':	// File Inclusion
-					run(restOfLine);
-					continue;
-				case '=':	// Set Variable
-					String[] args = getTwoArgs("variable", restOfLine, ' ');
-					variables.setVar(args[0], args[1]);
-					continue;
-					
-				case 'E':	// echo
-					System.out.println(variables.substVars(restOfLine));
-					continue;
-					
-				case 'X':	// XTENTION or PLUG-IN
-					String className = restOfLine;
-					if (className == null || className.length() == 0) {
-						throw new IllegalArgumentException("Plug-In Command must have class name");
-					} else {
-						Object o = Class.forName(className).newInstance();
-						if (!(o instanceof TestFilter)) {
-							throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
-						}
-						filterList.add((TestFilter)o);
-					}				
-					continue;
-					
-				case 'Y':	// REMOVE XTENTION or PLUG-IN
-					String clazzName = restOfLine;
-					for (Object o : filterList) {
-						if (clazzName.equals(o.getClass().getName())) {
-							filterList.remove(o);
-						}
+			case 'X':	// XTENTION or PLUG-IN
+				String className = restOfLine;
+				if (className == null || className.length() == 0) {
+					throw new IllegalArgumentException("Plug-In Command must have class name");
+				} else {
+					Object o = Class.forName(className).newInstance();
+					if (!(o instanceof TestFilter)) {
+						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
 					}
-					continue;
-					
-				case 'D':	// debug on/off
-					setDebug(getBoolean(restOfLine));
-					continue; 
-					
-				case 'B':	// set Base URL
-					URL u = new URL(restOfLine);
-					variables.setVar("HOST", u.getHost());
-					variables.setVar("PORT", Integer.toString(u.getPort()));
-					continue;
-					
-				case 'H':	// hard-code hostname
-					variables.setVar("HOST", restOfLine.trim());
-					continue;
-					
-				case 'O':	// hard-code pOrt number
-					variables.setVar("PORT", restOfLine.trim());
-					continue;
-					
-				case 'A':	// As user [pw]
-					String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
-					variables.setVar("USER", atmp[0]);
-					if (atmp[1] != null) {
-						variables.setVar("PASS", atmp[1]);
+					filterList.add((TestFilter)o);
+				}				
+				continue;
+				
+			case 'Y':	// REMOVE XTENTION or PLUG-IN
+				String clazzName = restOfLine;
+				for (Object o : filterList) {
+					if (clazzName.equals(o.getClass().getName())) {
+						filterList.remove(o);
 					}
-					continue;
+				}
+				continue;
+				
+			case 'D':	// debug on/off
+				setDebug(getBoolean(restOfLine));
+				continue; 
+				
+			case 'B':	// set Base URL
+				URL u = new URL(restOfLine);
+				variables.setVar("HOST", u.getHost());
+				variables.setVar("PORT", Integer.toString(u.getPort()));
+				continue;
+				
+			case 'H':	// hard-code hostname
+				variables.setVar("HOST", restOfLine.trim());
+				continue;
+				
+			case 'O':	// hard-code pOrt number
+				variables.setVar("PORT", restOfLine.trim());
+				continue;
+				
+			case 'A':	// As user [pw]
+				String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
+				variables.setVar("USER", atmp[0]);
+				if (atmp[1] != null) {
+					variables.setVar("PASS", atmp[1]);
+				}
+				continue;
+				
+			case 'C':	// Configuration
+				System.err.println("Config management not written yet, abandoning this file");
+				break;
+				
+			case 'N':	// start new session
+				session = new WebSession();
+				session.setThrowExceptionOnFailingStatusCode(false);
+				theLink = null;
+				continue;
+				
+			case 'Q':
+				stars();
+				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
+				stars();
+				report();
+				continue;				
+			}
+			
+			// Handle actual tests here; each case ends with break.
+			try {
+				System.out.println("TestRunner.run(): Starting 2nd Half Switch");
+				this.testStarted(line);
+				switch (c) {
+				
+				case 'U':	// get Unprotected page
+					resetForPage();
+					page = restOfLine;
+					assertValidRURL(page);
 					
-				case 'C':	// Configuration
-					System.err.println("Config management not written yet, abandoning this file");
+					if (debug) {
+						System.err.println(new URL("http", variables.getVar("HOST"),
+								variables.getIntVar("PORT"), page));
+					}
+					thePage = TestUtils.getSimplePage(session, 
+							variables.getVar("HOST"), variables.getIntVar("PORT"), page);
+					theResult = session.getWebResponse();
+					filterPage(thePage, theResult);
+					assertEquals("unprotected page load", HttpStatus.SC_OK, theResult.getStatus());
 					break;
 					
-				case 'N':	// start new session
-					session = new WebSession();
-					session.setThrowExceptionOnFailingStatusCode(false);
+				case 'P':	// get protected page
+					resetForPage();
+					page = restOfLine;
+					assertValidRURL(page);
+					
+					thePage = TestUtils.getProtectedPage(session, variables.getVar("HOST"),
+							variables.getIntVar("PORT"), page, 
+							variables.getVar("USER"), variables.getVar("PASS"));
+					theResult = session.getWebResponse();
+					filterPage(thePage, theResult);
+					assertEquals("protected page status", HttpStatus.SC_OK, theResult.getStatus());
+					assertEquals("protected page redirect", page, theResult.getUrl());
+					break;
+					
+				case 'M':	// page contains text
+					// PreCondition: theResult has been set by the U or P code above
 					theLink = null;
-					continue;
+					assertNotNull("Invalid test: requested txt before getting page", thePage);
+					theResult = session.getWebResponse();
+					if (theResult == null) { 
+						System.err.println("M ignored because page is null");
+						break;
+					}
+					String contentAsString = theResult.getContentAsString();
+					assertTrue("page contains text <" + restOfLine + ">", 
+							TestUtils.checkResultForPattern(contentAsString, variables.substVars(restOfLine)));
+					break;
 					
-				case 'Q':
-					System.out.println("*****************************************************************");
-					System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
-					System.out.println("*****************************************************************");
-					report();
-					continue;				
-				}
-				
-				// Handle actual tests here; each case ends with break.
-				try {
-					System.out.println("TestRunner.run(): Starting 2nd Half Switch");
-					this.testStarted(line);
-					switch (c) {
+				case 'T':	// page contains tag with text (in bodytext or attribute value)
+					// PreCondition: theResult has been set by the U or P code above
+					assertNotNull("Requested txt before getting page", theResult);
 					
-					case 'U':	// get Unprotected page
-						resetForPage();
-						page = restOfLine;
-						assertValidRURL(page);
-						
-						if (debug) {
-							System.err.println(new URL("http", variables.getVar("HOST"),
-									variables.getIntVar("PORT"), page));
+					String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
+					String tagType = ttmp[0];
+					String tagText = variables.substVars(ttmp[1]);
+					
+					// special case for "title" tag; assume only one <title> tag per HTML page
+					if ("title".equals(tagType)) {
+						String titleText = thePage.getTitleText();
+						System.out.println("TITLE FOUND = " + titleText);
+						assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
+						break; // out of case 'T'
+					}
+					
+					// look for tag;
+					boolean found = false;
+					
+					for (Iterator<HTMLComponent> iter = thePage.getChildren().iterator(); iter.hasNext();) {
+						HTMLComponent element = iter.next();
+						String bodyText = element.getBody();
+						if (bodyText != null && bodyText.indexOf(tagText) != -1) {
+							found = true;
+							break; // out of this for loop
 						}
-						thePage = TestUtils.getSimplePage(session, 
-								variables.getVar("HOST"), variables.getIntVar("PORT"), page);
-						theResult = session.getWebResponse();
-						filterPage(thePage, theResult);
-						assertEquals("unprotected page load", HttpStatus.SC_OK, theResult.getStatus());
-						break;
+					}
+					assertTrue("did not find tag type " + tagType + " with text: " + tagText, found);
+					break;
+					
+				case 'L':	// page contains Link
+					// PreCondition: theResult has been set by the U or P code above
+					String linkURL = restOfLine;
+					theLink = null;
+					for (HTMLAnchor oneLink : thePage.getAnchors()) {
 						
-					case 'P':	// get protected page
-						resetForPage();
-						page = restOfLine;
-						assertValidRURL(page);
-						
-						thePage = TestUtils.getProtectedPage(session, variables.getVar("HOST"),
-								variables.getIntVar("PORT"), page, 
-								variables.getVar("USER"), variables.getVar("PASS"));
-						theResult = session.getWebResponse();
-						filterPage(thePage, theResult);
-						assertEquals("protected page status", HttpStatus.SC_OK, theResult.getStatus());
-						assertEquals("protected page redirect", page, theResult.getUrl());
-						break;
-						
-					case 'M':	// page contains text
-						// PreCondition: theResult has been set by the U or P code above
-						theLink = null;
-						assertNotNull("Invalid test: requested txt before getting page", thePage);
-						theResult = session.getWebResponse();
-						if (theResult == null) { 
-							System.err.println("M ignored because page is null");
+						// Check in the Name attribute, if any
+						String n = oneLink.getName();
+						if (n != null && n.indexOf(linkURL) != -1) {
+							System.out.println("MATCH NAME");
+							theLink = oneLink;
 							break;
 						}
-						String contentAsString = theResult.getContentAsString();
-						assertTrue("page contains text <" + restOfLine + ">", 
-								TestUtils.checkResultForPattern(contentAsString, variables.substVars(restOfLine)));
-						break;
 						
-					case 'T':	// page contains tag with text (in bodytext or attribute value)
-						// PreCondition: theResult has been set by the U or P code above
-						assertNotNull("Requested txt before getting page", theResult);
-						
-						String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
-						String tagType = ttmp[0];
-						String tagText = variables.substVars(ttmp[1]);
-						
-						// special case for "title" tag; assume only one <title> tag per HTML page
-						if ("title".equals(tagType)) {
-							String titleText = thePage.getTitleText();
-							System.out.println("TITLE FOUND = " + titleText);
-							assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
-							break; // out of case 'T'
+						// Check the Href attribute too
+						n = oneLink.getURL();
+						if (n != null && n.indexOf(linkURL) != -1) {
+							System.out.println("MATCH NAME");
+							theLink = oneLink;
+							break;
 						}
 						
-						// look for tag;
-						boolean found = false;
+						// Check in the body text, if any.
+						// Note: will fail if body text is nested in e.g., font tag!
+						String t = oneLink.toString();
 						
-						for (Iterator<HTMLComponent> iter = thePage.getChildren().iterator(); iter.hasNext();) {
-							HTMLComponent element = iter.next();
-							String bodyText = element.getBody();
-							if (bodyText != null && bodyText.indexOf(tagText) != -1) {
-								found = true;
-								break; // out of this for loop
-							}
+						if (t != null && t.indexOf(linkURL) != -1) {
+							System.out.println("MATCH BODYTEXT");
+							theLink = oneLink;
+							break;
 						}
-						assertTrue("did not find tag type " + tagType + " with text: " + tagText, found);
-						break;
-						
-					case 'L':	// page contains Link
-						// PreCondition: theResult has been set by the U or P code above
-						String linkURL = restOfLine;
-						theLink = null;
-						for (HTMLAnchor oneLink : thePage.getAnchors()) {
-							
-							// Check in the Name attribute, if any
-							String n = oneLink.getName();
-							if (n != null && n.indexOf(linkURL) != -1) {
-								System.out.println("MATCH NAME");
-								theLink = oneLink;
-								break;
-							}
-							
-							// Check the Href attribute too
-							n = oneLink.getURL();
-							if (n != null && n.indexOf(linkURL) != -1) {
-								System.out.println("MATCH NAME");
-								theLink = oneLink;
-								break;
-							}
-							
-							// Check in the body text, if any.
-							// Note: will fail if body text is nested in e.g., font tag!
-							String t = oneLink.toString();
-							
-							if (t != null && t.indexOf(linkURL) != -1) {
-								System.out.println("MATCH BODYTEXT");
-								theLink = oneLink;
-								break;
-							}
-						}
-						assertNotNull("link not found" ,  theLink);
-						assertValidRURL(theLink.toString());
-						break;
-						
-					case 'G':	// Go to link
-						// PreCondition: theLink has been set by the 'L' case above.
-						assertNotNull("found link before gotoLink", theLink);
-						thePage = (HTMLPage)session.follow(theLink);
-						
-						assertEquals("go to link response code", HttpStatus.SC_OK, session.getWebResponse().getStatus());
-						break;
-						
-						// FORMS
-						
-					case 'F':
-						// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
-						String formName = restOfLine;
-						List<HTMLForm> theForms = thePage.getForms();
-						for (Iterator<HTMLForm> iterator = theForms.iterator(); iterator.hasNext();) {
-							HTMLForm oneForm = iterator.next();
-							if (oneForm.getName().indexOf(formName) != -1) {
-								theForm = oneForm;	// "You are the One"
-							}
-						}
-						assertNotNull("Find form named " + formName, theForm);
-						break;
-						
-					case 'R':	// set parameter to value
-						// PRECONDITION: theForm has been set by a previous F command
-						assertNotNull("find a form before setting Parameters", theForm);
-						
-						String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
-						String attrName = rtmp[0];
-						String attrValue = rtmp[1];
-
-						attrValue = variables.substVars(attrValue);
-						
-						if (debug) {
-							System.err.println("Name=" + attrName + "; value=" + attrValue);
-						}
-						
-						HTMLInput theButton = theForm.getInputByName(attrName);
-						assertNotNull("get Button", theButton);
-						theButton.setValue(attrValue);
-						
-						break;
-						
-					case 'S':
-						assertNotNull("Form found before submit", theForm);
-						
-						String submitValue = restOfLine;
-						
-						if (submitValue == null || "".equals(submitValue)) {
-							thePage = (HTMLPage)session.submitForm(theForm);   // SEND THE LOGIN
-						} else {
-							final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
-							thePage = (HTMLPage)session.submitForm(theForm, button);
-						}
-						
-						// Should take us to a new page; HtmlUnit handles redirections automatically on regular
-						// page gets, but for some reason not on form submits. I dunno, ask Brian.
-						WebResponse formResponse = session.getWebResponse();
-						int statusCode = formResponse.getStatus();
-						
-						if (TestUtils.isRedirectCode(statusCode)) {
-							String newLocation = formResponse.getHeaderValue("location");
-							System.out.println(newLocation);
-							assertNotNull("form submit->redirection: location header", newLocation);
-							thePage = TestUtils.getSimplePage(session, new URL(newLocation));
-							theResult = session.getWebResponse();
-							assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
-						}				
-						
-						break;				
-						
-					default:
-						fail("Unknown request: " + line);
 					}
-					this.testPassed(line);
+					assertNotNull("link not found" ,  theLink);
+					assertValidRURL(theLink.toString());
+					break;
 					
-				} catch (final NullPointerException e) {
-					System.err.println("Error in PageUnit: " + e);
-					e.printStackTrace(System.err);
-				} catch (final Throwable e) {
-					final Throwable cause = e.getCause();
-					this.testFailed(line);
-					System.err.println(
-							"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
-							" (" + e + ':' + cause + ")");
-				} // end of try
-				System.out.println("1");
-			} // end of while readLine loop
-			r.close();
+				case 'G':	// Go to link
+					// PreCondition: theLink has been set by the 'L' case above.
+					assertNotNull("found link before gotoLink", theLink);
+					thePage = (HTMLPage)session.follow(theLink);
+					
+					assertEquals("go to link response code", HttpStatus.SC_OK, session.getWebResponse().getStatus());
+					break;
+					
+					// FORMS
+					
+				case 'F':
+					// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
+					String formName = restOfLine;
+					List<HTMLForm> theForms = thePage.getForms();
+					for (Iterator<HTMLForm> iterator = theForms.iterator(); iterator.hasNext();) {
+						HTMLForm oneForm = iterator.next();
+						if (oneForm.getName().indexOf(formName) != -1) {
+							theForm = oneForm;	// "You are the One"
+						}
+					}
+					assertNotNull("Find form named " + formName, theForm);
+					break;
+					
+				case 'R':	// set parameter to value
+					// PRECONDITION: theForm has been set by a previous F command
+					assertNotNull("find a form before setting Parameters", theForm);
+					
+					String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
+					String attrName = rtmp[0];
+					String attrValue = rtmp[1];
+					
+					attrValue = variables.substVars(attrValue);
+					
+					if (debug) {
+						System.err.println("Name=" + attrName + "; value=" + attrValue);
+					}
+					
+					HTMLInput theButton = theForm.getInputByName(attrName);
+					assertNotNull("get Button", theButton);
+					theButton.setValue(attrValue);
+					
+					break;
+					
+				case 'S':
+					assertNotNull("Form found before submit", theForm);
+					
+					String submitValue = restOfLine;
+					
+					if (submitValue == null || "".equals(submitValue)) {
+						thePage = (HTMLPage)session.submitForm(theForm);   // SEND THE LOGIN
+					} else {
+						final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
+						thePage = (HTMLPage)session.submitForm(theForm, button);
+					}
+					
+					// Should take us to a new page; HtmlUnit handles redirections automatically on regular
+					// page gets, but for some reason not on form submits. I dunno, ask Brian.
+					WebResponse formResponse = session.getWebResponse();
+					int statusCode = formResponse.getStatus();
+					
+					if (TestUtils.isRedirectCode(statusCode)) {
+						String newLocation = formResponse.getHeaderValue("location");
+						System.out.println(newLocation);
+						assertNotNull("form submit->redirection: location header", newLocation);
+						thePage = TestUtils.getSimplePage(session, new URL(newLocation));
+						theResult = session.getWebResponse();
+						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
+					}				
+					
+					break;				
+					
+				default:
+					fail("Unknown request: " + line);
+				}
+				this.testPassed(line);
+				
+			} catch (final NullPointerException e) {
+				System.err.println("Error in PageUnit: " + e);
+				e.printStackTrace(System.err);
+			} catch (final Throwable e) {
+				final Throwable cause = e.getCause();
+				this.testFailed(line);
+				System.err.println(
+						"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
+						" (" + e + ':' + cause + ")");
+			} // end of try
+			stars();
+			System.out.printf("** END OF FILE %s **", thisFileName);
+			stars();
+		} // end of while readLine loop
+		r.close();
 
 		return new ResultStat(nTests, nSucceeded, nFailures);
+	}
+
+	/**
+	 * 
+	 */
+	private void stars() {
+		System.out.println("*****************************************************************");
 	}
 
 	private void filterPage(final HTMLPage thePage, final WebResponse theResult) throws Exception {
