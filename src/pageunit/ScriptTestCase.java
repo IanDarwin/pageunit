@@ -254,7 +254,7 @@ public class TestRunner extends TestCase {
 					}
 					String contentAsString = theResult.getContentAsString();
 					assertTrue("page contains text <" + restOfLine + ">", 
-							TestUtils.checkResultForPattern(contentAsString, variables.substVars(restOfLine)));
+							TestUtils.checkResultForPattern(contentAsString, restOfLine));
 					break;
 					
 				case 'T':	// page contains tag with text (in bodytext or attribute value)
@@ -263,7 +263,7 @@ public class TestRunner extends TestCase {
 					
 					String[] ttmp = getTwoArgs("tag", restOfLine, ' ');
 					String tagType = ttmp[0];
-					String tagText = variables.substVars(ttmp[1]);
+					String tagText =  ttmp[1];
 					
 					// special case for "title" tag; assume only one <title> tag per HTML page
 					if ("title".equals(tagType)) {
@@ -353,8 +353,6 @@ public class TestRunner extends TestCase {
 					String[] rtmp = getTwoArgs("name and value", restOfLine, '=');				
 					String attrName = rtmp[0];
 					String attrValue = rtmp[1];
-					
-					attrValue = variables.substVars(attrValue);
 					
 					if (debug) {
 						System.err.println("Name=" + attrName + "; value=" + attrValue);
