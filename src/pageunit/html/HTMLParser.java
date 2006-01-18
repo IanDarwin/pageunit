@@ -19,14 +19,12 @@ import javax.swing.text.html.parser.ParserDelegator;
  * the article
  * <a href="http://java.sun.com/products/jfc/tsc/articles/bookmarks/">
  * The Swing HTML Parser</a> on Sun's JFC web site.
- * XXX TODO Optimize: don't require construction for each page!
- * (Issue is that PAGE is used throughout, but don't want to make it static...).
- * @author ian
+ * @note This class is NOT thread-safe; for use in one thread at a time!
  * @version $Id$
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
-	private final HTMLPage PAGE;
+	private HTMLPage page;
 	
 	private final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
@@ -35,31 +33,30 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.A,
 			HTML.Tag.TITLE
 	};
-	private HTML.Tag[] wantedSimpleTags = {
+	private final HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag!!
 	};
 	
 	private HTMLForm currentForm;
 	
 	public HTMLParser() {
-		PAGE = new HTMLPageImpl("Outer Page");
-		pushContainer(PAGE);
+		// Nothing to do this time.
 	}
-	
-	// This variable and three methods implement a semi-opaque stack of HTML containers
-	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
 
 	private boolean debug;
 	
-	void pushContainer(HTMLContainer newbie) {
+	// This variable and three methods implement a semi-opaque stack of HTML containers
+	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
+	
+	private void pushContainer(HTMLContainer newbie) {
 		containerStack.push(newbie);
 	}
 	
-	HTMLContainer popContainer() {
+	private HTMLContainer popContainer() {
 		return containerStack.pop();
 	}
 	
-	HTMLContainer currentContainer() {
+	private HTMLContainer currentContainer() {
 		return containerStack.peek();
 	}
 	
@@ -82,17 +79,17 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				}
 				
 				if (tmp instanceof HTMLAnchor) {
-					PAGE.addAnchor((HTMLAnchor)tmp);
+					page.addAnchor((HTMLAnchor)tmp);
 				}
 				if (tmp instanceof HTMLForm) {
 					currentForm = (HTMLForm)tmp;
-					PAGE.addForm(currentForm);
+					page.addForm(currentForm);
 				}
 				if (tmp instanceof HTMLInput && currentForm != null) {
 					((HTMLFormImpl)currentForm).addInput((HTMLInput)tmp);
 				}
 				if (tmp instanceof HTMLTitle) {
-					((HTMLPageImpl)PAGE).setTitle((HTMLTitle)tmp);
+					((HTMLPageImpl)page).setTitle((HTMLTitle)tmp);
 				}
 			}
 		}
@@ -141,13 +138,38 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		currentContainer().setBody(bodyContent);
 	}
 	
+	private String content = null;
+	
+	/** Parse an HTML page given a Reader. Since we will 99% likely need the page as a String,
+	 * read it all into a String (content), and pass it to parse(String).
+	 * @param reader
+	 * @return
+	 * @throws IOException
+	 * @throws HTMLParseException
+	 */
 	public HTMLPage parse(Reader reader) throws IOException, HTMLParseException {
-		new ParserDelegator().parse(reader, this, true);
-		return PAGE;
+		StringBuffer sb = new StringBuffer();
+		int ch;		
+		while ((ch = reader.read()) != -1) {
+			sb.append((char)ch);
+		}
+		content = sb.toString();
+		return parse(content);
 	}
 	
+	/** Parse an HTML page given it as a (long) String.
+	 * Create a StringReader and pass that to ParserDelegator().parse().
+	 * @param s
+	 * @return
+	 * @throws IOException
+	 * @throws HTMLParseException
+	 */
 	public HTMLPage parse(String s) throws IOException, HTMLParseException {
-		return parse(new StringReader(s));
+		page = new HTMLPageImpl("Outer Page");
+		pushContainer(page);
+		page.setContent(content);
+		new ParserDelegator().parse(new StringReader(s), this, true);
+		return page;
 	}
 	
 	/**

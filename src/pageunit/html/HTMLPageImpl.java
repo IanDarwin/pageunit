@@ -11,6 +11,8 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	private List<HTMLAnchor> anchors = new ArrayList<HTMLAnchor>();
 
 	private List<HTMLForm> forms = new ArrayList<HTMLForm>();
+
+	private String content;
 	
 	public HTMLPageImpl(String name) {
 		super(name);
@@ -87,5 +89,17 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 		if (title == null)
 			return null;
 		return title.getBody();
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public int getContentLength() {
+		return content.length();
 	}
 }
