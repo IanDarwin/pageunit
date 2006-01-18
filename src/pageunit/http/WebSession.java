@@ -69,7 +69,7 @@ public class WebSession {
 		request = new WebRequest();
 		
 		byte[] responseBody = getter.getResponseBody();
-		System.out.println("Read body length was " + responseBody.length);
+		// System.out.println("Read body length was " + responseBody.length);
 		getter.releaseConnection();	
 		
 		responseText = new String(responseBody);
