@@ -70,12 +70,7 @@ public class TestUtils {
 			String targetHost, int targetPort, String targetPage)
 			throws IOException, HTMLParseException {
 
-		if (!targetPage.startsWith("/")) {
-			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
-			targetPage = "/" + targetPage;
-		}
-
-		final URL url = new URL("http", targetHost, targetPort, targetPage);
+		final URL url = qualifyURL(targetHost, targetPort, targetPage);
 		
 		return getSimplePage(webClient, url);
 
@@ -116,12 +111,7 @@ public class TestUtils {
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException, HTMLParseException {
 		
-		if (!targetPage.startsWith("/")) {
-			System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
-			targetPage = "/" + targetPage;
-		}
-
-		final URL url = new URL("http", targetHost, targetPort, targetPage);
+		final URL url = qualifyURL(targetHost, targetPort, targetPage);
 		
 		// request protected page, and let WebSession handle redirection here.
 		final HTMLPage page1 = (HTMLPage) session.getPage(url);	// Ask for one page, really get login page
@@ -150,6 +140,27 @@ public class TestUtils {
 		statusCode = res2.getStatus();
 
 		return formResultsPage;	// HtmlUnit handles redirection for us
+	}
+
+	/**
+	 * @param targetHost
+	 * @param targetPort
+	 * @param targetPage
+	 * @return
+	 * @throws MalformedURLException
+	 */
+	private static URL qualifyURL(final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
+		final URL url;
+		if (targetPage.startsWith("http:")) {
+			url = new URL(targetPage);
+		} else {
+			if (!targetPage.startsWith("/")) {
+				System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
+				targetPage = "/" + targetPage;
+			}
+			url = new URL("http", targetHost, targetPort, targetPage);
+		}
+		return url;
 	}
 	
 	/**
