@@ -1,2 +1,2 @@
-# Exercise the Link Checker
-V http://${HOST}:${PORT}/
+# Exercise the Link Checker against the public site.
+V http://www.phenogenomics.ca/
