@@ -92,7 +92,8 @@ public class LinkChecker {
 		
 				// Now see if the URL is off-site.
 				if (!hrefURL.getHost().equals(rootURL.getHost())) {
-					System.out.println("-- OFFSITE -- not following");
+					System.out.print("-- OFFSITE -- ");
+					System.out.println(checkOneLink(hrefURL));
 					continue;
 				}
 		
