@@ -43,6 +43,32 @@ public class HTMLComponentFactory {
 		return null;
 	}
 
+	/** Return the Class type in my hierarchy that corresponds to the HTML.Tag type in Swing's.
+	 * @param tag
+	 * @return
+	 */
+	public static Class<?> classForTagType(HTML.Tag tag) {
+		if (tag == HTML.Tag.HTML) {
+			return HTMLHTMLImpl.class;
+		}
+		if (tag == HTML.Tag.A) {
+			return HTMLAnchorImpl.class;
+		}
+		if (tag == HTML.Tag.FORM) {
+			return HTMLFormImpl.class;
+		}
+		if (tag == HTML.Tag.IMG) {
+			return HTMLIMGImpl.class;
+		}
+		if (tag == HTML.Tag.INPUT) {
+			return HTMLInputImpl.class;
+		}
+		if (tag == HTML.Tag.TITLE) {
+			return HTMLTitleImpl.class;
+		}
+		return HTMLComponentBase.class;
+	}
+	
 	private static String getAttribute(Attribute attr_name, MutableAttributeSet attrs) {
 		if (attrs == null)
 			return null;

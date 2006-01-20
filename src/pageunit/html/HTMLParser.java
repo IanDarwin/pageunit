@@ -70,7 +70,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (debug) {
 					System.out.print("COMPLEX: ");
 				}
-				HTMLComponent tmp = doTag(tag, attrs);
+				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
 				
 				currentContainer().addChild(tmp);
 				
@@ -96,8 +96,13 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	}
 	
 	@Override
-	public void handleEndTag(HTML.Tag t, int pos) {
-		if (t instanceof HTMLContainer) {
+	/** If the HTML.tag that we get represents a class is an HTMLContainer in my hierarchy,
+	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
+	 * element (as happened prior to this revision).
+	 */
+	public void handleEndTag(HTML.Tag tag, int pos) {
+		Class<?> c = HTMLComponentFactory.classForTagType(tag);
+		if (HTMLContainer.class.isAssignableFrom(c)) {
 			popContainer();
 		}
 	}
@@ -113,18 +118,10 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					if (debug) {
 						System.out.print("SIMPLE: ");
 					}
-					currentContainer().addChild(doTag(tag, attrs));
+					currentContainer().addChild(HTMLComponentFactory.create(tag, attrs));
 				}
 			}
 		}
-	}
-	
-	private HTMLComponent doTag(HTML.Tag tag,  MutableAttributeSet attrs) {
-		HTMLComponent comp = HTMLComponentFactory.create(tag, attrs);
-		if (debug) {
-			System.out.println(comp);
-		}
-		return comp;
 	}
 	
 	@Override

@@ -16,7 +16,7 @@ public class ParserTest2 extends TestCase {
 	String testData = 
 	"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" +
 	"<html lang=\"en\" >" +
-	"<head>" +
+	"<head><title>This Title Added</title>" +
 	"<link rel=stylesheet type='text/css' href='./layout/default/css/common.css'>" +
 	"<style type=\"text/css\"><link type='text/css' " +
 		"rel=stylesheet href=\"./layout/default/css/common.css\"></style></style>" +
@@ -44,6 +44,6 @@ public class ParserTest2 extends TestCase {
 		assertNotNull("get name field", username);
 		HTMLInput passwd = form.getInputByName("user_pw");
 		assertNotNull("get pw field", passwd);
-		assertNull(page.getTitleText());
+		assertNotNull(page.getTitleText());
 	}
 }
