@@ -267,6 +267,7 @@ public class TestRunner extends TestCase {
 					if ("title".equals(tagType)) {
 						String titleText = thePage.getTitleText();
 						System.out.println("TITLE FOUND = " + titleText);
+						assertNotNull("T title", titleText);
 						assertTrue("T title " + tagText, titleText.indexOf(tagText) != -1);
 						break; // out of case 'T'
 					}
