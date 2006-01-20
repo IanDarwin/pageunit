@@ -29,10 +29,8 @@ import com.darwinsys.util.VariableMap;
 
 /**
  * Run the tests listed in the input files. Set up as a JUnit "test case" not as a JUnit Test Runner,
- * until we find a way to do the latter, so (a) it all appears as one ginormous test, and 
+ * until we find a way to do the latter. Result: (a) it all appears as one ginormous test, and 
  * (b) it also has a Main method so you can run it standalone.
- * <br>
- * To Do items are listed in the file under docs/.
  * @version $Id$
  */
 public class TestRunner extends TestCase {	
