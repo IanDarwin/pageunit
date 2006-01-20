@@ -48,6 +48,7 @@ public class TestRunner extends TestCase {
 	private List<TestFilter> filterList = new ArrayList<TestFilter>();
 	private VariableMap variables = new VariableMap();
 	private File curDir;
+	public final static int PORT_MAX_IPV4 = Short.MAX_VALUE;
 
 	
 	/** Run this test with default test file, for use in JUnit.
@@ -175,7 +176,15 @@ public class TestRunner extends TestCase {
 				continue;
 				
 			case 'O':	// hard-code pOrt number
-				variables.setVar("PORT", restOfLine.trim());
+				String portNumStr = restOfLine.trim();
+				try {
+					int i = Integer.parseInt(portNumStr);
+					if (i < 0 || i > PORT_MAX_IPV4)
+						System.err.println("Value not in range 0.." + PORT_MAX_IPV4 + " " + portNumStr);
+					variables.setVar("PORT", portNumStr);
+				} catch (NumberFormatException e) {
+					System.err.printf("FAIL: %s not a valid port number", portNumStr);
+				}
 				continue;
 				
 			case 'A':	// As user [pw]
@@ -404,12 +413,16 @@ public class TestRunner extends TestCase {
 			} catch (final NullPointerException e) {
 				System.err.println("Error in PageUnit: " + e);
 				e.printStackTrace(System.err);
+			} catch (final NumberFormatException e) {
+				System.err.println("Error in PageUnit: " + e);
+				e.printStackTrace(System.err);
 			} catch (final Throwable e) {
 				final Throwable cause = e.getCause();
 				this.testFailed(line);
 				System.err.println(
 						"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
 						" (" + e + ':' + cause + ")");
+				System.err.flush();
 			} // end of try
 		} // end of while readLine loop
 		
