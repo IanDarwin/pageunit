@@ -46,4 +46,11 @@ public class ParserTest2 extends TestCase {
 		assertNotNull("get pw field", passwd);
 		assertNotNull(page.getTitleText());
 	}
+	
+	public void testNoTitle() throws Exception {
+		String testData2 = testData.replace("<title>This Title Added</title>", "");
+		HTMLPage page = new HTMLParser().parse(new StringReader(testData2));
+		assertNotNull("parse result", page);
+		assertNull(page.getTitleText());
+	}
 }
