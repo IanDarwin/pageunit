@@ -211,7 +211,7 @@ public class TestRunner extends TestCase {
 				this.testStarted(line);
 				switch (c) {
 				
-				case 'U':	// get Unprotected page
+				case 'P':	// get Unprotected page
 					resetForPage();
 					page = restOfLine;
 					assertValidRURL(page);
@@ -227,7 +227,7 @@ public class TestRunner extends TestCase {
 					assertEquals("unprotected page load", HttpStatus.SC_OK, theResult.getStatus());
 					break;
 					
-				case 'P':	// get protected page
+				case 'J':	// get J2EE protected page
 					resetForPage();
 					page = restOfLine;
 					assertValidRURL(page);
@@ -332,7 +332,7 @@ public class TestRunner extends TestCase {
 					// FORMS
 					
 				case 'F':
-					// Find Form By Name - don't use getFormByName as SOFIA puts junk at start of form name.
+					// Find Form By Name
 					String formName = restOfLine;
 					List<HTMLForm> theForms = thePage.getForms();
 					for (Iterator<HTMLForm> iterator = theForms.iterator(); iterator.hasNext();) {
