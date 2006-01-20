@@ -20,14 +20,6 @@ public class TestUtilsTest extends TestCase {
 	}
 
 	/*
-	 * Test method for 'pageunit.TestUtils.checkResultForPattern(CharSequence, String)'
-	 */
-	public void testCheckResultForPattern() {
-		assertTrue(TestUtils.checkResultForPattern("a b c", "b"));
-		assertFalse(TestUtils.checkResultForPattern("a b c", "d"));
-	}
-
-	/*
 	 * Test method for 'pageunit.TestUtils.{set,is}Debug()'
 	 */
 	public void testDebug() {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import junit.framework.TestCase;
 
@@ -49,7 +52,8 @@ public class TestRunner extends TestCase {
 	private VariableMap variables = new VariableMap();
 	private File curDir;
 	public final static int PORT_MAX_IPV4 = Short.MAX_VALUE;
-
+	/** Number of M variables created by last successful M command */
+	private int mHighWater = 0;
 	
 	/** Run this test with default test file, for use in JUnit.
 	 * @return The results of all tests.
@@ -82,7 +86,12 @@ public class TestRunner extends TestCase {
 				System.err.printf("File %s has no directory parent", thisFileName);
 			}
 		}
-		LineNumberReader r = new LineNumberReader(new FileReader(f));
+		Reader rdr = new FileReader(f);
+		return run(rdr, thisFileName);
+	}
+	
+	public ResultStat run(final Reader rdr, String thisFileName) throws Exception {
+		LineNumberReader r = new LineNumberReader(rdr);
 		
 		stars();
 		System.out.println("PageUnit $Version$");
@@ -260,8 +269,18 @@ public class TestRunner extends TestCase {
 						break;
 					}
 					String contentAsString = theResult.getContentAsString();
-					assertTrue("page contains text <" + restOfLine + ">", 
-							TestUtils.checkResultForPattern(contentAsString, restOfLine));
+					Pattern mPattern = Pattern.compile(restOfLine);
+					Matcher mMatcher = mPattern.matcher(contentAsString);
+					boolean mFound = mMatcher.find();
+					assertTrue("page contains text <" + restOfLine + ">", mFound);
+					int i;
+					for (i = 0; i < mMatcher.groupCount(); i++) {
+						variables.setVar("M" + i, mMatcher.group(i));
+					}
+					for ( ; i < mHighWater; i++) {
+						variables.remove("M" + i);
+					}
+					mHighWater = mMatcher.groupCount();
 					break;
 					
 				case 'T':	// page contains tag with text (in bodytext or attribute value)
@@ -419,9 +438,11 @@ public class TestRunner extends TestCase {
 			} catch (final Throwable e) {
 				final Throwable cause = e.getCause();
 				this.testFailed(line);
-				System.err.println(
-						"FAILURE: " + thisFileName + ":" + r.getLineNumber() + 
-						" (" + e + ':' + cause + ")");
+				System.err.print("FAILURE: " + thisFileName + ":" + r.getLineNumber() + " (" + e);
+				if (cause != null) {
+					System.err.print(":" + cause);
+				}
+				System.err.println(")");
 				System.err.flush();
 			} // end of try
 		} // end of while readLine loop

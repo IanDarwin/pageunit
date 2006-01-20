@@ -74,4 +74,10 @@ public class TestRunnerTest extends TestCase {
 		}
 		throw new AssertionError("Did not catch expected Exception from getBoolean");
 	}
+	
+	public void testCommandM() throws Exception {
+		String script = "P http://www.phenogenomics.ca/\n" +
+			"M Toronto \\(Cen.*\\) for Phenogenomics";
+		// Not ready to run this under JUnit - need to glom output as well as input... sigh.
+	}
 }

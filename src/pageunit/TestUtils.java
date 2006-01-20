@@ -184,16 +184,6 @@ public class TestUtils {
 			return false;
 		}
 	}
-	/** Test the input against a pattern.
-	 * @param sb The input sequence
-	 * @param expect The string (which can be a Java 1.4 regex).
-	 */
-	public static boolean checkResultForPattern(CharSequence sb, String expect) {
-		Pattern pE = Pattern.compile(expect);
-		Matcher mE = pE.matcher(sb);
-		return mE.find();
-	}	
-
 	
 	/** Retrieve a property, either from the System Properties
 	 * (consulted first, to allow overriding via command line -D)
