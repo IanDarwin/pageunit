@@ -2,17 +2,12 @@
 # TCP Test Suite Driver
 # $Id$
 
-# See the docs directory for a description of the input language.
+# Variables let you save values.
+# Echo allows you to print a line to the standard output.
+= myvar My New value
+E Variable myvar has been set to ${myvar}
 
-N
-
-# Apply site-specific filter (at our site we require a CVS identifier in every page)
-X pageunit.NullTestFilter
-
-= test1 My New value
-E Variable test1 has been set to ${test1}
-
-# Test redirections
+# Redirections let you re-use common bits of test
 < inner.test
 
 # Ensure that logout is harmless when you're not logged in.
