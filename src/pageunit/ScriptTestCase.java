@@ -398,7 +398,8 @@ public class TestRunner extends TestCase {
 					
 					if (submitValue == null || "".equals(submitValue)) {
 						thePage = (HTMLPage)session.submitForm(theForm);   // SEND THE LOGIN
-					} else {
+					} else { 
+						// Use only getInputByName() here! Too confusing otherwise.
 						final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
 						thePage = (HTMLPage)session.submitForm(theForm, button);
 					}
