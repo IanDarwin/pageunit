@@ -69,13 +69,6 @@ public class TestRunner extends TestCase {
 	 */
 	public ResultStat run(final String thisFileName) throws Exception {			
 	
-		variables.clear();
-
-		variables.setVar("USER", TestUtils.getProperty("login"));
-		variables.setVar("PASS", TestUtils.getProperty("password"));
-		variables.setVar("HOST", TestUtils.getProperty("host"));
-		variables.setVar("PORT", TestUtils.getProperty("port"));
-		
 		File f = new File(thisFileName);
 		if (f.isAbsolute()) {
 			curDir = f.getParentFile();
@@ -91,6 +84,14 @@ public class TestRunner extends TestCase {
 	}
 	
 	public ResultStat run(final Reader rdr, String thisFileName) throws Exception {
+		
+		variables.clear();
+
+		variables.setVar("USER", TestUtils.getProperty("login"));
+		variables.setVar("PASS", TestUtils.getProperty("password"));
+		variables.setVar("HOST", TestUtils.getProperty("host"));
+		variables.setVar("PORT", TestUtils.getProperty("port"));
+
 		LineNumberReader r = new LineNumberReader(rdr);
 		
 		stars();
@@ -268,14 +269,18 @@ public class TestRunner extends TestCase {
 						System.err.println("M ignored because page is null");
 						break;
 					}
+					String pattern = restOfLine;
 					String contentAsString = theResult.getContentAsString();
-					Pattern mPattern = Pattern.compile(restOfLine);
-					Matcher mMatcher = mPattern.matcher(contentAsString);
+					System.out.println(contentAsString.length());
+					Matcher mMatcher = Pattern.compile(pattern).matcher(contentAsString);
 					boolean mFound = mMatcher.find();
-					assertTrue("page contains text <" + restOfLine + ">", mFound);
+					assertTrue("page contains regex <" + pattern + ">", mFound);
+					System.out.printf("mMatcher.find() => %b, groupCount() => %d%n", mFound, mMatcher.groupCount());
 					int i;
-					for (i = 0; i < mMatcher.groupCount(); i++) {
-						variables.setVar("M" + i, mMatcher.group(i));
+					for (i = 0; i <= mMatcher.groupCount(); i++) {
+						final String group = mMatcher.group(i);
+						// System.out.println("Set M" + i + " to: "+ group);
+						variables.setVar("M" + i, group);
 					}
 					for ( ; i < mHighWater; i++) {
 						variables.remove("M" + i);
