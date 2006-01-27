@@ -6,16 +6,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpStatus;
 
-import pageunit.http.WebSession;
-import pageunit.http.WebResponse;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
+import pageunit.http.WebResponse;
+import pageunit.http.WebSession;
 
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
@@ -84,7 +82,9 @@ public class TestUtils {
 	 * @throws HTMLParseException 
 	 */
 	public static HTMLPage getSimplePage(WebSession session, URL url) throws IOException, HTMLParseException {
+		
 		final HTMLPage page = (HTMLPage) session.getPage(url);
+		
 		System.out.println("Got to simple page: " + session.getWebResponse().getUrl());
 		
 		return page;
