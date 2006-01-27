@@ -1,5 +1,7 @@
 package regress;
 
+import java.io.StringReader;
+
 import pageunit.TestRunner;
 import junit.framework.TestCase;
 
@@ -77,7 +79,9 @@ public class TestRunnerTest extends TestCase {
 	
 	public void testCommandM() throws Exception {
 		String script = "P http://www.phenogenomics.ca/\n" +
-			"M Toronto \\(Cen.*\\) for Phenogenomics";
-		// Not ready to run this under JUnit - need to glom output as well as input... sigh.
+			"M Toronto (Centre) for Phenogenomics\n" +
+			"E M0 is ${M0}\n" +
+			"E M1 is ${M1}\n";
+		new TestRunner().run(new StringReader(script), "Imbedded test data");
 	}
 }
