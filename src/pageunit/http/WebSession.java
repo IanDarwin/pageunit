@@ -58,7 +58,10 @@ public class WebSession {
 				url.getHost(), url.getPort(), url.getProtocol());
 
 		GetMethod getter = new GetMethod(url.getPath());
-		getter.setFollowRedirects(false);
+		
+		// This is evil, do not use it, Tomcat redirects from / to /index.bar
+		// getter.setFollowRedirects(false);
+		
 		System.out.println("Initial request: " + getter);
 
 		int status = client.executeMethod(getter);
@@ -69,7 +72,7 @@ public class WebSession {
 		request = new WebRequest();
 		
 		byte[] responseBody = getter.getResponseBody();
-		// System.out.println("Read body length was " + responseBody.length);
+		System.out.println("Read body length was " + responseBody.length);
 		getter.releaseConnection();	
 		
 		responseText = new String(responseBody);
