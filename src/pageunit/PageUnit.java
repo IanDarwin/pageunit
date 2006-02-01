@@ -3,7 +3,7 @@ package pageunit;
 import java.io.File;
 import java.util.Arrays;
 
-/** Main program to run test files under PageUnit.
+/** Main program to run test files under PageUnit. NOT WORKING.
  * @author ian
  */
 public class PageUnit {
