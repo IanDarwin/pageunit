@@ -40,7 +40,7 @@ import com.darwinsys.util.VariableMap;
  * (b) it also has a Main method so you can run it standalone.
  * @version $Id$
  */
-public class TestRunner extends TestCase {	
+public class ScriptTestCase extends TestCase {	
 
 	private String fileName;
 	private final List<String> lines = new ArrayList<String>();
@@ -63,15 +63,15 @@ public class TestRunner extends TestCase {
 	 * @param fileName the test script file name.
 	 * @throws Exception
 	 */
-	public TestRunner(String fileName) throws Exception {			
+	public ScriptTestCase(String fileName) throws Exception {			
 		this(new File(fileName), fileName);
 	}
 
-	public TestRunner(File theFile, String fileName) throws IOException {		
+	public ScriptTestCase(File theFile, String fileName) throws IOException {		
 		this(new BufferedReader(new FileReader(theFile)), fileName);
 	}
 	
-	public TestRunner(Reader r, String fileName) throws IOException {
+	public ScriptTestCase(Reader r, String fileName) throws IOException {
 		this.fileName = fileName;
 		BufferedReader is = new BufferedReader(r);
 		String line;

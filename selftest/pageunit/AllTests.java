@@ -14,7 +14,7 @@ public class AllTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for regress");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(TestRunnerTest.class);
+		suite.addTestSuite(ScriptFileTest.class);
 		suite.addTestSuite(TestUtilsTest.class);
 		suite.addTestSuite(HTMLComponentFactoryTest.class);
 		suite.addTestSuite(ParserTest.class);
