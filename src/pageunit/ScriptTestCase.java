@@ -77,17 +77,38 @@ public class TestRunner extends TestCase {
 		String line;
 		int tests = 0;
 		while ((line = is.readLine()) != null) {
-			if (line.length() == 0 )
+			if (!looksLikeCommand(line)) {
 				continue;
-			char cmdChar = line.charAt(0);
-			if ( cmdChar == '#')
-				continue;
+			}
 			lines.add(line);
 			++tests;
 		}
 		this.tests = tests;
 	}
 		
+	/** Check if the given line looks like a command, that is, has a non-comment char in col 1.
+	 * @param line
+	 * @return
+	 */
+	private boolean looksLikeCommand(String line) {
+		if (line.length() == 0 )
+			return false;
+		if (isComment(line))
+			return false;
+		
+		// XXX rip out redirections until they work again, to keep the count right!
+		if (line.charAt(0) == '<')
+			return false;
+			
+		return true;
+	}
+	
+	// Allow # or ; as comment chars (not //, because of e.g., /index.html
+	private boolean isComment(String line) {
+		char cmdChar = line.charAt(0);
+		return (cmdChar == '#' || cmdChar == ';') ;
+	}
+	
 //		 XXX MOVE THIS ELSEWHERE AND GET WORKING AGAIN
 //		if (theFile.isAbsolute()) {
 //			curDir = theFile.getParentFile();
@@ -131,7 +152,7 @@ public class TestRunner extends TestCase {
 			String line = lines.get(lineNumber);
 			System.out.printf("%d: %s%n", lineNumber, line);
 
-			if (line.length() == 0 || line.charAt(0) == '#') {
+			if (!looksLikeCommand(line)) {
 				System.out.println(line);
 				continue;
 			}
@@ -150,11 +171,14 @@ public class TestRunner extends TestCase {
 			results.startTest(test);
 			
 			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
-			if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
+			if (restOfLine.length() > 0 && isComment(restOfLine)) {
+				System.out.println("SKIP");
 				continue;
 			}
+			System.out.println("NOT SKIP");
 			restOfLine = variables.substVars(restOfLine);
 			String page;
+			
 			
 			try {
 				switch(c) {
@@ -184,8 +208,8 @@ public class TestRunner extends TestCase {
 						try {
 							o = Class.forName(className).newInstance();
 						} catch (Throwable e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
+							throw new IllegalArgumentException("class " + className + " did not load: " + e);
 						}
 						if (!(o instanceof TestFilter)) {
 							throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
@@ -214,8 +238,8 @@ public class TestRunner extends TestCase {
 						variables.setVar("HOST", u.getHost());
 						variables.setVar("PORT", Integer.toString(u.getPort()));
 					} catch (MalformedURLException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
+						throw new IllegalArgumentException("URL " + restOfLine + " threw " + e1);
 					}				
 					continue;
 					
@@ -270,6 +294,7 @@ public class TestRunner extends TestCase {
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
 					assertEquals("unprotected page load", HttpStatus.SC_OK, theResult.getStatus());
+					System.out.println("Got page " + page);
 					break;
 					
 				case 'J':	// get J2EE protected page
@@ -389,7 +414,7 @@ public class TestRunner extends TestCase {
 					assertEquals("go to link response code", HttpStatus.SC_OK, session.getWebResponse().getStatus());
 					break;
 					
-					// FORMS
+				// FORMS
 					
 				case 'F':
 					// Find Form By Name
@@ -435,8 +460,7 @@ public class TestRunner extends TestCase {
 						thePage = (HTMLPage)session.submitForm(theForm, button);
 					}
 					
-					// Should take us to a new page; HtmlUnit handles redirections automatically on regular
-					// page gets, but for some reason not on form submits. I dunno, ask Brian.
+					// That should have taken us to a new page.
 					WebResponse formResponse = session.getWebResponse();
 					int statusCode = formResponse.getStatus();
 					
@@ -458,20 +482,20 @@ public class TestRunner extends TestCase {
 					
 				default:
 					fail("Unknown request: " + line);
+					break;
 				}
 				
 			} catch (final AssertionFailedError e) {
-				System.err.println("Error in PageUnit: " + e);
+				System.err.println("FAILURE: " + fileName + ";" + lineNumber + e);
 				results.addFailure(test, e);
 			} catch (final Throwable e) {
 				final Throwable cause = e.getCause();
 				results.addError(test, e);
-				System.err.print("FAILURE: " + fileName + ":" + lineNumber + " (" + e);
+				System.err.print("ERROR: " + fileName + ":" + lineNumber + " (" + e);
 				if (cause != null) {
 					System.err.print(":" + cause);
 				}
 				System.err.println(")");
-				System.err.flush();
 			} finally {
 				results.endTest(test);
 			}
