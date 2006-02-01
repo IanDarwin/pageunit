@@ -28,14 +28,7 @@ public class PageTest implements Test {
 	}
 
 	public void run(TestResult result) {
-		result.startTest(this);
-		try {
-			Thread.sleep(250);
-		} catch (InterruptedException e) {
-			// canthappen
-		}
-		
-		result.endTest(this);
+		throw new IllegalStateException("Called run method in PageTest line wrapper class!");
 	}	
 	public String toString() {
 		return String.format("PageTest: %c %d %s", command, lineNumber, fileName);
