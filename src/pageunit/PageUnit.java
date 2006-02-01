@@ -12,17 +12,15 @@ public class PageUnit {
 
 	public static final String TESTS_FILE = "tests" + TEST_FILENAME_EXT;
 	
-	private static TestRunner t = new TestRunner();
+	private static TestRunner t;// = new TestRunner();
 	
 	private static int numFilesRun = 0;
-	
-	private static ResultStat r = new ResultStat(0,0,0);
-	
+		
 	public static void main(String[] args) {
 		
 		try {
 			if (args.length == 0) {
-				t.run(TESTS_FILE);
+				t = new TestRunner(TESTS_FILE);
 			} else {
 				for (int i = 0; i < args.length; i++) {
 					final String fsObjectName = args[i];
@@ -31,7 +29,6 @@ public class PageUnit {
 				}
 			}
 			System.out.printf("%d files run\n", numFilesRun);
-			System.out.println(r);
 		} catch (Exception e) {
 			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
 			e.printStackTrace();
@@ -47,7 +44,8 @@ public class PageUnit {
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
-				r = t.run(f.getAbsolutePath()).add(r);
+				t = new TestRunner(f.getAbsolutePath());
+				// r = t.run(f.getAbsolutePath()).add(r);
 			} else {
 				//System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
 			}

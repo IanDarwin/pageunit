@@ -1,10 +1,11 @@
 package pageunit;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -15,7 +16,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 import org.apache.commons.httpclient.HttpStatus;
 
@@ -37,11 +41,10 @@ import com.darwinsys.util.VariableMap;
  * @version $Id$
  */
 public class TestRunner extends TestCase {	
-	
-	private int nTests;
-	private int nSucceeded;
-	private int nFailures;
 
+	private String fileName;
+	private final List<String> lines = new ArrayList<String>();
+	
 	private WebSession session;
 	private WebResponse theResult = null;
 	private HTMLPage thePage = null;
@@ -50,40 +53,61 @@ public class TestRunner extends TestCase {
 	private boolean debug;
 	private List<TestFilter> filterList = new ArrayList<TestFilter>();
 	private VariableMap variables = new VariableMap();
-	private File curDir;
+
 	public final static int PORT_MAX_IPV4 = Short.MAX_VALUE;
 	/** Number of M variables created by last successful M command */
 	private int mHighWater = 0;
-	
-	/** Run this test with default test file, for use in JUnit.
-	 * @return The results of all tests.
-	 * @throws Exception If a first-half test blows up.
-	 */
-	public ResultStat testAllTests() throws Exception {
-		return run(PageUnit.TESTS_FILE);
-	}
+	private int tests;
 	
 	/** Run ALL the tests in the named test file.
 	 * @param fileName the test script file name.
 	 * @throws Exception
 	 */
-	public ResultStat run(final String thisFileName) throws Exception {			
-	
-		File f = new File(thisFileName);
-		if (f.isAbsolute()) {
-			curDir = f.getParentFile();
-		} else {
-			if (curDir != null) {
-				f = new File(curDir, thisFileName);
-			} else {
-				System.err.printf("File %s has no directory parent", thisFileName);
-			}
-		}
-		Reader rdr = new FileReader(f);
-		return run(rdr, thisFileName);
+	public TestRunner(String fileName) throws Exception {			
+		this(new File(fileName), fileName);
+	}
+
+	public TestRunner(File theFile, String fileName) throws IOException {		
+		this(new BufferedReader(new FileReader(theFile)), fileName);
 	}
 	
-	public ResultStat run(final Reader rdr, String thisFileName) throws Exception {
+	public TestRunner(Reader r, String fileName) throws IOException {
+		this.fileName = fileName;
+		BufferedReader is = new BufferedReader(r);
+		String line;
+		int tests = 0;
+		while ((line = is.readLine()) != null) {
+			if (line.length() == 0 || line.charAt(0) == '#')
+				continue;
+			// XXX a bit more refinement
+			lines.add(line);
+			++tests;
+		}
+		this.tests = tests;
+	}
+		
+//		 XXX MOVE THIS ELSEWHERE AND GET WORKING AGAIN
+//		if (theFile.isAbsolute()) {
+//			curDir = theFile.getParentFile();
+//		} else {
+
+//			if (curDir != null) {
+//				theFile = new File(curDir, fileName);
+//			} else {
+//				System.err.printf("File %s has no directory parent", fileName);
+//			}
+	
+	
+	@Override
+	public int countTestCases() {
+		System.out.println("TestRunner.countTestCases() --> " + tests);
+		return tests;
+	}
+
+	/** Run all the tests in the current file.
+	 */
+	@Override
+	public void run(TestResult results) {
 		
 		variables.clear();
 
@@ -91,41 +115,40 @@ public class TestRunner extends TestCase {
 		variables.setVar("PASS", TestUtils.getProperty("password"));
 		variables.setVar("HOST", TestUtils.getProperty("host"));
 		variables.setVar("PORT", TestUtils.getProperty("port"));
-
-		LineNumberReader r = new LineNumberReader(rdr);
 		
 		stars();
 		System.out.println("PageUnit $Version$");
 		System.out.println("Test run with default URL http://" + variables.getVar("HOST") + ":" + variables.getVar("PORT"));
-		System.out.println("Input test file: " + thisFileName);
+		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
 		stars();
 
 		session = new WebSession();
-
-		String line;
 		
-		readLoop:
-		while ((line = r.readLine()) != null) {	// MAIN LOOP PER LINE
-			if (line.length() == 0) {
-				System.out.println();
-				continue;
-			}
-			if (line.charAt(0) == '#') {
+
+		for (int lineNumber = 0, numLines = lines.size(); lineNumber < numLines; lineNumber++) {	// MAIN LOOP PER LINE
+
+			String line = lines.get(lineNumber);
+			System.out.printf("%d: %s%n", lineNumber, line);
+
+			if (line.length() == 0 || line.charAt(0) == '#') {
 				System.out.println(line);
 				continue;
 			}
-			System.out.println("CMD: " + line);
 			
 			StringTokenizer st = new StringTokenizer(line);
 			if (st.countTokens() < 1) {
-				throw new IOException("invalid line " + line);
+				throw new IllegalArgumentException("invalid line " + line);
 			}
 			String cmd = st.nextToken();
 			if (cmd.length() != 1) {
-				throw new IOException("invalid command in line " + line);
+				throw new IllegalArgumentException("invalid command in line " + line);
 			}
 			char c = cmd.charAt(0);
+			
+			Test test = new PageTest(c, fileName, lineNumber);
+			results.startTest(test);
+			
 			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
 			if (restOfLine.length() < 1 || restOfLine.charAt(0) == '#') {
 				continue;
@@ -136,9 +159,11 @@ public class TestRunner extends TestCase {
 			// First-half testing: Exceptions thrown here are fatal to the remainder of this FILE.
 			// Handle declarative (non-test) requests here.
 			// Each case ends with continue, to next iteration of main loop.
+			try {
 			switch(c) {
 			case '<':	// File Inclusion
-				run(restOfLine);
+				// run(restOfLine);
+				System.err.println("< MECHANISM IS BROKEN");
 				continue;
 			case '=':	// Set Variable
 				String[] args = getTwoArgs("variable", restOfLine, ' ');
@@ -154,7 +179,13 @@ public class TestRunner extends TestCase {
 				if (className == null || className.length() == 0) {
 					throw new IllegalArgumentException("Plug-In Command must have class name");
 				} else {
-					Object o = Class.forName(className).newInstance();
+					Object o = null;
+					try {
+						o = Class.forName(className).newInstance();
+					} catch (Throwable e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					if (!(o instanceof TestFilter)) {
 						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
 					}
@@ -176,9 +207,15 @@ public class TestRunner extends TestCase {
 				continue; 
 				
 			case 'B':	// set Base URL
-				URL u = new URL(restOfLine);
-				variables.setVar("HOST", u.getHost());
-				variables.setVar("PORT", Integer.toString(u.getPort()));
+				URL u = null;
+				try {
+					u = new URL(restOfLine);
+					variables.setVar("HOST", u.getHost());
+					variables.setVar("PORT", Integer.toString(u.getPort()));
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}				
 				continue;
 				
 			case 'H':	// hard-code hostname
@@ -215,20 +252,13 @@ public class TestRunner extends TestCase {
 				theLink = null;
 				continue;
 				
-			case 'Q':
-				stars();
-				System.out.println("*   Test Run Terminated by 'Q' command, others may be skipped   *");
-				stars();
-				report();
-				break readLoop;				
-			}
+//			}
 			
 			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
 			// Handle most "actual" tests here; each case ends with break.
-			try {
+			
 				//System.out.println("TestRunner.run(): Starting 2nd Half Switch");
-				this.testStarted(line);
-				switch (c) {
+//				switch (c) {
 				
 				case 'P':	// get Unprotected page
 					resetForPage();
@@ -433,33 +463,28 @@ public class TestRunner extends TestCase {
 				default:
 					fail("Unknown request: " + line);
 				}
-				this.testPassed(line);
 				
-			} catch (final NullPointerException e) {
+			} catch (final AssertionFailedError e) {
 				System.err.println("Error in PageUnit: " + e);
-				e.printStackTrace(System.err);
-			} catch (final NumberFormatException e) {
-				System.err.println("Error in PageUnit: " + e);
-				e.printStackTrace(System.err);
+				results.addFailure(test, e);
 			} catch (final Throwable e) {
 				final Throwable cause = e.getCause();
-				this.testFailed(line);
-				System.err.print("FAILURE: " + thisFileName + ":" + r.getLineNumber() + " (" + e);
+				results.addError(test, e);
+				System.err.print("FAILURE: " + fileName + ":" + lineNumber + " (" + e);
 				if (cause != null) {
 					System.err.print(":" + cause);
 				}
 				System.err.println(")");
 				System.err.flush();
-			} // end of try
-		} // end of while readLine loop
+			}
+			results.endTest(test);
+		}
 		
 		stars();
-		System.out.printf("** END OF FILE %s **%n", thisFileName);
+		System.out.printf("** END OF FILE %s **%n", fileName);
 		stars();
 
-		r.close();
-
-		return new ResultStat(nTests, nSucceeded, nFailures);
+		return;
 	}
 
 	/**
@@ -486,28 +511,6 @@ public class TestRunner extends TestCase {
 	}
 
 	/**
-	 * @param line
-	 */
-	private void testStarted(String line) {
-		++nTests;
-	}
-
-	/**
-	 * @param line
-	 */
-	private void testFailed(String line) {
-		++nFailures;
-	}
-
-	/**
-	 * @param line
-	 */
-	private void testPassed(String line) {
-		++nSucceeded;
-	}
-
-
-	/**
 	 * Reset common fields for pages, and do some common error checking.
 	 */
 	private void resetForPage() {
@@ -517,11 +520,6 @@ public class TestRunner extends TestCase {
 			System.err.println("Warning: no Session before Get Unprotected Page");
 			session = new WebSession();
 		}
-	}
-	
-	private void report() {
-		System.out.println("RUNS " + nTests + "; FAILURES " + nFailures + " so far.");
-		// assertTrue(nFailures + " script test failures", nFailures == 0);
 	}
 	
 	// Various "parsing" methods - consolidated here, all made

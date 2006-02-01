@@ -3,7 +3,9 @@ package regress;
 import java.io.StringReader;
 
 import pageunit.TestRunner;
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 /** Horrible name, sorry: test some of the self-contained methods in TestRunner
  * @author ian
@@ -82,6 +84,7 @@ public class TestRunnerTest extends TestCase {
 			"M Toronto (Centre) for Phenogenomics\n" +
 			"E M0 is ${M0}\n" +
 			"E M1 is ${M1}\n";
-		new TestRunner().run(new StringReader(script), "Imbedded test data");
+		Test t = new TestRunner(new StringReader(script), "Imbedded test data");
+		t.run(new TestResult());
 	}
 }
