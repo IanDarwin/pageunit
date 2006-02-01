@@ -77,9 +77,11 @@ public class TestRunner extends TestCase {
 		String line;
 		int tests = 0;
 		while ((line = is.readLine()) != null) {
-			if (line.length() == 0 || line.charAt(0) == '#')
+			if (line.length() == 0 )
 				continue;
-			// XXX a bit more refinement
+			char cmdChar = line.charAt(0);
+			if ( cmdChar == '#')
+				continue;
 			lines.add(line);
 			++tests;
 		}
@@ -96,8 +98,7 @@ public class TestRunner extends TestCase {
 //			} else {
 //				System.err.printf("File %s has no directory parent", fileName);
 //			}
-	
-	
+
 	@Override
 	public int countTestCases() {
 		System.out.println("TestRunner.countTestCases() --> " + tests);
@@ -124,7 +125,6 @@ public class TestRunner extends TestCase {
 		stars();
 
 		session = new WebSession();
-		
 
 		for (int lineNumber = 0, numLines = lines.size(); lineNumber < numLines; lineNumber++) {	// MAIN LOOP PER LINE
 
@@ -156,110 +156,106 @@ public class TestRunner extends TestCase {
 			restOfLine = variables.substVars(restOfLine);
 			String page;
 			
-			// First-half testing: Exceptions thrown here are fatal to the remainder of this FILE.
-			// Handle declarative (non-test) requests here.
-			// Each case ends with continue, to next iteration of main loop.
 			try {
-			switch(c) {
-			case '<':	// File Inclusion
-				// run(restOfLine);
-				System.err.println("< MECHANISM IS BROKEN");
-				continue;
-			case '=':	// Set Variable
-				String[] args = getTwoArgs("variable", restOfLine, ' ');
-				variables.setVar(args[0], args[1]);
-				continue;
-				
-			case 'E':	// echo
-				System.out.println(restOfLine);
-				continue;
-				
-			case 'X':	// XTENTION or PLUG-IN
-				String className = restOfLine;
-				if (className == null || className.length() == 0) {
-					throw new IllegalArgumentException("Plug-In Command must have class name");
-				} else {
-					Object o = null;
+				switch(c) {
+				// First-half testing: Exceptions thrown here are fatal to the remainder of this FILE.
+				// Handle declarative (non-test) requests here.
+				// Each case ends with continue, to next iteration of main loop.
+
+				case '<':	// File Inclusion
+					// run(restOfLine);
+					System.err.println("< MECHANISM IS BROKEN");
+					continue;
+				case '=':	// Set Variable
+					String[] args = getTwoArgs("variable", restOfLine, ' ');
+					variables.setVar(args[0], args[1]);
+					continue;
+					
+				case 'E':	// echo
+					System.out.println(restOfLine);
+					continue;
+					
+				case 'X':	// XTENTION or PLUG-IN
+					String className = restOfLine;
+					if (className == null || className.length() == 0) {
+						throw new IllegalArgumentException("Plug-In Command must have class name");
+					} else {
+						Object o = null;
+						try {
+							o = Class.forName(className).newInstance();
+						} catch (Throwable e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (!(o instanceof TestFilter)) {
+							throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
+						}
+						filterList.add((TestFilter)o);
+					}				
+					continue;
+					
+				case 'Y':	// REMOVE XTENTION or PLUG-IN
+					String clazzName = restOfLine;
+					for (Object o : filterList) {
+						if (clazzName.equals(o.getClass().getName())) {
+							filterList.remove(o);
+						}
+					}
+					continue;
+					
+				case 'D':	// debug on/off
+					setDebug(getBoolean(restOfLine));
+					continue; 
+					
+				case 'B':	// set Base URL
+					URL u = null;
 					try {
-						o = Class.forName(className).newInstance();
-					} catch (Throwable e) {
+						u = new URL(restOfLine);
+						variables.setVar("HOST", u.getHost());
+						variables.setVar("PORT", Integer.toString(u.getPort()));
+					} catch (MalformedURLException e1) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						e1.printStackTrace();
+					}				
+					continue;
+					
+				case 'H':	// hard-code hostname
+					variables.setVar("HOST", restOfLine.trim());
+					continue;
+					
+				case 'O':	// hard-code pOrt number
+					String portNumStr = restOfLine.trim();
+					try {
+						int i = Integer.parseInt(portNumStr);
+						if (i < 0 || i > PORT_MAX_IPV4)
+							System.err.println("Value not in range 0.." + PORT_MAX_IPV4 + " " + portNumStr);
+						variables.setVar("PORT", portNumStr);
+					} catch (NumberFormatException e) {
+						System.err.printf("FAIL: %s not a valid port number", portNumStr);
 					}
-					if (!(o instanceof TestFilter)) {
-						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
+					continue;
+					
+				case 'A':	// As user [pw]
+					String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
+					variables.setVar("USER", atmp[0]);
+					if (atmp[1] != null) {
+						variables.setVar("PASS", atmp[1]);
 					}
-					filterList.add((TestFilter)o);
-				}				
-				continue;
-				
-			case 'Y':	// REMOVE XTENTION or PLUG-IN
-				String clazzName = restOfLine;
-				for (Object o : filterList) {
-					if (clazzName.equals(o.getClass().getName())) {
-						filterList.remove(o);
-					}
-				}
-				continue;
-				
-			case 'D':	// debug on/off
-				setDebug(getBoolean(restOfLine));
-				continue; 
-				
-			case 'B':	// set Base URL
-				URL u = null;
-				try {
-					u = new URL(restOfLine);
-					variables.setVar("HOST", u.getHost());
-					variables.setVar("PORT", Integer.toString(u.getPort()));
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}				
-				continue;
-				
-			case 'H':	// hard-code hostname
-				variables.setVar("HOST", restOfLine.trim());
-				continue;
-				
-			case 'O':	// hard-code pOrt number
-				String portNumStr = restOfLine.trim();
-				try {
-					int i = Integer.parseInt(portNumStr);
-					if (i < 0 || i > PORT_MAX_IPV4)
-						System.err.println("Value not in range 0.." + PORT_MAX_IPV4 + " " + portNumStr);
-					variables.setVar("PORT", portNumStr);
-				} catch (NumberFormatException e) {
-					System.err.printf("FAIL: %s not a valid port number", portNumStr);
-				}
-				continue;
-				
-			case 'A':	// As user [pw]
-				String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
-				variables.setVar("USER", atmp[0]);
-				if (atmp[1] != null) {
-					variables.setVar("PASS", atmp[1]);
-				}
-				continue;
-				
-			case 'C':	// Configuration
-				System.err.println("Config management not written yet, abandoning this file");
-				break;
-				
-			case 'N':	// start new session
-				session = new WebSession();
-				session.setThrowExceptionOnFailingStatusCode(false);
-				theLink = null;
-				continue;
-				
-//			}
+					continue;
+					
+				case 'C':	// Configuration
+					System.err.println("Config management not written yet, abandoning this file");
+					break;
+					
+				case 'N':	// start new session
+					session = new WebSession();
+					session.setThrowExceptionOnFailingStatusCode(false);
+					theLink = null;
+					continue;
 			
 			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
 			// Handle most "actual" tests here; each case ends with break.
-			
-				//System.out.println("TestRunner.run(): Starting 2nd Half Switch");
-//				switch (c) {
-				
+
 				case 'P':	// get Unprotected page
 					resetForPage();
 					page = restOfLine;
@@ -476,8 +472,9 @@ public class TestRunner extends TestCase {
 				}
 				System.err.println(")");
 				System.err.flush();
+			} finally {
+				results.endTest(test);
 			}
-			results.endTest(test);
 		}
 		
 		stars();
@@ -487,9 +484,6 @@ public class TestRunner extends TestCase {
 		return;
 	}
 
-	/**
-	 * 
-	 */
 	private void stars() {
 		System.out.println("*****************************************************************");
 	}
