@@ -7,6 +7,8 @@ import regress.html.ParserTest;
 import regress.html.ParserTest2;
 import regress.linkchecker.LinkCheckerTest;
 
+/** Runs all self-tests for PageUnit
+ */
 public class AllTests {
 
 	public static Test suite() {
