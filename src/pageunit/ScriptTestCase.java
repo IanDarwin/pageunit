@@ -172,10 +172,8 @@ public class ScriptTestCase extends TestCase {
 			
 			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
 			if (restOfLine.length() > 0 && isComment(restOfLine)) {
-				System.out.println("SKIP");
 				continue;
 			}
-			System.out.println("NOT SKIP");
 			restOfLine = variables.substVars(restOfLine);
 			String page;
 			
