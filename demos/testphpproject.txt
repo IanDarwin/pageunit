@@ -2,6 +2,9 @@
 # TCP Test Suite Driver
 # $Id$
 
+# Setting debug value
+D true
+
 H calendar.phenogenomics.ca
 O 80
 A ian
