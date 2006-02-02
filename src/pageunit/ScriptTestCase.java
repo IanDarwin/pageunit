@@ -186,8 +186,8 @@ public class ScriptTestCase extends TestCase {
 
 				case '<':	// File Inclusion
 					// run(restOfLine);
-					System.err.println("< MECHANISM IS BROKEN");
-					continue;
+					throw new RuntimeException("< MECHANISM IS BROKEN");
+					// continue;
 				case '=':	// Set Variable
 					String[] args = getTwoArgs("variable", restOfLine, ' ');
 					variables.setVar(args[0], args[1]);
