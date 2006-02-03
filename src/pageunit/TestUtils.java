@@ -109,7 +109,7 @@ public class TestUtils {
 	 */
 	public static HTMLPage getPage(WebSession session,
 			final String targetHost, final int targetPort,
-			/* not final */String targetPage, final String login,
+			final String targetPage, final String login,
 			final String pass) throws IOException, HTMLParseException {
 		
 		final URL url = qualifyURL(targetHost, targetPort, targetPage);
