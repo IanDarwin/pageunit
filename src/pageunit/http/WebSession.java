@@ -27,9 +27,7 @@ public class WebSession {
 	private HttpClient client;
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
-	private WebRequest request;
 	private WebResponse response;
-	
 	
 	public WebSession() {
 		super();
@@ -60,7 +58,6 @@ public class WebSession {
 
 		GetMethod getter = new GetMethod(url.getPath());
 		
-		// This is evil, do not use it, Tomcat redirects from / to /index.bar
 		getter.setFollowRedirects(followRedirects);
 		
 		System.out.printf("Initial request: %s (followRedirects %b)%n", url, followRedirects);
@@ -69,8 +66,6 @@ public class WebSession {
 		if (status >= 400 && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
-
-		request = new WebRequest();
 		
 		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
@@ -132,8 +127,6 @@ public class WebSession {
 		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
-
-		request = new WebRequest();
 		
 		byte[] responseBody = poster.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
@@ -152,11 +145,7 @@ public class WebSession {
 	 * @throws IOException
 	 */
 	public HTMLPage submitForm(final HTMLForm form) throws HTMLParseException, IOException {
-		return submitForm(form, true, null);
-	}
-
-	public WebRequest getWebRequest() {
-		return request;
+		return submitForm(form, false, null);
 	}
 
 	public WebResponse getWebResponse() {
