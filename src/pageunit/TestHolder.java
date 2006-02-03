@@ -3,8 +3,8 @@ package pageunit;
 import junit.framework.Test;
 import junit.framework.TestResult;
 
-/** This class represents one actual test, which will have
- * been read from a file...
+/** This class is just a wrapper to represents one actual test, 
+ * which will have been read from a file...
  * @author ian
  */
 public class PageTest implements Test {
@@ -31,7 +31,19 @@ public class PageTest implements Test {
 		throw new IllegalStateException("Called run method in PageTest line wrapper class!");
 	}	
 	public String toString() {
-		return String.format("PageTest: %c %d %s", command, lineNumber, fileName);
+		return String.format("PageTest: %c %s:%d", command, fileName, lineNumber);
+	}
+
+	public char getCommand() {
+		return command;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public int getLineNumber() {
+		return lineNumber;
 	}
 
 }
