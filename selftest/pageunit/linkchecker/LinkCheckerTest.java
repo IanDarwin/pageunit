@@ -13,7 +13,7 @@ public class LinkCheckerTest extends TestCase {
 	
 	public void testSite() throws Exception {
 		System.out.println("LinkCheckerTest.testSite() starting");
-		URL rootURL = new URL("http://www.darwinsys.com/");
+		URL rootURL = new URL("http://www.darwinsys.com/file/");
 		
 		LinkChecker.checkStartingAt(rootURL.toString());
 
