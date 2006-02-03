@@ -287,7 +287,7 @@ public class ScriptTestCase extends TestCase {
 						System.err.println(new URL("http", variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
 					}
-					thePage = TestUtils.getSimplePage(session, 
+					thePage = TestUtils.getPage(session, 
 							variables.getVar("HOST"), variables.getIntVar("PORT"), page);
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -300,7 +300,9 @@ public class ScriptTestCase extends TestCase {
 					page = restOfLine;
 					assertValidRURL(page);
 					
-					thePage = TestUtils.getProtectedPage(session, variables.getVar("HOST"),
+					assertNotNull("username", variables.getVar("USER"));
+					assertNotNull("password", variables.getVar("PASS"));
+					thePage = TestUtils.getPage(session, variables.getVar("HOST"),
 							variables.getIntVar("PORT"), page, 
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
@@ -323,15 +325,15 @@ public class ScriptTestCase extends TestCase {
 					System.out.println(contentAsString.length());
 					Matcher mMatcher = Pattern.compile(pattern).matcher(contentAsString);
 					boolean mFound = mMatcher.find();
-					assertTrue("page contains regex <" + pattern + ">", mFound);
 					System.out.printf("mMatcher.find() => %b, groupCount() => %d%n", mFound, mMatcher.groupCount());
+					assertTrue("page contains regex <" + pattern + ">", mFound);
 					int i;
 					for (i = 0; i <= mMatcher.groupCount(); i++) {
 						final String group = mMatcher.group(i);
 						// System.out.println("Set M" + i + " to: "+ group);
 						variables.setVar("M" + i, group);
 					}
-					for ( ; i < mHighWater; i++) {
+					for ( ; i < mHighWater; i++) {	// remove any left from previous run with more groups.
 						variables.remove("M" + i);
 					}
 					mHighWater = mMatcher.groupCount();
@@ -455,7 +457,7 @@ public class ScriptTestCase extends TestCase {
 					} else { 
 						// Use only getInputByName() here! Too confusing otherwise.
 						final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
-						thePage = (HTMLPage)session.submitForm(theForm, button);
+						thePage = (HTMLPage)session.submitForm(theForm, true, button);
 					}
 					
 					// That should have taken us to a new page.
@@ -466,7 +468,7 @@ public class ScriptTestCase extends TestCase {
 						String newLocation = formResponse.getHeaderValue("location");
 						System.out.println(newLocation);
 						assertNotNull("form submit->redirection: location header", newLocation);
-						thePage = TestUtils.getSimplePage(session, new URL(newLocation));
+						thePage = TestUtils.getPage(session, new URL(newLocation));
 						theResult = session.getWebResponse();
 						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
 					}				
@@ -484,16 +486,13 @@ public class ScriptTestCase extends TestCase {
 				}
 				
 			} catch (final AssertionFailedError e) {
-				System.err.println("FAILURE: " + fileName + ";" + lineNumber + e);
+				fixupStackTrace(e, test);
 				results.addFailure(test, e);
+				printThrowable("FAILURE", e, (PageTest)test);
 			} catch (final Throwable e) {
-				final Throwable cause = e.getCause();
+				fixupStackTrace(e, test);
 				results.addError(test, e);
-				System.err.print("ERROR: " + fileName + ":" + lineNumber + " (" + e);
-				if (cause != null) {
-					System.err.print(":" + cause);
-				}
-				System.err.println(")");
+				printThrowable("ERROR", e, (PageTest)test);
 			} finally {
 				results.endTest(test);
 			}
@@ -504,6 +503,35 @@ public class ScriptTestCase extends TestCase {
 		stars();
 
 		return;
+	}
+
+	/** print the throwable along with the filename and line number
+	 * @param e
+	 * @param lineNumber
+	 */
+	private void printThrowable(final String type, final Throwable e, PageTest pt) {
+		System.err.print(type + ": " + pt.getFileName() + ";" + pt.getLineNumber() + " (" + e);
+		final Throwable cause = e.getCause();
+		if (cause != null) {
+			System.err.print(":" + cause);
+		}
+		System.err.println(")");
+	}
+
+	/** Modify the stack trace by adding a fake element that contains the filename and line number of the actual test.
+	 * @param e
+	 * @param test
+	 */
+	private void fixupStackTrace(Throwable e, Test test) {
+		StackTraceElement[] oldStack = e.getStackTrace();
+		StackTraceElement newTop = new StackTraceElement(getClass().getName(), "Test Runner", 
+				((PageTest)test).getFileName(),
+				((PageTest)test).getLineNumber());
+		int oldSize = oldStack.length;
+		StackTraceElement[] newStack = new StackTraceElement[oldSize + 1];	
+		System.arraycopy(oldStack, 0, newStack, 1, oldSize);
+		newStack[0] = newTop;
+		e.setStackTrace(newStack);
 	}
 
 	private void stars() {

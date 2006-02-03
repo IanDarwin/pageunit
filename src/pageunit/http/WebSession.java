@@ -30,6 +30,7 @@ public class WebSession {
 	private WebRequest request;
 	private WebResponse response;
 	
+	
 	public WebSession() {
 		super();
 		client = new HttpClient();
@@ -41,7 +42,7 @@ public class WebSession {
 	 * check with getStatus().
 	 * @param b
 	 */
-	public void setThrowExceptionOnFailingStatusCode(boolean b) {
+	public void setThrowExceptionOnFailingStatusCode(final boolean b) {
 		throwExceptionOnFailingStatusCode = b;
 	}
 
@@ -52,7 +53,7 @@ public class WebSession {
 	 * @throws HTMLParseException 
 	 * @throws HttpException 
 	 */
-	public HTMLPage getPage(URL url) throws IOException, HTMLParseException {
+	public HTMLPage getPage(final URL url, final boolean followRedirects) throws IOException, HTMLParseException {
 		
 		client.getHostConfiguration().setHost(
 				url.getHost(), url.getPort(), url.getProtocol());
@@ -60,9 +61,9 @@ public class WebSession {
 		GetMethod getter = new GetMethod(url.getPath());
 		
 		// This is evil, do not use it, Tomcat redirects from / to /index.bar
-		// getter.setFollowRedirects(false);
+		getter.setFollowRedirects(followRedirects);
 		
-		System.out.println("Initial request: " + getter);
+		System.out.printf("Initial request: %s (followRedirects %b)%n", url, followRedirects);
 
 		int status = client.executeMethod(getter);
 		if (status >= 400 && throwExceptionOnFailingStatusCode) {
@@ -81,6 +82,10 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
+	public HTMLPage getPage(final URL url) throws IOException, HTMLParseException {
+		return getPage(url, true);
+	}
+	
 	/**
 	 * A thin wrapper around getPage(): GET the page linked
 	 * to an anchor imbedded in a page.
@@ -89,7 +94,7 @@ public class WebSession {
 	 * @throws HTMLParseException 
 	 * @throws IOException 
 	 */
-	public HTMLPage follow(HTMLAnchor theLink) throws IOException, HTMLParseException {
+	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
 		URL u = TestUtils.completeURL(theLink.getURL());
 		return getPage(u);
 	}
@@ -100,15 +105,15 @@ public class WebSession {
 	 * @throws HTMLParseException
 	 * @throws IOException
 	 */
-	public HTMLPage submitForm(HTMLForm form, HTMLInput button) throws HTMLParseException, IOException {
+	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException {
 		String action = form.getAction();
 		
 		if (!action.contains("/")) {
 			action = "/" + action;	// XXX lame
 		}
 		PostMethod poster = new PostMethod(action);
-		poster.setFollowRedirects(false);
-		System.out.println("Initial request: " + poster);
+		poster.setFollowRedirects(followRedirects);
+		System.out.println("Initial request: " + action);
 
 		if (button != null) {
 			// XXX need to do something for this case...
@@ -140,8 +145,14 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
-	public HTMLPage submitForm(HTMLForm form) throws HTMLParseException, IOException {
-		return submitForm(form, null);
+	/** Submit a Form with defaults
+	 * @param form
+	 * @return
+	 * @throws HTMLParseException
+	 * @throws IOException
+	 */
+	public HTMLPage submitForm(final HTMLForm form) throws HTMLParseException, IOException {
+		return submitForm(form, true, null);
 	}
 
 	public WebRequest getWebRequest() {

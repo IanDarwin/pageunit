@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.apache.commons.httpclient.HttpStatus;
 
 import pageunit.html.HTMLForm;
+import pageunit.html.HTMLInput;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.http.WebResponse;
@@ -64,13 +65,13 @@ public class TestUtils {
 	 * @throws IOException
 	 * @throws HTMLParseException 
 	 */
-	public static HTMLPage getSimplePage(WebSession webClient,
+	public static HTMLPage getPage(WebSession webClient,
 			String targetHost, int targetPort, String targetPage)
 			throws IOException, HTMLParseException {
 
 		final URL url = qualifyURL(targetHost, targetPort, targetPage);
 		
-		return getSimplePage(webClient, url);
+		return getPage(webClient, url);
 
 	}
 	
@@ -81,7 +82,7 @@ public class TestUtils {
 	 * @return
 	 * @throws HTMLParseException 
 	 */
-	public static HTMLPage getSimplePage(WebSession session, URL url) throws IOException, HTMLParseException {
+	public static HTMLPage getPage(WebSession session, URL url) throws IOException, HTMLParseException {
 		
 		final HTMLPage page = (HTMLPage) session.getPage(url);
 		
@@ -106,7 +107,7 @@ public class TestUtils {
 	 * @throws IOException
 	 * @throws HTMLParseException 
 	 */
-	public static HTMLPage getProtectedPage(WebSession session,
+	public static HTMLPage getPage(WebSession session,
 			final String targetHost, final int targetPort,
 			/* not final */String targetPage, final String login,
 			final String pass) throws IOException, HTMLParseException {
@@ -114,21 +115,26 @@ public class TestUtils {
 		final URL url = qualifyURL(targetHost, targetPort, targetPage);
 		
 		// request protected page, and let WebSession handle redirection here.
-		final HTMLPage page1 = (HTMLPage) session.getPage(url);	// Ask for one page, really get login page
+		final HTMLPage page1 = (HTMLPage) session.getPage(url, true);	// Ask for one page, really get login page
 		
-		if (debug) {
-				System.out.println("Protected Page get: " + page1.getTitleText());
-		}
 		WebResponse interaction = session.getWebResponse();
 		int statusCode = interaction.getStatus();
-        if (debug) {
-        	System.out.println("Protected Page Get status: " + statusCode);
+        if (debug) {     	
+			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
         }
 
 		HTMLForm form = page1.getFormByName("loginForm");	// dependency on our form page
 
-		form.getInputByName("j_username").setValue(login);
-		form.getInputByName("j_password").setValue(pass);
+		HTMLInput userNameFormField = form.getInputByName("j_username");
+		if (userNameFormField == null) {
+			throw new IllegalStateException("Not a valid J2EE login form - no j_username");
+		}
+		userNameFormField.setValue(login);
+		HTMLInput userPassFormField = form.getInputByName("j_password");
+		if (userPassFormField == null) {
+			throw new IllegalStateException("Not a valid J2EE login form - no j_password");
+		}
+		userPassFormField.setValue(pass);
 		
 		HTMLPage formResultsPage = (HTMLPage)session.submitForm(form);   // SEND THE LOGIN
 		if (debug) {
