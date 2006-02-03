@@ -87,4 +87,10 @@ public class ScriptFileTest extends TestCase {
 		Test t = new ScriptTestCase(new StringReader(script), "Imbedded test data");
 		t.run(new TestResult());
 	}
+	
+	public void testBadCommand() throws Exception {
+		String script = "* This should fail";
+		Test t = new ScriptTestCase(new StringReader(script), "Imbedded test data");
+		t.run(new TestResult());
+	}
 }
