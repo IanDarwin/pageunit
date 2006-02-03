@@ -35,9 +35,7 @@ import pageunit.linkchecker.LinkChecker;
 import com.darwinsys.util.VariableMap;
 
 /**
- * Run the tests listed in the input files. Set up as a JUnit "test case" not as a JUnit Test Runner,
- * until we find a way to do the latter. Result: (a) it all appears as one ginormous test, and 
- * (b) it also has a Main method so you can run it standalone.
+ * Run the tests listed in the input file.
  * @version $Id$
  */
 public class ScriptTestCase extends TestCase {	
@@ -108,17 +106,6 @@ public class ScriptTestCase extends TestCase {
 		char cmdChar = line.charAt(0);
 		return (cmdChar == '#' || cmdChar == ';') ;
 	}
-	
-//		 XXX MOVE THIS ELSEWHERE AND GET WORKING AGAIN
-//		if (theFile.isAbsolute()) {
-//			curDir = theFile.getParentFile();
-//		} else {
-
-//			if (curDir != null) {
-//				theFile = new File(curDir, fileName);
-//			} else {
-//				System.err.printf("File %s has no directory parent", fileName);
-//			}
 
 	@Override
 	public int countTestCases() {
