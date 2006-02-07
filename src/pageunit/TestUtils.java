@@ -123,7 +123,10 @@ public class TestUtils {
 			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
         }
 
-		HTMLForm form = page1.getFormByName("loginForm");	// dependency on our form page
+        HTMLForm form = page1.getFormByURL("^j_security_check");
+		if (form == null) {
+			throw new IllegalStateException("Not a valid J2EE page, can't find form with action of j_security_check");
+		}
 
 		HTMLInput userNameFormField = form.getInputByName("j_username");
 		if (userNameFormField == null) {
@@ -136,7 +139,8 @@ public class TestUtils {
 		}
 		userPassFormField.setValue(pass);
 		
-		HTMLPage formResultsPage = (HTMLPage)session.submitForm(form);   // SEND THE LOGIN
+		// SEND THE LOGIN; disable redirects, HttpClient can't redirect "entity enclosing request" e.g., POST, how helpful.
+		HTMLPage formResultsPage = session.submitForm(form, false);   
 		if (debug) {
 			System.out.println("Login return " + formResultsPage.getTitleText());
 		}
@@ -144,8 +148,9 @@ public class TestUtils {
 		// Should be yet another redirect, back to original request page
 		WebResponse res2 = session.getWebResponse();
 		statusCode = res2.getStatus();
+		System.out.printf("After submit login, statusCode = %d%n", statusCode);
 
-		return formResultsPage;	// HtmlUnit handles redirection for us
+		return formResultsPage;
 	}
 
 	/**
