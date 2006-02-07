@@ -60,7 +60,7 @@ public class WebSession {
 		
 		getter.setFollowRedirects(followRedirects);
 		
-		System.out.printf("Initial request: %s (followRedirects %b)%n", url, followRedirects);
+		System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
 
 		int status = client.executeMethod(getter);
 		if (status >= 400 && throwExceptionOnFailingStatusCode) {
@@ -108,7 +108,7 @@ public class WebSession {
 		}
 		PostMethod poster = new PostMethod(action);
 		poster.setFollowRedirects(followRedirects);
-		System.out.println("Initial request: " + action);
+		System.out.println("Initial POST request: " + action);
 
 		if (button != null) {
 			// XXX need to do something for this case...
