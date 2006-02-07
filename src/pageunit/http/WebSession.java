@@ -68,14 +68,15 @@ public class WebSession {
 			throw new IOException("Status code: " + status);
 		}
 		
+		response = new WebResponse(responseText, url.toString(), status);
+		
 		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
 		System.out.println("Got to simple page: " + url);
+		response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 		getter.releaseConnection();	
 		
-		responseText = new String(responseBody);
-
-		response = new WebResponse(responseText, url.toString(), status);
+		responseText = new String(responseBody);			// must save in field.
 		
 		return new HTMLParser().parse(responseText);
 	}
@@ -172,15 +173,17 @@ public class WebSession {
 		}
 
 		// Should be yet another redirect, back to original request page
-		WebResponse res2 = getWebResponse();
-		statusCode = res2.getStatus();
+		WebResponse finalResponse = getWebResponse();
+		statusCode = finalResponse.getStatus();
 		System.out.printf("After submit login, statusCode = %d%n", statusCode);
 		
 		if (!TestUtils.isRedirectCode((statusCode))) {
 			throw new IllegalStateException("expected redirect status but got " + statusCode);
 		}
 		
-		return getPage(TestUtils.qualifyURL(targetHost, targetPort, "/admin/index.jsp"));
+		String redirectLocation = finalResponse.getHeader("location");
+		System.out.println("WebSession.getPage(): redirect location = " + redirectLocation);
+		return getPage(TestUtils.qualifyURL(targetHost, targetPort, redirectLocation));
 	}
 	
 	/**

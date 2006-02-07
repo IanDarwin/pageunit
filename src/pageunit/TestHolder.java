@@ -26,7 +26,7 @@ public class PageTest implements Test {
 	}
 
 	public int countTestCases() {
-		return 1;
+		return 1;					// This does represent one test read from a file.
 	}
 
 	public void run(TestResult result) {

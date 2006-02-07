@@ -438,7 +438,7 @@ public class ScriptTestCase extends TestCase {
 					int statusCode = formResponse.getStatus();
 					
 					if (TestUtils.isRedirectCode(statusCode)) {
-						String newLocation = formResponse.getHeaderValue("location");
+						String newLocation = formResponse.getHeader("location");
 						System.out.println(newLocation);
 						assertNotNull("form submit->redirection: location header", newLocation);
 						thePage = session.getPage(new URL(newLocation));
@@ -448,7 +448,7 @@ public class ScriptTestCase extends TestCase {
 					
 					break;	
 					
-				case 'V':	// Verify (Link Checker)
+				case 'V':	// Verify (Link Checker) - may take a long time!
 					System.out.printf("LinkChecker: %s%n", restOfLine);
 					LinkChecker.checkStartingAt(restOfLine);
 					break;
