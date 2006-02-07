@@ -75,7 +75,7 @@ public class WebSession {
 		
 		responseText = new String(responseBody);
 
-		response = new WebResponse(responseText, url.toString());
+		response = new WebResponse(responseText, url.toString(), status);
 		
 		return new HTMLParser().parse(responseText);
 	}
@@ -115,9 +115,6 @@ public class WebSession {
 		return getPage(url);
 
 	}
-	
-
-
 
 	/**
 	 * Get an HTML page that is protected by J2EE Container-based Forms
@@ -150,6 +147,7 @@ public class WebSession {
 			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
         }
 
+        // Find J2EE login form using regex: must begin with j_security_check, may have jsessionid...
         HTMLForm form = page1.getFormByURL("^j_security_check");
 		if (form == null) {
 			throw new IllegalStateException("Not a valid J2EE page, can't find form with action of j_security_check");
@@ -160,6 +158,7 @@ public class WebSession {
 			throw new IllegalStateException("Not a valid J2EE login form - no j_username field");
 		}
 		userNameFormField.setValue(login);
+		
 		HTMLInput userPassFormField = form.getInputByName("j_password");
 		if (userPassFormField == null) {
 			throw new IllegalStateException("Not a valid J2EE login form - no j_password field");
@@ -176,8 +175,12 @@ public class WebSession {
 		WebResponse res2 = getWebResponse();
 		statusCode = res2.getStatus();
 		System.out.printf("After submit login, statusCode = %d%n", statusCode);
-
-		return formResultsPage;
+		
+		if (!TestUtils.isRedirectCode((statusCode))) {
+			throw new IllegalStateException("expected redirect status but got " + statusCode);
+		}
+		
+		return getPage(TestUtils.qualifyURL(targetHost, targetPort, "/admin/index.jsp"));
 	}
 	
 	/**
@@ -200,17 +203,18 @@ public class WebSession {
 	 * @throws IOException
 	 */
 	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException {
+
 		String action = form.getAction();
 		
 		if (!action.contains("/")) {
-			action = "/" + action;	// XXX lame
+			action = "/" + action;	// Handle e.g., J2EE form "action='j_security_check'" from Tomcat
 		}
-		PostMethod poster = new PostMethod(action);
-		poster.setFollowRedirects(followRedirects);
+		PostMethod handler = new PostMethod(action);
+		handler.setFollowRedirects(followRedirects);
 		System.out.println("Initial POST request: " + action);
 
 		if (button != null) {
-			// XXX need to do something for this case...
+			System.err.println("Warning: ignoring button " + button);	// need to do something for this case...
 		}
 		// propagate the inputs().getValues()...
 		List<HTMLInput> inputs = form.getInputs();
@@ -220,19 +224,23 @@ public class WebSession {
 			HTMLInput input = inputs.get(i);
 			data[i] = new NameValuePair(input.getName(), input.getValue());
 		}
-        poster.setRequestBody(data);
+        handler.setRequestBody(data);
 		
-		int status = client.executeMethod(poster);
+		int status = client.executeMethod(handler);
 		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
+		if (debug) {
+			System.out.println("WebSession.submitForm(): status code after post was: " + status);
+		}
 		
-		byte[] responseBody = poster.getResponseBody();
+		byte[] responseBody = handler.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
-		poster.releaseConnection();	
+		handler.releaseConnection();	
 		responseText = new String(responseBody);
 
-		response = new WebResponse(responseText, action);
+		response = new WebResponse(responseText, action, status);
+		
 		
 		return new HTMLParser().parse(responseText);
 	}

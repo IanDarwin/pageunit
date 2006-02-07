@@ -7,19 +7,23 @@ import javax.servlet.http.Cookie;
  * @author ian
  */
 public class WebResponse {
-	String bodyContent;
-	String url;
+	private String bodyContent;
+	private String url;
+	private int status;
 
-	
-	public WebResponse(String bodyContent, String url) {
+	public WebResponse(String bodyContent, String url, int status) {
 		this.bodyContent = bodyContent;
 		this.url = url;
+		this.status = status;
 	}
 	public String getHeaderValue(String key) {
 		return null;
 	}
 	public int getStatus() {
-		return 200;
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
 	}
 	public Cookie[] getCookies() {
 		return null;
