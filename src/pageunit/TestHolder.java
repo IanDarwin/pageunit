@@ -9,6 +9,7 @@ import junit.framework.TestResult;
  */
 public class PageTest implements Test {
 	private final char command;
+	private final String args;
 	private final String fileName;
 	private final int lineNumber;
 	/**
@@ -16,9 +17,10 @@ public class PageTest implements Test {
 	 * @param fileName
 	 * @param lineNumber
 	 */
-	public PageTest(final char commandChar, final String fileName, final int lineNumber) {
+	public PageTest(final char commandChar, final String args, final String fileName, final int lineNumber) {
 		super();
 		this.command = commandChar;
+		this.args = args;
 		this.fileName = fileName;
 		this.lineNumber = lineNumber;
 	}
@@ -36,6 +38,10 @@ public class PageTest implements Test {
 
 	public char getCommand() {
 		return command;
+	}
+	
+	public String getArguments() {
+		return args;
 	}
 
 	public String getFileName() {

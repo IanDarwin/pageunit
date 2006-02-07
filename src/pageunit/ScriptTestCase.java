@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +41,7 @@ import com.darwinsys.util.VariableMap;
 public class ScriptTestCase extends TestCase {	
 
 	private String fileName;
-	private final List<String> lines = new ArrayList<String>();
+	private final List<PageTest> lines = new ArrayList<PageTest>();
 	
 	private WebSession session;
 	private WebResponse theResult = null;
@@ -55,7 +55,6 @@ public class ScriptTestCase extends TestCase {
 	public final static int PORT_MAX_IPV4 = Short.MAX_VALUE;
 	/** Number of M variables created by last successful M command */
 	private int mHighWater = 0;
-	private int tests;
 	
 	/** Run ALL the tests in the named test file.
 	 * @param fileName the test script file name.
@@ -69,19 +68,23 @@ public class ScriptTestCase extends TestCase {
 		this(new BufferedReader(new FileReader(theFile)), fileName);
 	}
 	
+	/** Construct a ScriptTestCase, reading the file into a List.
+	 * @param r
+	 * @param fileName
+	 * @throws IOException
+	 */
 	public ScriptTestCase(Reader r, String fileName) throws IOException {
 		this.fileName = fileName;
-		BufferedReader is = new BufferedReader(r);
+		LineNumberReader is = new LineNumberReader(r);
 		String line;
-		int tests = 0;
 		while ((line = is.readLine()) != null) {
+			char ch = line.charAt(0);
+			// XXX PLACE TO DO INCLUDE COMMAND??
 			if (!looksLikeCommand(line)) {
 				continue;
 			}
-			lines.add(line);
-			++tests;
+			lines.add(new PageTest(ch, line.substring(1).trim(), fileName, is.getLineNumber()));
 		}
-		this.tests = tests;
 	}
 		
 	/** Check if the given line looks like a command, that is, has a non-comment char in col 1.
@@ -109,6 +112,7 @@ public class ScriptTestCase extends TestCase {
 
 	@Override
 	public int countTestCases() {
+		int tests = lines.size();
 		System.out.println("TestRunner.countTestCases() --> " + tests);
 		return tests;
 	}
@@ -136,34 +140,16 @@ public class ScriptTestCase extends TestCase {
 
 		for (int lineNumber = 0, numLines = lines.size(); lineNumber < numLines; lineNumber++) {	// MAIN LOOP PER LINE
 
-			String line = lines.get(lineNumber);
+			PageTest test = lines.get(lineNumber);
+			String line = test.getArguments();
 			System.out.printf("%d: %s%n", lineNumber, line);
+			
+			char c = test.getCommand();
+			String restOfLine =  variables.substVars(test.getArguments());
+			
+			results.startTest(test);			
 
-			if (!looksLikeCommand(line)) {
-				System.out.println(line);
-				continue;
-			}
-			
-			StringTokenizer st = new StringTokenizer(line);
-			if (st.countTokens() < 1) {
-				throw new IllegalArgumentException("invalid line " + line);
-			}
-			String cmd = st.nextToken();
-			if (cmd.length() != 1) {
-				throw new IllegalArgumentException("invalid command in line " + line);
-			}
-			char c = cmd.charAt(0);
-			
-			Test test = new PageTest(c, fileName, lineNumber);
-			results.startTest(test);
-			
-			String restOfLine = line.length() > 2 ? line.substring(2).trim() : "";
-			if (restOfLine.length() > 0 && isComment(restOfLine)) {
-				continue;
-			}
-			restOfLine = variables.substVars(restOfLine);
-			String page;
-			
+			String page;		
 			
 			try {
 				switch(c) {
@@ -173,7 +159,7 @@ public class ScriptTestCase extends TestCase {
 
 				case '<':	// File Inclusion
 					// run(restOfLine);
-					throw new RuntimeException("< MECHANISM IS BROKEN");
+					throw new RuntimeException("< MECHANISM NOT (RE)IMPLEMENTED YET");
 					// continue;
 				case '=':	// Set Variable
 					String[] args = getTwoArgs("variable", restOfLine, ' ');
