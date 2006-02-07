@@ -57,8 +57,7 @@ public class WebSession {
 		client.getHostConfiguration().setHost(
 				url.getHost(), url.getPort(), url.getProtocol());
 
-		GetMethod getter = new GetMethod(url.getPath());
-		
+		GetMethod getter = new GetMethod(url.getPath());		
 		getter.setFollowRedirects(followRedirects);
 		
 		System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
@@ -68,10 +67,11 @@ public class WebSession {
 			throw new IOException("Status code: " + status);
 		}
 		
-		response = new WebResponse(responseText, url.toString(), status);
-		
 		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
+		responseText = new String(responseBody);
+		response = new WebResponse(responseText, url.toString(), status);
+
 		System.out.println("Got to simple page: " + url);
 		response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 		getter.releaseConnection();	
@@ -79,17 +79,6 @@ public class WebSession {
 		responseText = new String(responseBody);			// must save in field.
 		
 		return new HTMLParser().parse(responseText);
-	}
-	
-	/**
-	 * Get an unprotected page given its URL
-	 * @param webclient
-	 * @param newLocation
-	 * @return
-	 * @throws HTMLParseException 
-	 */
-	public HTMLPage getPage(final URL url) throws IOException, HTMLParseException {
-		return getPage(url, true);
 	}
 	
 	/**
@@ -113,7 +102,7 @@ public class WebSession {
 
 		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
 		
-		return getPage(url);
+		return getPage(url, true);
 
 	}
 
@@ -183,7 +172,9 @@ public class WebSession {
 		
 		String redirectLocation = finalResponse.getHeader("location");
 		System.out.println("WebSession.getPage(): redirect location = " + redirectLocation);
-		return getPage(TestUtils.qualifyURL(targetHost, targetPort, redirectLocation));
+		
+		// "To reach, at the end, the goal with which one started..."
+		return getPage(TestUtils.qualifyURL(targetHost, targetPort, redirectLocation), true);
 	}
 	
 	/**
@@ -196,7 +187,7 @@ public class WebSession {
 	 */
 	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
 		URL u = TestUtils.completeURL(theLink.getURL());
-		return getPage(u);
+		return getPage(u, true);
 	}
 	
 	/** Post an HTML Form
@@ -239,8 +230,8 @@ public class WebSession {
 		
 		byte[] responseBody = handler.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
-		handler.releaseConnection();	
 		responseText = new String(responseBody);
+		handler.releaseConnection();
 
 		response = new WebResponse(responseText, action, status);
 		response.setHeaders(handler.getResponseHeaders());
