@@ -9,13 +9,6 @@ import java.util.Properties;
 
 import org.apache.commons.httpclient.HttpStatus;
 
-import pageunit.html.HTMLForm;
-import pageunit.html.HTMLInput;
-import pageunit.html.HTMLPage;
-import pageunit.html.HTMLParseException;
-import pageunit.http.WebResponse;
-import pageunit.http.WebSession;
-
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
  * 
@@ -50,108 +43,7 @@ public class TestUtils {
 		}
 	}
 
-	/**
-	 * Get an unprotected page
-	 * 
-	 * @param session
-	 *            The HTTP Session
-	 * @param targetHost
-	 *            The name (or maybe IP as a String) for the host
-	 * @param targetPort
-	 *            The port number, 80 for default
-	 * @param targetPage
-	 *            The pathname part of the URL
-	 * @return An HttpMethod object containing the response.
-	 * @throws IOException
-	 * @throws HTMLParseException 
-	 */
-	public static HTMLPage getPage(WebSession webClient,
-			String targetHost, int targetPort, String targetPage)
-			throws IOException, HTMLParseException {
 
-		final URL url = qualifyURL(targetHost, targetPort, targetPage);
-		
-		return getPage(webClient, url);
-
-	}
-	
-	/**
-	 * Get an unprotected page given its URL
-	 * @param webclient
-	 * @param newLocation
-	 * @return
-	 * @throws HTMLParseException 
-	 */
-	public static HTMLPage getPage(WebSession session, URL url) throws IOException, HTMLParseException {
-		
-		final HTMLPage page = (HTMLPage) session.getPage(url);
-		
-		System.out.println("Got to simple page: " + session.getWebResponse().getUrl());
-		
-		return page;
-	}
-
-	/**
-	 * Get an HTML page that is protected by J2EE Container-based Forms
-	 * Authentication.
-	 * 
-	 * @param session
-	 *            The HTTP Session
-	 * @param targetHost
-	 *            The name (or maybe IP as a String) for the host
-	 * @param targetPort
-	 *            The port number, 80 for default
-	 * @param targetPage
-	 *            The pathname part of the URL
-	 * @return An HttpMethod object containing the response.
-	 * @throws IOException
-	 * @throws HTMLParseException 
-	 */
-	public static HTMLPage getPage(WebSession session,
-			final String targetHost, final int targetPort,
-			final String targetPage, final String login,
-			final String pass) throws IOException, HTMLParseException {
-		
-		final URL url = qualifyURL(targetHost, targetPort, targetPage);
-		
-		// request protected page, and let WebSession handle redirection here.
-		final HTMLPage page1 = (HTMLPage) session.getPage(url, true);	// Ask for one page, really get login page
-		
-		WebResponse interaction = session.getWebResponse();
-		int statusCode = interaction.getStatus();
-        if (debug) {     	
-			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
-        }
-
-        HTMLForm form = page1.getFormByURL("^j_security_check");
-		if (form == null) {
-			throw new IllegalStateException("Not a valid J2EE page, can't find form with action of j_security_check");
-		}
-
-		HTMLInput userNameFormField = form.getInputByName("j_username");
-		if (userNameFormField == null) {
-			throw new IllegalStateException("Not a valid J2EE login form - no j_username");
-		}
-		userNameFormField.setValue(login);
-		HTMLInput userPassFormField = form.getInputByName("j_password");
-		if (userPassFormField == null) {
-			throw new IllegalStateException("Not a valid J2EE login form - no j_password");
-		}
-		userPassFormField.setValue(pass);
-		
-		// SEND THE LOGIN; disable redirects, HttpClient can't redirect "entity enclosing request" e.g., POST, how helpful.
-		HTMLPage formResultsPage = session.submitForm(form);   
-		if (debug) {
-			System.out.println("Login return " + formResultsPage.getTitleText());
-		}
-
-		// Should be yet another redirect, back to original request page
-		WebResponse res2 = session.getWebResponse();
-		statusCode = res2.getStatus();
-		System.out.printf("After submit login, statusCode = %d%n", statusCode);
-
-		return formResultsPage;
-	}
 
 	/**
 	 * @param targetHost
@@ -160,7 +52,7 @@ public class TestUtils {
 	 * @return
 	 * @throws MalformedURLException
 	 */
-	private static URL qualifyURL(final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
+	public static URL qualifyURL(final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
 		final URL url;
 		if (targetPage.startsWith("http:")) {
 			url = new URL(targetPage);
@@ -259,12 +151,8 @@ public class TestUtils {
 		return new URL(prot, host, port, path);
 	}
 
-	public static URL completeURL(String u) {
-		try {
-			return completeURL(new URL(u));
-		} catch (MalformedURLException e) {
-			throw new RuntimeException("Invalid URL " + u);
-		}
+	public static URL completeURL(String u) throws MalformedURLException {
+		return completeURL(new URL(u));
 	}
 
 }

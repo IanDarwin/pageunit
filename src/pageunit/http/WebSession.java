@@ -28,6 +28,7 @@ public class WebSession {
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
 	private WebResponse response;
+	private boolean debug = true;
 	
 	public WebSession() {
 		super();
@@ -69,16 +70,114 @@ public class WebSession {
 		
 		byte[] responseBody = getter.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);
+		System.out.println("Got to simple page: " + url);
 		getter.releaseConnection();	
 		
 		responseText = new String(responseBody);
 
 		response = new WebResponse(responseText, url.toString());
+		
 		return new HTMLParser().parse(responseText);
 	}
 	
+	/**
+	 * Get an unprotected page given its URL
+	 * @param webclient
+	 * @param newLocation
+	 * @return
+	 * @throws HTMLParseException 
+	 */
 	public HTMLPage getPage(final URL url) throws IOException, HTMLParseException {
 		return getPage(url, true);
+	}
+	
+	/**
+	 * Get an unprotected page
+	 * 
+	 * @param session
+	 *            The HTTP Session
+	 * @param targetHost
+	 *            The name (or maybe IP as a String) for the host
+	 * @param targetPort
+	 *            The port number, 80 for default
+	 * @param targetPage
+	 *            The pathname part of the URL
+	 * @return An HttpMethod object containing the response.
+	 * @throws IOException
+	 * @throws HTMLParseException 
+	 */
+	public HTMLPage getPage(
+			String targetHost, int targetPort, String targetPage)
+			throws IOException, HTMLParseException {
+
+		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
+		
+		return getPage(url);
+
+	}
+	
+
+
+
+	/**
+	 * Get an HTML page that is protected by J2EE Container-based Forms
+	 * Authentication.
+	 * 
+	 * @param session
+	 *            The HTTP Session
+	 * @param targetHost
+	 *            The name (or maybe IP as a String) for the host
+	 * @param targetPort
+	 *            The port number, 80 for default
+	 * @param targetPage
+	 *            The pathname part of the URL
+	 * @return An HttpMethod object containing the response.
+	 * @throws IOException
+	 * @throws HTMLParseException 
+	 */
+	public HTMLPage getPage(final String targetHost, final int targetPort,
+			final String targetPage, final String login,
+			final String pass) throws IOException, HTMLParseException {
+		
+		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
+		
+		// request protected page, and let WebSession handle redirection here.
+		final HTMLPage page1 = (HTMLPage) getPage(url, true);	// Ask for one page, really get login page
+		
+		WebResponse interaction = getWebResponse();
+		int statusCode = interaction.getStatus();
+        if (debug) {     	
+			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
+        }
+
+        HTMLForm form = page1.getFormByURL("^j_security_check");
+		if (form == null) {
+			throw new IllegalStateException("Not a valid J2EE page, can't find form with action of j_security_check");
+		}
+
+		HTMLInput userNameFormField = form.getInputByName("j_username");
+		if (userNameFormField == null) {
+			throw new IllegalStateException("Not a valid J2EE login form - no j_username field");
+		}
+		userNameFormField.setValue(login);
+		HTMLInput userPassFormField = form.getInputByName("j_password");
+		if (userPassFormField == null) {
+			throw new IllegalStateException("Not a valid J2EE login form - no j_password field");
+		}
+		userPassFormField.setValue(pass);
+		
+		// SEND THE LOGIN; disable redirects, HttpClient can't redirect "entity enclosing request" e.g., POST, how helpful.
+		HTMLPage formResultsPage = submitForm(form);   
+		if (debug) {
+			System.out.println("Login return " + formResultsPage.getTitleText());
+		}
+
+		// Should be yet another redirect, back to original request page
+		WebResponse res2 = getWebResponse();
+		statusCode = res2.getStatus();
+		System.out.printf("After submit login, statusCode = %d%n", statusCode);
+
+		return formResultsPage;
 	}
 	
 	/**

@@ -260,7 +260,7 @@ public class ScriptTestCase extends TestCase {
 						System.err.println(new URL("http", variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
 					}
-					thePage = TestUtils.getPage(session, 
+					thePage = session.getPage(
 							variables.getVar("HOST"), variables.getIntVar("PORT"), page);
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -275,7 +275,7 @@ public class ScriptTestCase extends TestCase {
 					
 					assertNotNull("username", variables.getVar("USER"));
 					assertNotNull("password", variables.getVar("PASS"));
-					thePage = TestUtils.getPage(session, variables.getVar("HOST"),
+					thePage = session.getPage(variables.getVar("HOST"),
 							variables.getIntVar("PORT"), page, 
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
@@ -441,7 +441,7 @@ public class ScriptTestCase extends TestCase {
 						String newLocation = formResponse.getHeaderValue("location");
 						System.out.println(newLocation);
 						assertNotNull("form submit->redirection: location header", newLocation);
-						thePage = TestUtils.getPage(session, new URL(newLocation));
+						thePage = session.getPage(new URL(newLocation));
 						theResult = session.getWebResponse();
 						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
 					}				
