@@ -243,7 +243,7 @@ public class WebSession {
 		responseText = new String(responseBody);
 
 		response = new WebResponse(responseText, action, status);
-		
+		response.setHeaders(handler.getResponseHeaders());
 		
 		return new HTMLParser().parse(responseText);
 	}
