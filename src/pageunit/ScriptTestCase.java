@@ -78,6 +78,9 @@ public class ScriptTestCase extends TestCase {
 		LineNumberReader is = new LineNumberReader(r);
 		String line;
 		while ((line = is.readLine()) != null) {
+			if (line.length() == 0) {
+				continue;
+			}
 			char ch = line.charAt(0);
 			// XXX PLACE TO DO INCLUDE COMMAND??
 			if (!looksLikeCommand(line)) {
@@ -282,6 +285,7 @@ public class ScriptTestCase extends TestCase {
 					filterPage(thePage, theResult);
 					assertEquals("protected page status", HttpStatus.SC_OK, theResult.getStatus());
 					assertEquals("protected page redirect", page, theResult.getUrl());
+					System.out.println("Got page " + page);
 					break;
 					
 				case 'M':	// page contains text
@@ -289,10 +293,7 @@ public class ScriptTestCase extends TestCase {
 					theLink = null;
 					assertNotNull("Invalid test: requested txt before getting page", thePage);
 					theResult = session.getWebResponse();
-					if (theResult == null) { 
-						System.err.println("M ignored because page is null");
-						break;
-					}
+					assertNotNull("M ignored because page is null", theResult);
 					String pattern = restOfLine;
 					String contentAsString = theResult.getContentAsString();
 					System.out.println(contentAsString.length());
@@ -441,7 +442,7 @@ public class ScriptTestCase extends TestCase {
 						String newLocation = formResponse.getHeader("location");
 						System.out.println(newLocation);
 						assertNotNull("form submit->redirection: location header", newLocation);
-						thePage = session.getPage(new URL(newLocation));
+						thePage = session.getPage(new URL(newLocation), true);
 						theResult = session.getWebResponse();
 						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
 					}				
