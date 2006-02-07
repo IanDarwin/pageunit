@@ -140,7 +140,7 @@ public class TestUtils {
 		userPassFormField.setValue(pass);
 		
 		// SEND THE LOGIN; disable redirects, HttpClient can't redirect "entity enclosing request" e.g., POST, how helpful.
-		HTMLPage formResultsPage = session.submitForm(form, false);   
+		HTMLPage formResultsPage = session.submitForm(form);   
 		if (debug) {
 			System.out.println("Login return " + formResultsPage.getTitleText());
 		}
