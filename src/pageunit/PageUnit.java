@@ -1,6 +1,7 @@
 package pageunit;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.Arrays;
 
 /** Main program to run test files under PageUnit. NOT WORKING.
@@ -12,15 +13,14 @@ public class PageUnit {
 
 	public static final String TESTS_FILE = "tests" + TEST_FILENAME_EXT;
 	
-	private static ScriptTestCase t;// = new TestRunner();
-	
 	private static int numFilesRun = 0;
+	private static boolean debug;
 		
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		
 		try {
 			if (args.length == 0) {
-				t = new ScriptTestCase(TESTS_FILE);
+				processOne(new File(TESTS_FILE));
 			} else {
 				for (int i = 0; i < args.length; i++) {
 					final String fsObjectName = args[i];
@@ -44,10 +44,12 @@ public class PageUnit {
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
-				t = new ScriptTestCase(f.getAbsolutePath());
+				new ScriptTestCase(f.getAbsolutePath());
 				// r = t.run(f.getAbsolutePath()).add(r);
 			} else {
-				//System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
+				if (debug) {
+					System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
+				}
 			}
 		} else if (f.isDirectory()) {
 			loopThrough(f);
@@ -61,7 +63,12 @@ public class PageUnit {
 	 */
 	private static void loopThrough(final File dir) throws Exception {
 		assert dir.isDirectory() : "Logic error: not a directory";
-		File[] files = dir.listFiles();
+		File[] files = dir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name != null || name.endsWith(".txt");
+			}
+			
+		});
 		Arrays.sort(files);
 		for (File f : files) {
 			processOne(f);
