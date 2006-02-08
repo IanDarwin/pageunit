@@ -2,7 +2,7 @@ package pageunit.html;
 
 public interface HTMLInput extends HTMLContainer {
 	enum Type {
-		TEXT, PASSWORD, RADIO, HIDDEN, SUBMIT
+		TEXT, PASSWORD, RADIO, HIDDEN, SUBMIT, CHECKBOX, RESET, FILE, BUTTON
 	}
 	public String getValue();
 	public void setValue(String value);
