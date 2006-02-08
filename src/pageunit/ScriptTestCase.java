@@ -55,8 +55,9 @@ public class ScriptTestCase extends TestCase {
 	public final static int PORT_MAX_IPV4 = Short.MAX_VALUE;
 	/** Number of M variables created by last successful M command */
 	private int mHighWater = 0;
+	private File file;
 	
-	/** Run ALL the tests in the named test file.
+	/** Construct a ScriptTestCase from the named test file.
 	 * @param fileName the test script file name.
 	 * @throws Exception
 	 */
@@ -64,17 +65,36 @@ public class ScriptTestCase extends TestCase {
 		this(new File(fileName), fileName);
 	}
 
+	/** Construct a ScriptTestCase from a java.io.File object.
+	 * @param theFile A File object representing the file; MUST NOT be null unless there are guaranteed to be no
+	 * inclusion operators ('<') in the input.
+	 * @param fileName
+	 * @throws IOException
+	 */
 	public ScriptTestCase(File theFile, String fileName) throws IOException {		
-		this(new BufferedReader(new FileReader(theFile)), fileName);
+		this(theFile, new BufferedReader(new FileReader(theFile)), fileName);
 	}
 	
 	/** Construct a ScriptTestCase, reading the file into a List.
+	 * N.B. This constructor is needed for running from JUnit tests.
+	 * @param theFile A File object representing the file; MUST NOT be null unless there are guaranteed to be no
+	 * inclusion operators ('<') in the input.
+	 * @param reader An open Reader for the file.
+	 * @param fileName The filename.
+	 * @throws IOException
+	 */
+	public ScriptTestCase(File theFile, Reader reader, String fileName) throws IOException {
+		this.file = theFile;
+		this.fileName = fileName;
+		readTests(reader, fileName);
+	}
+
+	/** Read all the tests.
 	 * @param r
 	 * @param fileName
 	 * @throws IOException
 	 */
-	public ScriptTestCase(Reader r, String fileName) throws IOException {
-		this.fileName = fileName;
+	private void readTests(Reader r, String fileName) throws IOException {
 		LineNumberReader is = new LineNumberReader(r);
 		String line;
 		while ((line = is.readLine()) != null) {
@@ -82,11 +102,16 @@ public class ScriptTestCase extends TestCase {
 				continue;
 			}
 			char ch = line.charAt(0);
-			// XXX PLACE TO DO INCLUDE COMMAND??
+			String args = line.substring(1).trim();
+			
+			if (line.charAt(0) == '<') {
+				readTests(new FileReader(new File(file.getParentFile(), args)), args);	// recurse
+				continue;
+			}
 			if (!looksLikeCommand(line)) {
 				continue;
 			}
-			lines.add(new PageTest(ch, line.substring(1).trim(), fileName, is.getLineNumber()));
+			lines.add(new PageTest(ch, args, fileName, is.getLineNumber()));
 		}
 	}
 		
@@ -98,10 +123,6 @@ public class ScriptTestCase extends TestCase {
 		if (line.length() == 0 )
 			return false;
 		if (isComment(line))
-			return false;
-		
-		// XXX rip out redirections until they work again, to keep the count right!
-		if (line.charAt(0) == '<')
 			return false;
 			
 		return true;
@@ -160,10 +181,9 @@ public class ScriptTestCase extends TestCase {
 				// Handle declarative (non-test) requests here.
 				// Each case ends with continue, to next iteration of main loop.
 
-				case '<':	// File Inclusion
-					// run(restOfLine);
-					throw new RuntimeException("< MECHANISM NOT (RE)IMPLEMENTED YET");
-					// continue;
+				case '<':	// File Inclusion is now handled entirely in reading phase...
+					throw new IllegalStateException("'<' got into list of tests, should have been removed by readTests");
+
 				case '=':	// Set Variable
 					String[] args = getTwoArgs("variable", restOfLine, ' ');
 					variables.setVar(args[0], args[1]);
@@ -462,11 +482,11 @@ public class ScriptTestCase extends TestCase {
 			} catch (final AssertionFailedError e) {
 				fixupStackTrace(e, test);
 				results.addFailure(test, e);
-				printThrowable("FAILURE", e, (PageTest)test);
+				printThrowable("FAILURE", e, test);
 			} catch (final Throwable e) {
 				fixupStackTrace(e, test);
 				results.addError(test, e);
-				printThrowable("ERROR", e, (PageTest)test);
+				printThrowable("ERROR", e, test);
 			} finally {
 				results.endTest(test);
 			}

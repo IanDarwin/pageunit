@@ -84,13 +84,13 @@ public class ScriptFileTest extends TestCase {
 			"M Toronto (Centre) for Phenogenomics\n" +
 			"E M0 is ${M0}\n" +
 			"E M1 is ${M1}\n";
-		Test t = new ScriptTestCase(new StringReader(script), "Imbedded test data");
+		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
 		t.run(new TestResult());
 	}
 	
 	public void testBadCommand() throws Exception {
 		String script = "* This should fail";
-		Test t = new ScriptTestCase(new StringReader(script), "Imbedded test data");
+		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
 		t.run(new TestResult());
 	}
 }
