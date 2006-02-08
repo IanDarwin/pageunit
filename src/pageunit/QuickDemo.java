@@ -16,7 +16,6 @@ public class QuickDemo {
 			suite.addTest(new ScriptTestCase("demos/j2ee.txt"));
 			suite.addTest(new ScriptTestCase("demos/tiny.txt"));			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//$JUnit.END$
