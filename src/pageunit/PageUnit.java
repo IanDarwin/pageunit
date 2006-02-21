@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+
 /** Main program to run test files under PageUnit. NOT WORKING.
  * @author ian
  */
@@ -15,6 +18,7 @@ public class PageUnit {
 	
 	private static int numFilesRun = 0;
 	private static boolean debug;
+	private static TestResult res = new TestResult();
 		
 	public static void main(final String[] args) {
 		
@@ -44,8 +48,8 @@ public class PageUnit {
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
-				new ScriptTestCase(f.getAbsolutePath());
-				// r = t.run(f.getAbsolutePath()).add(r);
+				TestCase t = new ScriptTestCase(f.getAbsolutePath());
+				t.run(res);
 			} else {
 				if (debug) {
 					System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
