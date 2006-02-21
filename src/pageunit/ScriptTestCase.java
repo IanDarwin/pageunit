@@ -36,6 +36,9 @@ import com.darwinsys.util.VariableMap;
 
 /**
  * Run the tests listed in the input file.
+ * This file is the heart of PageUnit (but not, I hope,
+ * its "heart of darkness").
+ * 
  * @version $Id$
  */
 public class ScriptTestCase extends TestCase {	
@@ -280,7 +283,7 @@ public class ScriptTestCase extends TestCase {
 					assertValidRURL(page);
 					
 					if (debug) {
-						System.err.println(new URL("http", variables.getVar("HOST"),
+						System.err.println("G " + new URL("http", variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
 					}
 					thePage = session.getPage(
@@ -296,6 +299,11 @@ public class ScriptTestCase extends TestCase {
 					page = restOfLine;
 					assertValidRURL(page);
 					
+					if (debug) {
+						System.err.println("J " + new URL("http", variables.getVar("HOST"),
+								variables.getIntVar("PORT"), page));
+					}
+					
 					assertNotNull("username", variables.getVar("USER"));
 					assertNotNull("password", variables.getVar("PASS"));
 					thePage = session.getPage(variables.getVar("HOST"),
@@ -304,7 +312,9 @@ public class ScriptTestCase extends TestCase {
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
 					assertEquals("protected page status", HttpStatus.SC_OK, theResult.getStatus());
-					assertEquals("protected page redirect", page, theResult.getUrl());
+					// Can't use assertEquals here, as page may be "/admin/foo" but
+					// the URL will be http://host/admin/foo". Just check endswith.
+					assertTrue("protected page redirect", theResult.getUrl().endsWith(page));
 					System.out.println("Got page " + page);
 					break;
 					
