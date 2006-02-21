@@ -7,7 +7,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
-/** Horrible name, sorry: test some of the self-contained methods in ScriptTestCase
+/** Test some of the self-contained methods in ScriptTestCase
  * @author ian
  */
 public class ScriptFileTest extends TestCase {
