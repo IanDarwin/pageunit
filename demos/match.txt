@@ -1,6 +1,6 @@
 P http://www.phenogenomics.ca/
 M collaboration
-M TCP is an \(.*\) collaboration
+M TCP is an (.*) collaboration
 E Matched whole as ${M0}
 E Matched Group as ${M1}
 E Unset M2 is ${M2}
