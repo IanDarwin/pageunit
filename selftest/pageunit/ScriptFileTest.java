@@ -90,7 +90,7 @@ public class ScriptFileTest extends TestCase {
 	
 	public void testBadCommand() throws Exception {
 		String script = "* This should fail";
-		System.err.println("Following test will not show in the Green Bar as it's run on its own!");
+		System.err.println("Following 'Imbedded test data' test will fail the Green Bar as it's run on its own!");
 		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
 		t.run(new TestResult());
 	}
