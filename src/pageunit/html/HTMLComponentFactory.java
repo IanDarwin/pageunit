@@ -36,6 +36,14 @@ public class HTMLComponentFactory {
 			input.setValue(value);
 			return input;
 		}
+		if (tag == HTML.Tag.SELECT) {
+			HTMLSelect input = new HTMLSelectImpl(name);
+			return input;
+		}
+		if (tag == HTML.Tag.OPTION) {
+			HTMLOption input = new HTMLOptionImpl(name);
+			return input;
+		}
 		if (tag == HTML.Tag.TITLE) {
 			return new HTMLTitleImpl(null);
 		}
