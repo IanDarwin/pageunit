@@ -7,7 +7,7 @@ import java.util.Arrays;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
-/** Main program to run test files under PageUnit. NOT WORKING.
+/** Main program to run test files under PageUnit.
  * @author ian
  */
 public class PageUnit {
@@ -18,7 +18,7 @@ public class PageUnit {
 	
 	private static int numFilesRun = 0;
 	private static boolean debug;
-	private static TestResult res = new TestResult();
+	private static TestResult results = new TestResult();
 		
 	public static void main(final String[] args) {
 		
@@ -32,7 +32,7 @@ public class PageUnit {
 					processOne(f);
 				}
 			}
-			System.out.printf("%d files run\n", numFilesRun);
+			System.out.printf("%d files run, results: %s\n", numFilesRun, results);
 		} catch (Exception e) {
 			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
 			e.printStackTrace();
@@ -49,7 +49,7 @@ public class PageUnit {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
 				TestCase t = new ScriptTestCase(f.getAbsolutePath());
-				t.run(res);
+				t.run(results);
 			} else {
 				if (debug) {
 					System.err.printf("%s ignored, filename doesn't end in %s\n", f.getName(), TEST_FILENAME_EXT);
