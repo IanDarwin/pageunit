@@ -461,7 +461,7 @@ public class ScriptTestCase extends TestCase {
 					} else { 
 						// Use only getInputByName() here! Too confusing otherwise.
 						final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
-						thePage = (HTMLPage)session.submitForm(theForm, true, button);
+						thePage = (HTMLPage)session.submitForm(theForm, false, button);
 					}
 					
 					// That should have taken us to a new page.
