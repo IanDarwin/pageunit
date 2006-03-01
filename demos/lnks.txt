@@ -1,2 +1,2 @@
-# Exercise the Link Checker against the public site.
-V http://www.phenogenomics.ca/
+# Exercise the Link Checker against a small public site.
+V http://http://www.darwinsys.com/file/
