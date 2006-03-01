@@ -14,6 +14,7 @@ import pageunit.TestUtils;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLInput;
+import pageunit.html.HTMLInputImpl;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
@@ -207,16 +208,25 @@ public class WebSession {
 		handler.setFollowRedirects(followRedirects);
 		System.out.println("Initial POST request: " + action);
 
-		if (button != null) {
-			System.err.println("Warning: ignoring button " + button);	// need to do something for this case...
-		}
 		// propagate the inputs().getValues()...
-		List<HTMLInput> inputs = form.getInputs();
+		List<HTMLInput> inputs = form.getInputs();		
+		// If a button was named, remove non-specified submit buttons from the list of inputs
+		if (button != null) {
+			for (int i = 0; i < inputs.size(); ) {
+	
+				HTMLInputImpl input = (HTMLInputImpl) inputs.get(i);
+		
+				if (input.getType().equals(HTMLInput.Type.SUBMIT)
+						&& !input.getName().equals(button.getName()))
+					inputs.remove(i);
+			}
+		}
 		final int numInputs = inputs.size();
 		NameValuePair[] data = new NameValuePair[numInputs];
-		for (int i = 0; i < numInputs; i++) {
-			HTMLInput input = inputs.get(i);
-			data[i] = new NameValuePair(input.getName(), input.getValue());
+		int i = 0;
+		for (HTMLInput input : inputs) {
+			data[i++] = new NameValuePair(input.getName(), input.getValue());
+			System.out.println(">>>" + input + "<<< " + data[i-1]);
 		}
         handler.setRequestBody(data);
 		
