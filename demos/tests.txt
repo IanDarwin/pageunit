@@ -45,16 +45,16 @@ P /LogoutServlet
 
 # Go to Person List, put name in Search box, click Search button, ensure it comes back
 # with a list containing this person...
-P /view/PersonList.jsp
+J /view/PersonList.jsp
 M Person List
 F pageForm
 R firstName=Ian
 R lastName=Darwin
 #
 S displaybox1_search
-#T title Person List
-#M Ian Darwin
-#L Ian Darwin
+T title Person List
+M Aleem
+L Aleem
 
 P /upload/uploaddetail.jsp
 T title View/Archive
