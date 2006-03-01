@@ -226,7 +226,6 @@ public class WebSession {
 		int i = 0;
 		for (HTMLInput input : inputs) {
 			data[i++] = new NameValuePair(input.getName(), input.getValue());
-			System.out.println(">>>" + input + "<<< " + data[i-1]);
 		}
         handler.setRequestBody(data);
 		
