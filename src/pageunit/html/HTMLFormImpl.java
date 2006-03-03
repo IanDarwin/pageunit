@@ -15,6 +15,10 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	public HTMLFormImpl(String name, String action, String method) {
 		super(name);
 		this.action = action;
+		if (method == null) {
+			System.err.println("Warning: form has no method attribute");
+			method = "get";
+		}
 		this.method = HTTPMethod.valueOf(method.toUpperCase());
 	}
 
