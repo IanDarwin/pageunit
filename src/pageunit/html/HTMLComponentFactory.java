@@ -71,6 +71,12 @@ public class HTMLComponentFactory {
 		if (tag == HTML.Tag.INPUT) {
 			return HTMLInputImpl.class;
 		}
+		if (tag == HTML.Tag.SELECT) {
+			return HTMLSelectImpl.class;
+		}
+		if (tag == HTML.Tag.OPTION) {
+			return HTMLOptionImpl.class;
+		}
 		if (tag == HTML.Tag.TITLE) {
 			return HTMLTitleImpl.class;
 		}
