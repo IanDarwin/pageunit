@@ -2,6 +2,7 @@ package pageunit.http;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -209,16 +210,18 @@ public class WebSession {
 		System.out.println("Initial POST request: " + action);
 
 		// propagate the inputs().getValues()...
-		List<HTMLInput> inputs = form.getInputs();		
+		List<HTMLInput> inputs = form.getInputs();
+		
 		// If a button was named, remove non-specified submit buttons from the list of inputs
 		if (button != null) {
-			for (int i = 0; i < inputs.size(); ) {
+			Iterator<HTMLInput> inputsIterator = inputs.iterator();
+			while (inputsIterator.hasNext()) {
 	
-				HTMLInputImpl input = (HTMLInputImpl) inputs.get(i);
+				HTMLInputImpl input = (HTMLInputImpl) inputsIterator.next();
 		
 				if (input.getType().equals(HTMLInput.Type.SUBMIT)
 						&& !input.getName().equals(button.getName()))
-					inputs.remove(i);
+					inputsIterator.remove();
 			}
 		}
 		final int numInputs = inputs.size();
