@@ -12,7 +12,7 @@ public class HTMLComponentFactory {
 
 	public static HTMLComponent create(Tag tag, MutableAttributeSet attrs) {
 		String name = getAttribute(HTML.Attribute.NAME, attrs);
-		// If this were a Java 5 enum we could use switch.
+		// If HTML.Tag were a Java 5 enum we could use switch.
 		if (tag == HTML.Tag.HTML) {
 			return new HTMLHTMLImpl("top");
 		}

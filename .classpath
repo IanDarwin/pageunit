@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="lib/servletapi.jar"/>
 	<classpathentry sourcepath="/darwinsys-api/src" kind="lib" path="lib/darwinsys.jar"/>
 	<classpathentry kind="lib" path="lib/ant-1.6.5.jar"/>
+	<classpathentry kind="lib" path="lib/jsr223-script.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
