@@ -4,6 +4,8 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 
 	private Type type;
 	private String value;
+	private String onClick;
+	private String onChanged;
 	
 	public HTMLInputImpl(String name, String type) {
 		super(name);
@@ -25,5 +27,21 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 	public String toString() {		
 		return String.format(
 			"<input type=%s name=%s value=%s>", type, getName(), value);
+	}
+
+	public void setOnChanged(String script) {
+		this.onChanged = script;
+	}
+
+	public void setOnClick(String script) {
+		this.onClick = script;
+	}
+
+	protected String getOnChanged() {
+		return onChanged;
+	}
+
+	protected String getOnClick() {
+		return onClick;
 	}
 }

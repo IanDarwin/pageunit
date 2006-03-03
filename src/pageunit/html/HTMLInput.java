@@ -6,4 +6,6 @@ public interface HTMLInput extends HTMLContainer {
 	}
 	public String getValue();
 	public void setValue(String value);
+	public void setOnChanged(String script);
+	public void setOnClick(String script);
 }

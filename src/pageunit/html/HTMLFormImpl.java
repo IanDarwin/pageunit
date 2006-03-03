@@ -11,6 +11,7 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	String action;
 	HTTPMethod method;
 	List<HTMLInput> inputs = new ArrayList<HTMLInput>();
+	private String onSubmit;
 	
 	public HTMLFormImpl(String name, String action, String method) {
 		super(name);
@@ -64,6 +65,14 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	public String toString() {		
 		return String.format(
 			"<form method=%s action=%s name=%s>", method, action, getName());
+	}
+
+	public void setOnSubmit(String script) {
+		this.onSubmit = script;
+	}
+
+	protected String getOnSubmit() {
+		return onSubmit;
 	}
 
 }
