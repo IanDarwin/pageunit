@@ -18,7 +18,12 @@ public class PageUnit {
 	
 	private static int numFilesRun = 0;
 	private static boolean debug;
-	private static TestResult results = new TestResult();
+	private static TestResult results = new TestResult() {
+		@Override
+		public String toString() {
+			return String.format("%d Errors, %d Failures", errorCount(), failureCount());
+		}		
+	};
 		
 	public static void main(final String[] args) {
 		
