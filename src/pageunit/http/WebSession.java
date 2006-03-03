@@ -59,7 +59,7 @@ public class WebSession {
 		client.getHostConfiguration().setHost(
 				url.getHost(), url.getPort(), url.getProtocol());
 
-		GetMethod getter = new GetMethod(url.getPath());		
+		GetMethod getter = new GetMethod(url.toString());		
 		getter.setFollowRedirects(followRedirects);
 		
 		System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
