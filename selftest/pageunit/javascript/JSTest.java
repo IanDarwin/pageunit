@@ -17,7 +17,7 @@ public class JSTest extends TestCase {
 					.getEngineByName("js");
 			System.out.println(engine.getClass());
 			Object ret;
-			ret = engine.eval("print('Hello')");
+			ret = engine.eval("print('Hello World!')");
 			System.out.println("Results: " + ret);
 		} catch (Exception e) {
 			e.printStackTrace();
