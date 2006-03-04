@@ -4,6 +4,7 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 
 	private String name;
 	private String body;
+	private boolean debug = false;
 
 	public HTMLComponentBase(String name) {
 		this.name = name;
@@ -23,5 +24,8 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 
 	public void setBody(String body) {
 		this.body = body;
+		if (debug) {
+			System.out.printf("Set body of %s to %s%n", getClass(), getBody());
+		}
 	}
 }
