@@ -9,7 +9,9 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 	
 	public HTMLInputImpl(String name, String type) {
 		super(name);
-		this.type = Type.valueOf(type.toUpperCase());
+		if (type != null) {
+			this.type = Type.valueOf(type.toUpperCase());
+		}
 	}
 
 	public Type getType() {
