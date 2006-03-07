@@ -31,7 +31,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.FORM,
 			HTML.Tag.INPUT,	// MUST appear in both lists, sorry.
 			HTML.Tag.A,
-			HTML.Tag.TITLE
+			HTML.Tag.TITLE,
+			HTML.Tag.SCRIPT
 	};
 	private final HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag!!
@@ -43,7 +44,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		// Nothing to do this time.
 	}
 
-	private boolean debug;
+	private boolean debug = true;
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
@@ -68,7 +69,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
 				if (debug) {
-					System.out.print("COMPLEX: ");
+					System.out.println("COMPLEX: " + tag);
 				}
 				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
 				
@@ -128,7 +129,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	public void handleText(char[] data, int pos) {
 		final String bodyContent = new String(data);
 		if (">".equals(bodyContent))
-			return;	// A glitch in the parser causes this with abbreviated tags.
+			return;	// A glitch in the Java 5.0 parser causes this with abbreviated tags.
 		if (debug) {
 			System.out.println("TEXT: " + bodyContent);
 		}
