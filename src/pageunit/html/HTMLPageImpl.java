@@ -90,6 +90,10 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 			return null;
 		return title.getBody();
 	}
+	
+	public String getTitle() {		
+		return title == null ? null : title.getBody();
+	}
 
 	public void setContent(String content) {
 		this.content = content;

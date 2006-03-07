@@ -68,9 +68,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
-				if (debug) {
-					System.out.println("COMPLEX: " + tag);
-				}
 				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
 				
 				currentContainer().addChild(tmp);
@@ -89,7 +86,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (tmp instanceof HTMLInput && currentForm != null) {
 					((HTMLFormImpl)currentForm).addInput((HTMLInput)tmp);
 				}
-				if (tmp instanceof HTMLTitle) {
+				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)page).getTitle() == null) {
 					((HTMLPageImpl)page).setTitle((HTMLTitle)tmp);
 				}
 			}
@@ -97,19 +94,21 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	}
 	
 	@Override
-	/** If the HTML.tag that we get represents a class is an HTMLContainer in my hierarchy,
+	/** If the HTML.tag that we get represents a class in an HTMLContainer in my hierarchy,
 	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
 	 * element (as happened prior to this revision).
 	 */
-	public void handleEndTag(HTML.Tag tag, int pos) {
-		Class<?> c = HTMLComponentFactory.classForTagType(tag);
-		if (HTMLContainer.class.isAssignableFrom(c)) {
+	public void handleEndTag(HTML.Tag tag, int pos) {		
+		if (tag instanceof HTMLContainer) {
 			popContainer();
 		}
 	}
 	
 	@Override
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
+		if (debug) {
+			System.out.println("SimpleTag: " + tag);
+		}
 		for (HTML.Tag t : wantedSimpleTags) {
 			if (t == tag) {
 				if (HTML.Tag.INPUT == t) {
@@ -131,9 +130,12 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (">".equals(bodyContent))
 			return;	// A glitch in the Java 5.0 parser causes this with abbreviated tags.
 		if (debug) {
-			System.out.println("TEXT: " + bodyContent);
+			System.out.println("TEXT += " + bodyContent);
 		}
-		currentContainer().setBody(bodyContent);
+		currentContainer().appendBody(bodyContent);
+		if (debug) {
+			System.out.println("TEXT == " + currentContainer().getBody());
+		}
 	}
 	
 	private String content = null;

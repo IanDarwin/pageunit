@@ -3,8 +3,8 @@ package pageunit.html;
 public abstract class HTMLComponentBase implements HTMLComponent {
 
 	private String name;
-	private String body;
-	private boolean debug = false;
+	private StringBuffer body = new StringBuffer();
+	private boolean debug = true;
 
 	public HTMLComponentBase(String name) {
 		this.name = name;
@@ -19,13 +19,20 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 	}
 	
 	public String getBody() {
-		return body;
+		return body.toString();
 	}
 
 	public void setBody(String body) {
-		this.body = body;
+		this.body.replace(0, this.body.length(), body);
 		if (debug) {
-			System.out.printf("Set body of %s to %s%n", getClass(), getBody());
+			System.out.printf("Set body of %s to this value: %s (%s)%n", this, body, getBody());
+		}
+	}
+	
+	public void appendBody(String body) {
+		this.body.append(body);
+		if (debug) {
+			System.out.printf("Added to body of %s this value: %s (%s)%n", this, body, getBody());
 		}
 	}
 }

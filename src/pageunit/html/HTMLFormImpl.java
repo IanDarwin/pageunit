@@ -71,7 +71,7 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 		this.onSubmit = script;
 	}
 
-	protected String getOnSubmit() {
+	public String getOnSubmit() {
 		return onSubmit;
 	}
 

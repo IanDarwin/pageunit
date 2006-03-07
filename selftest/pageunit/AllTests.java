@@ -2,6 +2,7 @@ package regress;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import regress.html.HTMLComponentBaseTest;
 import regress.html.HTMLComponentFactoryTest;
 import regress.html.ParserTest;
 import regress.html.ParserTest2;
@@ -17,6 +18,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ScriptFileTest.class);
 		suite.addTestSuite(TestUtilsTest.class);
+		suite.addTestSuite(HTMLComponentBaseTest.class);
 		suite.addTestSuite(HTMLComponentFactoryTest.class);
 		suite.addTestSuite(ParserTest.class);
 		suite.addTestSuite(ParserTest2.class);
