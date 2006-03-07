@@ -4,7 +4,7 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 
 	private String name;
 	private StringBuffer body = new StringBuffer();
-	private boolean debug = true;
+	private boolean debug = false;
 
 	public HTMLComponentBase(String name) {
 		this.name = name;

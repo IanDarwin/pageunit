@@ -44,7 +44,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		// Nothing to do this time.
 	}
 
-	private boolean debug = true;
+	private boolean debug = false;
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
