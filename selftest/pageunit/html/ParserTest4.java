@@ -6,7 +6,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLForm;
 import pageunit.html.HTMLMeta;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
