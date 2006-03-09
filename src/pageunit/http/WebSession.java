@@ -1,9 +1,12 @@
 package pageunit.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -13,9 +16,11 @@ import org.apache.commons.httpclient.methods.PostMethod;
 
 import pageunit.TestUtils;
 import pageunit.html.HTMLAnchor;
+import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLInput;
 import pageunit.html.HTMLInputImpl;
+import pageunit.html.HTMLMeta;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
@@ -54,8 +59,9 @@ public class WebSession {
 	 * @throws HTMLParseException 
 	 * @throws HttpException 
 	 */
-	public HTMLPage getPage(final URL url, final boolean followRedirects) throws IOException, HTMLParseException {
-		
+	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException {
+		HTMLPage page;
+		do {
 		client.getHostConfiguration().setHost(
 				url.getHost(), url.getPort(), url.getProtocol());
 
@@ -80,9 +86,38 @@ public class WebSession {
 		
 		responseText = new String(responseBody);			// must save in field.
 		
-		return new HTMLParser().parse(responseText);
+		page = new HTMLParser().parse(responseText);
+		} while ((url = isRedirectpage(page)) != null);
+		return page;
 	}
 	
+	private URL isRedirectpage(HTMLPage page) {
+		// XXX Do we need to check HTTP status for !isRedirectURL?
+		
+		// check for META tag with Refresh
+		for (HTMLComponent c : page.getChildren()) {
+			if (c instanceof HTMLMeta) {
+				HTMLMeta m = (HTMLMeta)c;
+				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
+					return null;
+				}
+				String content = m.getMetaContent();
+				Pattern patt = Pattern.compile("\\d+;\\s*(.*)");
+				Matcher mat = patt.matcher(content);
+				if (mat.find()) {
+					try {
+						return new URL(mat.group(1));
+					} catch (MalformedURLException e) {
+						System.err.println("HTTP META REFRESH BOMBED: " + e);
+						return null;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+
 	/**
 	 * Get an unprotected page
 	 * 
