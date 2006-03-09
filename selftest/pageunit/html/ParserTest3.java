@@ -6,7 +6,6 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLContainer;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
@@ -30,7 +29,7 @@ public class ParserTest3 extends TestCase {
 		assertNotNull(page);
 		boolean found = false;
 		List<HTMLComponent> children = page.getChildren();
-		for (HTMLComponent c : ((HTMLContainer)children.get(0)).getChildren()) {
+		for (HTMLComponent c : children) {
 			System.out.printf("HTML Page Child %s%n", c);
 			if (c instanceof HTMLForm) {
 				System.out.printf("FORM: onSubmit=%s%n", ((HTMLForm)c).getOnSubmit());

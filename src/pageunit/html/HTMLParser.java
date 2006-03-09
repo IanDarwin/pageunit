@@ -24,7 +24,7 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
-	private HTMLPage page;
+	private HTMLPage currentPage;
 	
 	private final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
@@ -70,24 +70,27 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			if (t==tag) {
 				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
 				
-				currentContainer().addChild(tmp);
+				currentPage.addChild(tmp);
+				if (currentPage != currentContainer()) {
+					currentContainer().addChild(tmp);
+				}
 				
 				if (tmp instanceof HTMLContainer) {
 					pushContainer((HTMLContainer)tmp);
 				}
 				
 				if (tmp instanceof HTMLAnchor) {
-					page.addAnchor((HTMLAnchor)tmp);
+					currentPage.addAnchor((HTMLAnchor)tmp);
 				}
 				if (tmp instanceof HTMLForm) {
 					currentForm = (HTMLForm)tmp;
-					page.addForm(currentForm);
+					currentPage.addForm(currentForm);
 				}
 				if (tmp instanceof HTMLInput && currentForm != null) {
 					((HTMLFormImpl)currentForm).addInput((HTMLInput)tmp);
 				}
-				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)page).getTitle() == null) {
-					((HTMLPageImpl)page).setTitle((HTMLTitle)tmp);
+				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)currentPage).getTitle() == null) {
+					((HTMLPageImpl)currentPage).setTitle((HTMLTitle)tmp);
 				}
 			}
 		}
@@ -165,11 +168,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 * @throws HTMLParseException
 	 */
 	public HTMLPage parse(String s) throws IOException, HTMLParseException {
-		page = new HTMLPageImpl("Outer Page");
-		pushContainer(page);
-		page.setContent(content);
+		currentPage = new HTMLPageImpl("Outer Page");
+		pushContainer(currentPage);
+		currentPage.setContent(content);
 		new ParserDelegator().parse(new StringReader(s), this, true);
-		return page;
+		return currentPage;
 	}
 	
 	/**

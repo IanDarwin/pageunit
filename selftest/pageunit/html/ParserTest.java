@@ -29,9 +29,12 @@ public class ParserTest extends TestCase {
 	}
 	
 	public void testPageChild() {
-		List<HTMLComponent> topLevelItems = page.getChildren();
-		assertEquals("Children of TOP", 1, topLevelItems.size());
-		HTMLHTML htmlTop = (HTMLHTML)topLevelItems.get(0);
+		List<HTMLComponent> allItems = page.getChildren();
+		assertEquals("Children of Page", 5, allItems.size());
+		for (Object o : allItems) {
+			System.out.println("Child of Page: " + o);
+		}
+		HTMLHTML htmlTop = (HTMLHTML)allItems.get(0);
 		assertTrue("child of HTML is title", htmlTop.getChildren().get(0) instanceof HTMLTitle);
 	}
 	
