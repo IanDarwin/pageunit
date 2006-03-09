@@ -140,7 +140,9 @@ public class ScriptTestCase extends TestCase {
 	@Override
 	public int countTestCases() {
 		int tests = lines.size();
-		System.out.println("TestRunner.countTestCases() --> " + tests);
+		if (debug) {
+			System.out.println("TestRunner.countTestCases() --> " + tests);
+		}
 		return tests;
 	}
 
