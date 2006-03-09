@@ -64,7 +64,7 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	@Override
 	public String toString() {		
 		return String.format(
-			"<form method=%s action=%s name=%s>", method, action, getName());
+			"<form method=%s action=%s name=%s onsubmit=%s>", method, action, getName(), onSubmit);
 	}
 
 	public void setOnSubmit(String script) {

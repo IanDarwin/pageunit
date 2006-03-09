@@ -23,6 +23,8 @@ import javax.swing.text.html.parser.ParserDelegator;
  * @version $Id$
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
+	
+	private boolean debug = false;
 		
 	private HTMLPage currentPage;
 	
@@ -32,10 +34,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.INPUT,	// MUST appear in both lists, sorry.
 			HTML.Tag.A,
 			HTML.Tag.TITLE,
-			HTML.Tag.SCRIPT
+			HTML.Tag.SCRIPT,
 	};
 	private final HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag!!
+			HTML.Tag.META,
 	};
 	
 	private HTMLForm currentForm;
@@ -43,8 +46,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	public HTMLParser() {
 		// Nothing to do this time.
 	}
-
-	private boolean debug = false;
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
@@ -70,10 +71,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			if (t==tag) {
 				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
 				
-				currentPage.addChild(tmp);
-				if (currentPage != currentContainer()) {
-					currentContainer().addChild(tmp);
-				}
+				addAsChild(tmp);
 				
 				if (tmp instanceof HTMLContainer) {
 					pushContainer((HTMLContainer)tmp);
@@ -95,18 +93,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			}
 		}
 	}
-	
-	@Override
-	/** If the HTML.tag that we get represents a class in an HTMLContainer in my hierarchy,
-	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
-	 * element (as happened prior to this revision).
-	 */
-	public void handleEndTag(HTML.Tag tag, int pos) {		
-		if (tag instanceof HTMLContainer) {
-			popContainer();
-		}
-	}
-	
+
 	@Override
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 		if (debug) {
@@ -121,9 +108,31 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 					if (debug) {
 						System.out.print("SIMPLE: ");
 					}
-					currentContainer().addChild(HTMLComponentFactory.create(tag, attrs));
+					addAsChild(HTMLComponentFactory.create(tag, attrs));
 				}
 			}
+		}
+	}
+
+	@Override
+	/** If the HTML.tag that we get represents a class in an HTMLContainer in my hierarchy,
+	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
+	 * element (as happened prior to this revision).
+	 */
+	public void handleEndTag(HTML.Tag tag, int pos) {		
+		// XXX gross bug, must use classForWhatever instead of tag here!
+		if (tag instanceof HTMLContainer) {
+			popContainer();
+		}
+	}
+	
+	/**
+	 * @param c
+	 */
+	private void addAsChild(HTMLComponent c) {
+		currentPage.addChild(c);
+		if (currentPage != currentContainer()) {
+			currentContainer().addChild(c);
 		}
 	}
 	

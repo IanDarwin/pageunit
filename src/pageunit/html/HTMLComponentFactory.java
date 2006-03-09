@@ -1,5 +1,7 @@
 package pageunit.html;
 
+import java.util.Enumeration;
+
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
@@ -8,13 +10,19 @@ import javax.swing.text.html.HTML.Tag;
  */
 public class HTMLComponentFactory {
 
+	private static boolean debug = false;
+
 	/** Factory pattern: Create a new tag. 
 	 * DO NOT CHANGE without also changing classForTagType() accordingly!
 	 * @param tag
-	 * @param attrs
+	 * @param attrs The Set of attributes (note that the names are coerced to lower case for us, so look em up in lower case!).
 	 * @return The construct HTMLComponent.
 	 */
 	public static HTMLComponent create(Tag tag, MutableAttributeSet attrs) {
+		if (debug ) {
+			System.err.println(String.format("create(%s)", tag));
+			dumpAttrs(attrs);
+		}
 		String name = getAttribute(HTML.Attribute.NAME, attrs);
 		// If HTML.Tag were a Java 5 enum we could use switch.
 		if (tag == HTML.Tag.HTML) {
@@ -25,7 +33,6 @@ public class HTMLComponentFactory {
 			return new HTMLAnchorImpl(name, url);
 		}
 		if (tag == HTML.Tag.FORM) {
-			System.out.printf("FORM, attribtes types is %s%n", attrs.getClass());
 			String action = getAttribute(HTML.Attribute.ACTION, attrs);
 			String method = getAttribute(HTML.Attribute.METHOD, attrs);
 			String onSubmit = getAttribute("onsubmit", attrs);			
@@ -42,14 +49,14 @@ public class HTMLComponentFactory {
 			String value = getAttribute(HTML.Attribute.VALUE, attrs);
 			HTMLInput input = new HTMLInputImpl(name, type);
 			input.setValue(value);
-			// String onChange = getAttribute(HTML.Attribute.)
-			// String onClick = getAttribute(HTML.Attribute.)
+			String onChange = getAttribute("onchange", attrs);
+			String onClick = getAttribute("onclick", attrs);
 			// input.setEnabled(true);
 			return input;
 		}
 		if (tag == HTML.Tag.SELECT) {
 			HTMLSelect input = new HTMLSelectImpl(name);
-			// String onChange = getAttribute(HTML.Attribute.)
+			String onChange = getAttribute("onchange", attrs);
 			return input;
 		}
 		if (tag == HTML.Tag.OPTION) {
@@ -62,8 +69,12 @@ public class HTMLComponentFactory {
 		if (tag == HTML.Tag.SCRIPT) {
 			return new HTMLScriptImpl(name);
 		}
-		System.err.printf("HTMLComponentFactory(%s): unknown", tag);
-		return null;
+		if (tag == HTML.Tag.META) {
+			String equiv = getAttribute(HTML.Attribute.HTTPEQUIV, attrs);
+			String content = getAttribute(HTML.Attribute.CONTENT, attrs);
+			return new HTMLMetaImpl(name, equiv, content);
+		}
+		throw new IllegalStateException(String.format("HTMLComponentFactory(%s): requested build of unknown tag", tag));
 	}
 
 	/** Return the Class type in my hierarchy that corresponds to the HTML.Tag type in Swing's HTML;
@@ -99,6 +110,9 @@ public class HTMLComponentFactory {
 		if (tag == HTML.Tag.SCRIPT) {
 			return HTMLScriptImpl.class;
 		}
+		if (tag == HTML.Tag.META) {
+			return HTMLMetaImpl.class;
+		}
 		return HTMLComponentBase.class;
 	}
 	
@@ -108,4 +122,13 @@ public class HTMLComponentFactory {
 		return (String)attrs.getAttribute(attr_name);
 	}
 
+	private static void dumpAttrs(MutableAttributeSet attrs) {
+		Enumeration e = attrs.getAttributeNames();
+		while (e.hasMoreElements()) {
+			Object key = e.nextElement();
+			System.err.print(key);
+			System.err.print(" --> ");
+			System.err.println(attrs.getAttribute(key));
+		}
+	}
 }
