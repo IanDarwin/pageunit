@@ -5,6 +5,7 @@ import junit.framework.TestSuite;
 import regress.html.HTMLComponentBaseTest;
 import regress.html.HTMLComponentFactoryTest;
 import regress.html.HTMLMetaImplTest;
+import regress.html.HTMLSelectTest;
 import regress.html.ParserTest;
 import regress.html.ParserTest2;
 import regress.html.ParserTest3;
@@ -23,6 +24,7 @@ public class AllTests {
 		suite.addTestSuite(TestUtilsTest.class);
 		suite.addTestSuite(HTMLComponentBaseTest.class);
 		suite.addTestSuite(HTMLComponentFactoryTest.class);
+		suite.addTestSuite(HTMLSelectTest.class);
 		suite.addTestSuite(HTMLMetaImplTest.class);
 		suite.addTestSuite(ParserTest.class);
 		suite.addTestSuite(ParserTest2.class);
