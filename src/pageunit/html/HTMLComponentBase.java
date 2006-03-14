@@ -35,4 +35,9 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 			System.out.printf("Added to body of %s this value: %s (%s)%n", this, body, getBody());
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("<%s: Name %s>", getClass(), getName());
+	}
 }
