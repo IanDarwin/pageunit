@@ -32,12 +32,14 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.HTML,
 			HTML.Tag.FORM,
 			HTML.Tag.INPUT,	// MUST appear in both lists, sorry.
+			HTML.Tag.SELECT,
 			HTML.Tag.A,
 			HTML.Tag.TITLE,
 			HTML.Tag.SCRIPT,
 	};
 	private final HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag!!
+			HTML.Tag.OPTION,
 			HTML.Tag.META,
 	};
 	
