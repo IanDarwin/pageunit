@@ -19,7 +19,7 @@ public class HTMLSelectImpl extends HTMLInputImpl implements HTMLSelect {
 				}
 			}
 		}
-		System.err.println("Warn: no <option> for " + value);
+		System.err.println("Warning: no <option> for " + value);
 		super.setValue(value);
 	}
 }
