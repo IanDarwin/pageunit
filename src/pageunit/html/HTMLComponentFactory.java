@@ -35,9 +35,9 @@ public class HTMLComponentFactory {
 		if (tag == HTML.Tag.FORM) {
 			String action = getAttribute(HTML.Attribute.ACTION, attrs);
 			String method = getAttribute(HTML.Attribute.METHOD, attrs);
-			String onSubmit = getAttribute("onsubmit", attrs);			
+						
 			HTMLFormImpl form = new HTMLFormImpl(name, action, method);
-			form.setOnSubmit(onSubmit);
+			processOnSubmit(form, attrs);
 			return form;
 		}
 		if (tag == HTML.Tag.IMG) {
@@ -49,14 +49,14 @@ public class HTMLComponentFactory {
 			String value = getAttribute(HTML.Attribute.VALUE, attrs);
 			HTMLInput input = new HTMLInputImpl(name, type);
 			input.setValue(value);
-			String onChange = getAttribute("onchange", attrs);
-			String onClick = getAttribute("onclick", attrs);
+			processOnChange(input, attrs);
+			processOnClick(input, attrs);
 			// input.setEnabled(true);
 			return input;
 		}
 		if (tag == HTML.Tag.SELECT) {
 			HTMLSelect input = new HTMLSelectImpl(name);
-			String onChange = getAttribute("onchange", attrs);
+			processOnChange(input, attrs);
 			return input;
 		}
 		if (tag == HTML.Tag.OPTION) {
@@ -75,6 +75,25 @@ public class HTMLComponentFactory {
 			return new HTMLMetaImpl(name, equiv, content);
 		}
 		throw new IllegalStateException(String.format("HTMLComponentFactory(%s): requested build of unknown tag", tag));
+	}
+
+	private static void processOnChange(OnChangeSettable c, MutableAttributeSet attrs) {
+		String script = getAttribute("onchange", attrs);
+		if (script != null) {
+			c.setOnChange(script);
+		}		
+	}
+	private static void processOnClick(OnClickSettable c, MutableAttributeSet attrs) {
+		String script = getAttribute("onclick", attrs);
+		if (script != null) {
+			c.setOnClick(script);
+		}		
+	}
+	private static void processOnSubmit(OnSubmitSettable c, MutableAttributeSet attrs) {
+		String script = getAttribute("onsubmit", attrs);
+		if (script != null) {
+			c.setOnSubmit(script);
+		}		
 	}
 
 	/** Return the Class type in my hierarchy that corresponds to the HTML.Tag type in Swing's HTML;

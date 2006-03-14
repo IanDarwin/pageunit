@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public interface HTMLInput extends HTMLContainer {
+public interface HTMLInput extends HTMLContainer,OnChangeSettable, OnClickSettable {
 	enum Type {
 		TEXT, PASSWORD, RADIO, HIDDEN, SUBMIT, CHECKBOX, RESET, FILE, BUTTON, SELECT
 	}

@@ -39,11 +39,21 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 		this.onClick = script;
 	}
 
-	protected String getOnChanged() {
+	public String getOnChanged() {
 		return onChanged;
 	}
 
-	protected String getOnClick() {
+	public String getOnClick() {
 		return onClick;
+	}
+
+	public void setOnChange(String script) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public String getOnChange() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
