@@ -202,27 +202,29 @@ public class ScriptTestCase extends TestCase {
 					String className = restOfLine;
 					if (className == null || className.length() == 0) {
 						throw new IllegalArgumentException("Plug-In Command must have class name");
-					} else {
-						Object o = null;
-						try {
-							o = Class.forName(className).newInstance();
-						} catch (Throwable e) {
-							e.printStackTrace();
-							throw new IllegalArgumentException("class " + className + " did not load: " + e);
-						}
-						if (!(o instanceof TestFilter)) {
-							throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
-						}
-						filterList.add((TestFilter)o);
-					}				
+					}
+					Object xo = null;
+					try {
+						xo = Class.forName(className).newInstance();
+					} catch (Throwable e) {
+						e.printStackTrace();
+						throw new IllegalArgumentException("class " + className + " did not load: " + e);
+					}
+					if (!(xo instanceof TestFilter)) {
+						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
+					}
+					filterList.add((TestFilter)xo);			
 					continue;
 					
 				case Y:	// REMOVE XTENTION or PLUG-IN
 					String clazzName = restOfLine;
-					for (Object o : filterList) {
-						if (o.getClass().getName().equals(clazzName)) {
+					if (clazzName == null || clazzName.length() == 0) {
+						throw new IllegalArgumentException("Plug-In Command must have class name");
+					}
+					for (Object yo : filterList) {
+						if (yo.getClass().getName().equals(clazzName)) {
 							System.out.println("Removing filter " + clazzName);
-							filterList.remove(o);
+							filterList.remove(yo);
 						}
 					}
 					continue;
