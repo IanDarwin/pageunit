@@ -220,7 +220,8 @@ public class ScriptTestCase extends TestCase {
 				case Y:	// REMOVE XTENTION or PLUG-IN
 					String clazzName = restOfLine;
 					for (Object o : filterList) {
-						if (clazzName.equals(o.getClass().getName())) {
+						if (o.getClass().getName().equals(clazzName)) {
+							System.out.println("Removing filter " + clazzName);
 							filterList.remove(o);
 						}
 					}
