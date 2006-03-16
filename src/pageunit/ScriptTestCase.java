@@ -91,7 +91,7 @@ public class ScriptTestCase extends TestCase {
 		this.fileName = fileName;
 		readTests(reader, fileName);
 	}
-
+	
 	/** Read all the tests.
 	 * @param r
 	 * @param fileName
@@ -146,7 +146,7 @@ public class ScriptTestCase extends TestCase {
 		return tests;
 	}
 
-	/** Run all the tests in the current file.
+	/** Run all the tests in the current file; normally called by JUnit framework
 	 */
 	@Override
 	public void run(TestResult results) {
@@ -173,7 +173,7 @@ public class ScriptTestCase extends TestCase {
 			String line = test.getArguments();
 			System.out.printf("%d: %s%n", lineNumber, line);
 			
-			char c = test.getCommand();
+			Command c = test.getCommand();
 			String restOfLine =  variables.substVars(test.getArguments());
 			
 			results.startTest(test);			
@@ -186,19 +186,19 @@ public class ScriptTestCase extends TestCase {
 				// Handle declarative (non-test) requests here.
 				// Each case ends with continue, to next iteration of main loop.
 
-				case '<':	// File Inclusion is now handled entirely in reading phase...
+				case SOURCE:	// File Inclusion is now handled entirely in reading phase...
 					throw new IllegalStateException("'<' got into list of tests, should have been removed by readTests");
 
-				case '=':	// Set Variable
+				case SET:	// Set Variable
 					String[] args = getTwoArgs("variable", restOfLine, ' ');
 					variables.setVar(args[0], args[1]);
 					continue;
 					
-				case 'E':	// echo
+				case E:	// echo
 					System.out.println(restOfLine);
 					continue;
 					
-				case 'X':	// XTENTION or PLUG-IN
+				case X:	// XTENTION or PLUG-IN
 					String className = restOfLine;
 					if (className == null || className.length() == 0) {
 						throw new IllegalArgumentException("Plug-In Command must have class name");
@@ -217,7 +217,7 @@ public class ScriptTestCase extends TestCase {
 					}				
 					continue;
 					
-				case 'Y':	// REMOVE XTENTION or PLUG-IN
+				case Y:	// REMOVE XTENTION or PLUG-IN
 					String clazzName = restOfLine;
 					for (Object o : filterList) {
 						if (clazzName.equals(o.getClass().getName())) {
@@ -226,11 +226,11 @@ public class ScriptTestCase extends TestCase {
 					}
 					continue;
 					
-				case 'D':	// debug on/off
+				case D:	// debug on/off
 					setDebug(getBoolean(restOfLine));
 					continue; 
 					
-				case 'B':	// set Base URL
+				case B:	// set Base URL
 					URL u = null;
 					try {
 						u = new URL(restOfLine);
@@ -242,11 +242,11 @@ public class ScriptTestCase extends TestCase {
 					}				
 					continue;
 					
-				case 'H':	// hard-code hostname
+				case H:	// hard-code hostname
 					variables.setVar("HOST", restOfLine.trim());
 					continue;
 					
-				case 'O':	// hard-code pOrt number
+				case O:	// hard-code pOrt number
 					String portNumStr = restOfLine.trim();
 					try {
 						int i = Integer.parseInt(portNumStr);
@@ -258,7 +258,7 @@ public class ScriptTestCase extends TestCase {
 					}
 					continue;
 					
-				case 'A':	// As user [pw]
+				case A:	// As user [pw]
 					String[] atmp = getOneOrTwoArgs("name [pass]", restOfLine, ' ');				
 					variables.setVar("USER", atmp[0]);
 					if (atmp[1] != null) {
@@ -266,11 +266,11 @@ public class ScriptTestCase extends TestCase {
 					}
 					continue;
 					
-				case 'C':	// Configuration
+				case C:	// Configuration
 					System.err.println("Config management not written yet, abandoning this file");
 					break;
 					
-				case 'N':	// start new session
+				case N:	// start new session
 					session = new WebSession();
 					session.setThrowExceptionOnFailingStatusCode(false);
 					theLink = null;
@@ -279,7 +279,7 @@ public class ScriptTestCase extends TestCase {
 			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
 			// Handle most "actual" tests here; each case ends with break.
 
-				case 'P':	// get Unprotected page
+				case P:	// get Unprotected page
 					resetForPage();
 					page = restOfLine;
 					assertValidRURL(page);
@@ -296,7 +296,7 @@ public class ScriptTestCase extends TestCase {
 					System.out.println("Got page " + page);
 					break;
 					
-				case 'J':	// get J2EE protected page
+				case J:	// get J2EE protected page
 					resetForPage();
 					page = restOfLine;
 					assertValidRURL(page);
@@ -320,7 +320,7 @@ public class ScriptTestCase extends TestCase {
 					System.out.println("Got page " + page);
 					break;
 					
-				case 'M':	// page contains text
+				case M:	// page contains text
 					// PreCondition: theResult has been set by the U or P code above
 					theLink = null;
 					assertNotNull("Invalid test: requested txt before getting page", thePage);
@@ -345,7 +345,7 @@ public class ScriptTestCase extends TestCase {
 					mHighWater = mMatcher.groupCount();
 					break;
 					
-				case 'T':	// page contains tag with text (in bodytext or attribute value)
+				case T:	// page contains tag with text (in bodytext or attribute value)
 					// PreCondition: theResult has been set by the U or P code above
 					assertNotNull("Requested txt before getting page", theResult);
 					
@@ -376,7 +376,7 @@ public class ScriptTestCase extends TestCase {
 					assertTrue("did not find tag type " + tagType + " with text: " + tagText, found);
 					break;
 					
-				case 'L':	// page contains Link
+				case L:	// page contains Link
 					// PreCondition: theResult has been set by the U or P code above
 					String linkURL = restOfLine;
 					theLink = null;
@@ -412,7 +412,7 @@ public class ScriptTestCase extends TestCase {
 					assertValidRURL(theLink.toString());
 					break;
 					
-				case 'G':	// Go to link
+				case G:	// Go to link
 					// PreCondition: theLink has been set by the 'L' case above.
 					assertNotNull("found link before gotoLink", theLink);
 					thePage = (HTMLPage)session.follow(theLink);
@@ -422,8 +422,7 @@ public class ScriptTestCase extends TestCase {
 					
 				// FORMS
 					
-				case 'F':
-					// Find Form By Name
+				case F: // Find Form By Name
 					String formName = restOfLine;
 					List<HTMLForm> theForms = thePage.getForms();
 					for (Iterator<HTMLForm> iterator = theForms.iterator(); iterator.hasNext();) {
@@ -435,7 +434,7 @@ public class ScriptTestCase extends TestCase {
 					assertNotNull("Find form named " + formName, theForm);
 					break;
 					
-				case 'R':	// set parameter to value
+				case R:	// set parameter to value
 					// PRECONDITION: theForm has been set by a previous F command
 					assertNotNull("find a form before setting Parameters", theForm);
 					
@@ -453,7 +452,7 @@ public class ScriptTestCase extends TestCase {
 					
 					break;
 					
-				case 'S':	// SUBMIT
+				case S:	// SUBMIT
 					assertNotNull("Form found before submit", theForm);
 					
 					String submitValue = restOfLine;
@@ -481,7 +480,7 @@ public class ScriptTestCase extends TestCase {
 					
 					break;	
 					
-				case 'V':	// Verify (Link Checker) - may take a long time!
+				case V:	// Verify (Link Checker) - may take a long time!
 					System.out.printf("LinkChecker: %s%n", restOfLine);
 					LinkChecker.checkStartingAt(restOfLine);
 					break;

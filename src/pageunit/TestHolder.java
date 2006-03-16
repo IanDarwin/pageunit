@@ -8,7 +8,7 @@ import junit.framework.TestResult;
  * @author ian
  */
 public class PageTest implements Test {
-	private final char command;
+	private final Command command;
 	private final String args;
 	private final String fileName;
 	private final int lineNumber;
@@ -19,7 +19,11 @@ public class PageTest implements Test {
 	 */
 	public PageTest(final char commandChar, final String args, final String fileName, final int lineNumber) {
 		super();
-		this.command = commandChar;
+		if (commandChar == '<')
+			command = Command.SOURCE;
+		else if (commandChar == '=')
+			command = Command.SET;
+		else command = Command.valueOf(String.valueOf(commandChar));
 		this.args = args;
 		this.fileName = fileName;
 		this.lineNumber = lineNumber;
@@ -36,7 +40,7 @@ public class PageTest implements Test {
 		return String.format("PageTest: %c %s:%d", command, fileName, lineNumber);
 	}
 
-	public char getCommand() {
+	public Command getCommand() {
 		return command;
 	}
 	

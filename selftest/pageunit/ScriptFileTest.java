@@ -90,8 +90,11 @@ public class ScriptFileTest extends TestCase {
 	
 	public void testBadCommand() throws Exception {
 		String script = "* This should fail";
-		System.err.println("Following 'Imbedded test data' test will NOT fail the Green Bar as it's run on its own!");
-		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
-		t.run(new TestResult());
+		try {
+			new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
+			fail("did not throw expected IAE on bad command");
+		} catch (IllegalArgumentException e) {
+			System.out.println("Caught expected IAE on invalid command");
+		}
 	}
 }
