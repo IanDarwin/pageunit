@@ -25,6 +25,7 @@ public class HTMLComponentFactory {
 		}
 		String name = getAttribute(HTML.Attribute.NAME, attrs);
 		// If HTML.Tag were a Java 5 enum we could use switch.
+		
 		if (tag == HTML.Tag.HTML) {
 			return new HTMLHTMLImpl("top");
 		}
@@ -68,6 +69,9 @@ public class HTMLComponentFactory {
 		}
 		if (tag == HTML.Tag.SCRIPT) {
 			return new HTMLScriptImpl(name);
+		}
+		if (tag == HTML.Tag.STYLE) {
+			return new HTMLStyleImpl(name);
 		}
 		if (tag == HTML.Tag.META) {
 			String equiv = getAttribute(HTML.Attribute.HTTPEQUIV, attrs);
@@ -128,6 +132,9 @@ public class HTMLComponentFactory {
 		}
 		if (tag == HTML.Tag.SCRIPT) {
 			return HTMLScriptImpl.class;
+		}
+		if (tag == HTML.Tag.STYLE) {
+			return HTMLStyleImpl.class;
 		}
 		if (tag == HTML.Tag.META) {
 			return HTMLMetaImpl.class;
