@@ -31,16 +31,16 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
 			HTML.Tag.FORM,
-			HTML.Tag.INPUT,	// MUST appear in both lists, sorry.
 			HTML.Tag.SELECT,
 			HTML.Tag.A,
 			HTML.Tag.TITLE,
 			HTML.Tag.SCRIPT,
+			HTML.Tag.STYLE,
 	};
 	private final HTML.Tag[] wantedSimpleTags = {
-			HTML.Tag.INPUT,	// Input is treated as simple tag!!
-			HTML.Tag.OPTION,
+			HTML.Tag.INPUT,	// Input is treated as simple tag by the Swing HTML Parser
 			HTML.Tag.META,
+			HTML.Tag.OPTION,
 	};
 	
 	private HTMLForm currentForm;
@@ -72,12 +72,13 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
 				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
+				if (debug) {
+					System.out.println("DOING COMPLEX: " + tmp);
+				}
 				
 				addAsChild(tmp);
 				
-				if (tmp instanceof HTMLContainer) {
-					pushContainer((HTMLContainer)tmp);
-				}
+				handeCommon(tmp);
 				
 				if (tmp instanceof HTMLAnchor) {
 					currentPage.addAnchor((HTMLAnchor)tmp);
@@ -85,14 +86,16 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (tmp instanceof HTMLForm) {
 					currentForm = (HTMLForm)tmp;
 					currentPage.addForm(currentForm);
-				}
-				if (tmp instanceof HTMLInput && currentForm != null) {
-					((HTMLFormImpl)currentForm).addInput((HTMLInput)tmp);
-				}
+				}				
 				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)currentPage).getTitle() == null) {
 					((HTMLPageImpl)currentPage).setTitle((HTMLTitle)tmp);
 				}
+				handeCommon(tmp);
+				return;
 			}
+		}
+		if (debug) {
+			System.out.printf("HTMLParser: requested handleStartTag of unknown tag %s%n", tag);
 		}
 	}
 
@@ -102,17 +105,31 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			System.out.println("SimpleTag: " + tag);
 		}
 		for (HTML.Tag t : wantedSimpleTags) {
-			if (t == tag) {
-				if (HTML.Tag.INPUT == t) {
-					// Logic for Input tag fits better in HandleStartTag.
-					handleStartTag(tag, attrs, pos);
-				} else {
-					if (debug) {
-						System.out.print("SIMPLE: ");
-					}
-					addAsChild(HTMLComponentFactory.create(tag, attrs));
+			if (t == tag) {				
+				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
+				if (debug) {
+					System.out.println("DOING SIMPLE: " + tmp);
 				}
+				addAsChild(tmp);
+				handeCommon(tmp);
+				return;
 			}
+		}
+		if (debug) {
+			System.out.printf("HTMLParser: requested handleSimpleTag of unknown tag %s%n", tag);			
+		}
+	}
+
+	/**
+	 * Handle special goo that may need application to both simple and complex tag types.
+	 * @param comp
+	 */
+	private void handeCommon(HTMLComponent comp) {
+		if (comp instanceof HTMLContainer) {
+			pushContainer((HTMLContainer)comp);
+		}
+		if (comp instanceof HTMLInput && currentForm != null) {
+			((HTMLFormImpl)currentForm).addInput((HTMLInput)comp);
 		}
 	}
 
