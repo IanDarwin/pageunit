@@ -101,6 +101,7 @@ public class ScriptTestCase extends TestCase {
 		LineNumberReader is = new LineNumberReader(r);
 		String line;
 		while ((line = is.readLine()) != null) {
+			line = line.trim();
 			if (line.length() == 0) {
 				continue;
 			}
