@@ -75,10 +75,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (debug) {
 					System.out.println("DOING COMPLEX: " + tmp);
 				}
-				
-				addAsChild(tmp);
-				
-				handeCommon(tmp);
+								
+				handleCommon(tmp);
 				
 				if (tmp instanceof HTMLAnchor) {
 					currentPage.addAnchor((HTMLAnchor)tmp);
@@ -90,7 +88,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)currentPage).getTitle() == null) {
 					((HTMLPageImpl)currentPage).setTitle((HTMLTitle)tmp);
 				}
-				handeCommon(tmp);
+
 				return;
 			}
 		}
@@ -110,8 +108,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				if (debug) {
 					System.out.println("DOING SIMPLE: " + tmp);
 				}
-				addAsChild(tmp);
-				handeCommon(tmp);
+				
+				handleCommon(tmp);
 				return;
 			}
 		}
@@ -124,7 +122,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 * Handle special goo that may need application to both simple and complex tag types.
 	 * @param comp
 	 */
-	private void handeCommon(HTMLComponent comp) {
+	private void handleCommon(HTMLComponent comp) {
+		currentPage.addChild(comp);
+		if (currentPage != currentContainer()) {
+			currentContainer().addChild(comp);
+		}
 		if (comp instanceof HTMLContainer) {
 			pushContainer((HTMLContainer)comp);
 		}
@@ -139,19 +141,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 * element (as happened prior to this revision).
 	 */
 	public void handleEndTag(HTML.Tag tag, int pos) {		
-		// XXX gross bug, must use classForWhatever instead of tag here!
-		if (tag instanceof HTMLContainer) {
+		if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
 			popContainer();
-		}
-	}
-	
-	/**
-	 * @param c
-	 */
-	private void addAsChild(HTMLComponent c) {
-		currentPage.addChild(c);
-		if (currentPage != currentContainer()) {
-			currentContainer().addChild(c);
 		}
 	}
 	
