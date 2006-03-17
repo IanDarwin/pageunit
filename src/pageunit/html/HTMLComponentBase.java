@@ -38,6 +38,6 @@ public abstract class HTMLComponentBase implements HTMLComponent {
 	
 	@Override
 	public String toString() {
-		return String.format("<%s: Name %s>", getClass(), getName());
+		return String.format("<%s: Name %s>", getClass().getName(), getName());
 	}
 }
