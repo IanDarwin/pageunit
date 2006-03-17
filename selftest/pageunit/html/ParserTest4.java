@@ -53,8 +53,7 @@ public class ParserTest4 extends TestCase {
 		for (HTMLComponent c : children) {
 			if (c instanceof HTMLScript) {
 				System.out.println("Found: " + c);
-				// assertEquals("var highlight; var highlightSelected;", c.getBody());
-				System.err.println("WARNING: test incomplete here");
+				assertEquals("var highlight; var highlightSelected;", c.getBody());
 				return;
 			}
 		}
