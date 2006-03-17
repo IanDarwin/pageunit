@@ -19,11 +19,17 @@ public class PageTest implements Test {
 	 */
 	public PageTest(final char commandChar, final String args, final String fileName, final int lineNumber) {
 		super();
+		String commandString = new String(new char[] {commandChar});
 		if (commandChar == '<')
 			command = Command.SOURCE;
 		else if (commandChar == '=')
 			command = Command.SET;
-		else command = Command.valueOf(String.valueOf(commandChar));
+		else try {
+			command = Command.valueOf(commandString);
+		} catch (IllegalArgumentException e) {
+			System.err.printf("Could not handle command `%s'%n", commandString);
+			throw e;
+		}
 		this.args = args;
 		this.fileName = fileName;
 		this.lineNumber = lineNumber;
