@@ -1,6 +1,6 @@
 package pageunit.html;
 
-public class HTMLScriptImpl extends HTMLContainerBase implements HTMLScript {
+public class HTMLScriptImpl extends HTMLComponentBase implements HTMLScript {
 
 	private String lang;
 
@@ -14,5 +14,10 @@ public class HTMLScriptImpl extends HTMLContainerBase implements HTMLScript {
 
 	public String getLanguage() {
 		return lang;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("<Script name='%s' language='%s'>", getName(), getLanguage());
 	}
 }
