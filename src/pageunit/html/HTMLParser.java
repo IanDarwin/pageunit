@@ -43,7 +43,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.OPTION,
 	};
 	
-	private HTMLForm currentForm;
+	private HTMLForm currentForm;		// for addInput()
 	
 	public HTMLParser() {
 		// Nothing to do this time.
@@ -60,7 +60,25 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		return containerStack.pop();
 	}
 	
-	private HTMLContainer currentContainer() {
+	private HTMLContainer currentContainer() {	// for addChild()
+		return containerStack.peek();
+	}
+	
+	// Same deal for current component, so body text goes in correctly:
+	// This variable and three methods implement a semi-opaque stack of HTML containers
+	private Stack<HTMLComponent> componentStack = new Stack<HTMLComponent>();
+	
+	private void pushComponent(HTMLComponent newbie) {
+		//System.out.printf("HTMLParser.pushComponent(%s)%n", newbie);
+		componentStack.push(newbie);
+	}
+	
+	private HTMLComponent popComponent() {
+		//System.out.printf("HTMLParser.popComponent() ==> %s%n", componentStack.peek());
+		return componentStack.pop();
+	}
+	
+	private HTMLContainer currentComponent() {	// for setBody()
 		return containerStack.peek();
 	}
 	
@@ -69,32 +87,36 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (debug) {
 			System.out.println("StartTag: " + tag);
 		}
+		HTMLComponent comp = null;
+		boolean found = false;
 		for (HTML.Tag t : wantedComplexTags) {
 			if (t==tag) {
-				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
-				if (debug) {
-					System.out.println("DOING COMPLEX: " + tmp);
-				}
-								
-				handleCommon(tmp);
-				
-				if (tmp instanceof HTMLAnchor) {
-					currentPage.addAnchor((HTMLAnchor)tmp);
-				}
-				if (tmp instanceof HTMLForm) {
-					currentForm = (HTMLForm)tmp;
-					currentPage.addForm(currentForm);
-				}				
-				if (tmp instanceof HTMLTitle && ((HTMLPageImpl)currentPage).getTitle() == null) {
-					((HTMLPageImpl)currentPage).setTitle((HTMLTitle)tmp);
-				}
-
-				return;
+				comp = HTMLComponentFactory.create(tag, attrs);
+				found = true;
+				break;				
 			}
 		}
-		if (debug) {
-			System.out.printf("HTMLParser: requested handleStartTag of unknown tag %s%n", tag);
+		if (!found) {
+			comp = new GenericHTMLContainer(null, tag.toString());
 		}
+		if (debug) {
+			System.out.println("DOING COMPLEX: " + comp);
+		}
+		pushComponent(comp);
+		handleCommon(comp);
+		
+		if (comp instanceof HTMLAnchor) {
+			currentPage.addAnchor((HTMLAnchor)comp);
+		}
+		if (comp instanceof HTMLForm) {
+			currentForm = (HTMLForm)comp;
+			currentPage.addForm(currentForm);
+		}				
+		if (comp instanceof HTMLTitle && ((HTMLPageImpl)currentPage).getTitle() == null) {
+			((HTMLPageImpl)currentPage).setTitle((HTMLTitle)comp);
+		}
+
+		return;
 	}
 
 	@Override
@@ -102,20 +124,24 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (debug) {
 			System.out.println("SimpleTag: " + tag);
 		}
+		HTMLComponent comp = null;
+		boolean found = false;
 		for (HTML.Tag t : wantedSimpleTags) {
 			if (t == tag) {				
-				HTMLComponent tmp = HTMLComponentFactory.create(tag, attrs);
-				if (debug) {
-					System.out.println("DOING SIMPLE: " + tmp);
-				}
-				
-				handleCommon(tmp);
-				return;
+				comp = HTMLComponentFactory.create(tag, attrs);
+				found = true;
+				break;
 			}
 		}
-		if (debug) {
-			System.out.printf("HTMLParser: requested handleSimpleTag of unknown tag %s%n", tag);			
+		if (!found) {
+			comp = new GenericHTMLComponent(null, tag.toString());		
 		}
+		if (debug) {
+			System.out.println("DOING SIMPLE: " + comp);
+		}
+
+		handleCommon(comp);
+		return;
 	}
 
 	/**
@@ -140,7 +166,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
 	 * element (as happened prior to this revision).
 	 */
-	public void handleEndTag(HTML.Tag tag, int pos) {		
+	public void handleEndTag(HTML.Tag tag, int pos) {
+		if (debug) {
+			System.out.printf("HTMLParser.handleEndTag(%s)%n", tag);
+		}
+		popComponent();
 		if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
 			popContainer();
 		}
@@ -154,7 +184,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (debug) {
 			System.out.println("TEXT += " + bodyContent);
 		}
-		currentContainer().appendBody(bodyContent);
+		currentComponent().appendBody(bodyContent);
 		if (debug) {
 			System.out.println("TEXT == " + currentContainer().getBody());
 		}
