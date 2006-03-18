@@ -30,7 +30,7 @@ public class ParserTest extends TestCase {
 	
 	public void testPageChild() {
 		List<HTMLComponent> allItems = page.getChildren();
-		assertEquals("Children of Page", 5, allItems.size());
+		assertEquals("Children of Page", 8, allItems.size());
 		for (Object o : allItems) {
 			System.out.println("Child of Page: " + o);
 		}
