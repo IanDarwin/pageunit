@@ -57,6 +57,7 @@ public class ParserTest4 extends TestCase {
 				return;
 			}
 		}
+		fail("look for <script>");
 	}
 	
 	public void testFindStyle() throws Throwable {
@@ -70,5 +71,6 @@ public class ParserTest4 extends TestCase {
 				return;
 			}
 		}
+		fail("look for <style>");
 	}
 }
