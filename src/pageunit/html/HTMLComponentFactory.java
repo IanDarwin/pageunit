@@ -68,7 +68,11 @@ public class HTMLComponentFactory {
 			return new HTMLTitleImpl(null);
 		}
 		if (tag == HTML.Tag.SCRIPT) {
-			return new HTMLScriptImpl(name);
+			HTMLScript script = new HTMLScriptImpl(name);
+			String lang = getAttribute(HTML.Attribute.LANGUAGE, attrs);
+			if (lang != null)
+				script.setLanguage(lang);
+			return script;
 		}
 		if (tag == HTML.Tag.STYLE) {
 			return new HTMLStyleImpl(name);
