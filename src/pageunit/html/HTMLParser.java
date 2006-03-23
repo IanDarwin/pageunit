@@ -9,6 +9,7 @@ import java.util.Stack;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.parser.ParserDelegator;
 
 /**
@@ -41,6 +42,17 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.INPUT,	// Input is treated as simple tag by the Swing HTML Parser
 			HTML.Tag.META,
 			HTML.Tag.OPTION,
+	};
+	
+	/** Tags that should be discarded because otherwise they would cause
+	 * text to be assigned to the wrong parent tag.
+	 */
+	private final HTML.Tag[] totallyIgnoreTags = {
+			HTML.Tag.B,
+			HTML.Tag.I,
+			HTML.Tag.EM,
+			HTML.Tag.STRIKE,
+			HTML.Tag.STRONG,
 	};
 	
 	private HTMLForm currentForm;		// for addInput()
@@ -96,7 +108,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				break;				
 			}
 		}
-		if (!found) {
+		if (!found && !totallyIgnoreThisTag(tag)) {
 			comp = new GenericHTMLContainer(null, tag.toString());
 		}
 		if (debug) {
@@ -119,6 +131,15 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		return;
 	}
 
+	private boolean totallyIgnoreThisTag(Tag tag) {
+		for (HTML.Tag t : totallyIgnoreTags) {
+			if (t == tag) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
 		if (debug) {
@@ -133,7 +154,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				break;
 			}
 		}
-		if (!found) {
+		if (!found && !totallyIgnoreThisTag(tag)) {
 			comp = new GenericHTMLComponent(null, tag.toString());		
 		}
 		if (debug) {
