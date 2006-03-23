@@ -11,7 +11,6 @@ import pageunit.html.HTMLHTML;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
-import pageunit.html.HTMLTitle;
 
 public class ParserTest extends TestCase {
 	final String testData = "<html><head><title>Fool</title></head><body>" +
