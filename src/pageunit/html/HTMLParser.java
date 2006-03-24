@@ -231,13 +231,19 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 	}
 	
+	/** The Swing HTML parser sends the body of all SCRIPT tags as comments, even if they are
+	 * non-comment Script elements. So convert them here.
+	 * @see javax.swing.text.html.HTMLEditorKit$ParserCallback#handleComment(char[], int)
+	 */
 	@Override
 	public void handleComment(char[] data, int pos) {
-		System.out.println("HTMLParser.handleComment()");
+		if (debug)
+			System.out.println("HTMLParser.handleComment()");
 		if (currentComponent() instanceof HTMLScript) {
 			currentComponent().appendBody(new String(data));
 		} else {
-			System.out.println("LOSING THIS, because curComp = " + currentComponent() + " " + new String(data));
+			if (debug)
+				System.out.println("LOSING THIS, because curComp = " + currentComponent() + " " + new String(data));
 		}
 	}
 	
