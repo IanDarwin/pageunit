@@ -26,6 +26,8 @@ import javax.swing.text.html.parser.ParserDelegator;
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	private boolean debug = false;
+	private boolean debugComponentStack = false;
+	private boolean debugContainerStack = false;
 		
 	private HTMLPage currentPage;
 	
@@ -65,10 +67,17 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
 	
 	private void pushContainer(HTMLContainer newbie) {
+		if (debugContainerStack)
+			System.out.printf("HTMLParser.pushContainer(%s) [%d]%n", newbie, containerStack.size());
+		if (newbie == null) {
+			throw new IllegalArgumentException("may not push null");
+		}
 		containerStack.push(newbie);
 	}
 	
 	private HTMLContainer popContainer() {
+		if (debugContainerStack)
+			System.out.printf("HTMLParser.popContainer(%s) [%d]%n", containerStack.peek(), containerStack.size());
 		return containerStack.pop();
 	}
 	
@@ -81,17 +90,22 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private Stack<HTMLComponent> componentStack = new Stack<HTMLComponent>();
 	
 	private void pushComponent(HTMLComponent newbie) {
-		//System.out.printf("HTMLParser.pushComponent(%s)%n", newbie);
+		if (debugComponentStack)
+			System.out.printf("HTMLParser.pushComponent(%s) [%d]%n", newbie, componentStack.size());
+		if (newbie == null) {
+			throw new IllegalArgumentException("may not push null");
+		}
 		componentStack.push(newbie);
 	}
 	
 	private HTMLComponent popComponent() {
-		//System.out.printf("HTMLParser.popComponent() ==> %s%n", componentStack.peek());
+		if (debugComponentStack)
+			System.out.printf("HTMLParser.popComponent(%s) [%d]%n", componentStack.peek(), componentStack.size());
 		return componentStack.pop();
 	}
 	
-	private HTMLContainer currentComponent() {	// for setBody()
-		return containerStack.peek();
+	private HTMLComponent currentComponent() {	// for setBody()
+		return componentStack.peek();
 	}
 	
 	@Override
@@ -108,7 +122,10 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 				break;				
 			}
 		}
-		if (!found && !totallyIgnoreThisTag(tag)) {
+		if (!found) {
+			if (totallyIgnoreThisTag(tag)) {
+				return;
+			}
 			comp = new GenericHTMLContainer(null, tag.toString());
 		}
 		if (debug) {
@@ -183,13 +200,16 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	}
 
 	@Override
-	/** If the HTML.tag that we get represents a class in an HTMLContainer in my hierarchy,
+	/** If the HTML.tag that we get represents a class in an HTMLContainer in *my* hierarchy,
 	 * then I need to pop this container, so we don't get the whole body appearing in the TITLE
 	 * element (as happened prior to this revision).
 	 */
 	public void handleEndTag(HTML.Tag tag, int pos) {
 		if (debug) {
 			System.out.printf("HTMLParser.handleEndTag(%s)%n", tag);
+		}
+		if (totallyIgnoreThisTag(tag)) {
+			return;
 		}
 		popComponent();
 		if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
@@ -200,14 +220,24 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	@Override
 	public void handleText(char[] data, int pos) {
 		final String bodyContent = new String(data);
-		if (">".equals(bodyContent))
-			return;	// A glitch in the Java 5.0 parser causes this with abbreviated tags.
 		if (debug) {
 			System.out.println("TEXT += " + bodyContent);
 		}
+		if (">".equals(bodyContent))
+			return;	// A glitch in the Java 5.0 parser causes this with abbreviated tags.
 		currentComponent().appendBody(bodyContent);
 		if (debug) {
-			System.out.println("TEXT == " + currentContainer().getBody());
+			System.out.println("TEXT NOW " + currentContainer().getBody());
+		}
+	}
+	
+	@Override
+	public void handleComment(char[] data, int pos) {
+		System.out.println("HTMLParser.handleComment()");
+		if (currentComponent() instanceof HTMLScript) {
+			currentComponent().appendBody(new String(data));
+		} else {
+			System.out.println("LOSING THIS, because curComp = " + currentComponent() + " " + new String(data));
 		}
 	}
 	
