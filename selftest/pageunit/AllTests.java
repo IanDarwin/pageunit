@@ -22,6 +22,7 @@ public class AllTests {
 		//$JUnit-BEGIN$
 		suite.addTestSuite(ScriptFileTest.class);
 		suite.addTestSuite(TestUtilsTest.class);
+		suite.addTestSuite(TestXandY.class);
 		suite.addTestSuite(HTMLComponentBaseTest.class);
 		suite.addTestSuite(HTMLComponentFactoryTest.class);
 		suite.addTestSuite(HTMLSelectTest.class);
