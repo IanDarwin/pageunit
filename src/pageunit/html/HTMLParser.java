@@ -55,6 +55,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.EM,
 			HTML.Tag.STRIKE,
 			HTML.Tag.STRONG,
+			HTML.Tag.DIV,
 			HTML.Tag.TABLE,
 			HTML.Tag.TR,
 			HTML.Tag.TD
@@ -63,13 +64,14 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private HTMLForm currentForm;		// for addInput()
 	
 	public HTMLParser() {
+		System.out.println("CONSTRUCT NEW HTMLParser.HTMLParser()");
 		// Nothing to do this time.
 	}
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
 	
-	private void pushContainer(HTMLContainer newbie) {
+	void pushContainer(HTMLContainer newbie) {
 		if (debugContainerStack)
 			System.out.printf("HTMLParser.pushContainer(%s) [%d]%n", newbie, containerStack.size());
 		if (newbie == null) {
@@ -78,13 +80,14 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		containerStack.push(newbie);
 	}
 	
-	private HTMLContainer popContainer() {
+	HTMLContainer popContainer() {
+		HTMLContainer c = containerStack.pop();
 		if (debugContainerStack)
-			System.out.printf("HTMLParser.popContainer(%s) [%d]%n", containerStack.peek(), containerStack.size());
-		return containerStack.pop();
+			System.out.printf("HTMLParser.popContainer(%s) [%d]%n", c, containerStack.size());
+		return c;
 	}
 	
-	private HTMLContainer currentContainer() {	// for addChild()
+	HTMLContainer currentContainer() {	// for addChild()
 		return containerStack.peek();
 	}
 	
@@ -92,22 +95,23 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	// This variable and three methods implement a semi-opaque stack of HTML containers
 	private Stack<HTMLComponent> componentStack = new Stack<HTMLComponent>();
 	
-	private void pushComponent(HTMLComponent newbie) {
-		if (debugComponentStack)
-			System.out.printf("HTMLParser.pushComponent(%s) [%d]%n", newbie, componentStack.size());
+	void pushComponent(HTMLComponent newbie) {
 		if (newbie == null) {
 			throw new IllegalArgumentException("may not push null");
 		}
 		componentStack.push(newbie);
-	}
-	
-	private HTMLComponent popComponent() {
 		if (debugComponentStack)
-			System.out.printf("HTMLParser.popComponent(%s) [%d]%n", componentStack.peek(), componentStack.size());
-		return componentStack.pop();
+			System.out.printf("HTMLParser.pushComponent(%s) [%d]%n", newbie, componentStack.size());
 	}
 	
-	private HTMLComponent currentComponent() {	// for setBody()
+	HTMLComponent popComponent() {
+		HTMLComponent c = componentStack.pop();
+		if (debugComponentStack)
+			System.out.printf("HTMLParser.popComponent(%s) [%d]%n", c, componentStack.size());
+		return c;
+	}
+	
+	HTMLComponent currentComponent() {
 		return componentStack.peek();
 	}
 	
@@ -169,15 +173,13 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			System.out.println("SimpleTag: " + tag);
 		}
 		HTMLComponent comp = null;
-		boolean found = false;
 		for (HTML.Tag t : wantedSimpleTags) {
 			if (t == tag) {				
 				comp = HTMLComponentFactory.create(tag, attrs);
-				found = true;
 				break;
 			}
 		}
-		if (!found && !totallyIgnoreThisTag(tag)) {
+		if (comp == null && !totallyIgnoreThisTag(tag)) {
 			comp = new GenericHTMLComponent(null, tag.toString());		
 		}
 		if (debug) {
@@ -214,12 +216,15 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (debug) {
 			System.out.printf("HTMLParser.handleEndTag(%s)%n", tag);
 		}
-		if (isWantedComplexTag(tag) && !totallyIgnoreThisTag(tag)) {
+		Class<?> classForTagType = HTMLComponentFactory.classForTagType(tag);
+		HTMLComponent curComp = currentComponent();
+		if (curComp.getClass().isAssignableFrom(classForTagType)) {
 			popComponent();
-			if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
-				popContainer();
-			}
 		}
+		if (HTMLContainer.class.isAssignableFrom(classForTagType)) {
+			popContainer();
+		}
+
 	}
 	
 	@Override
