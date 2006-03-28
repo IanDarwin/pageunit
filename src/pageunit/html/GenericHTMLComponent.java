@@ -12,4 +12,12 @@ public class GenericHTMLComponent extends HTMLComponentBase {
 	public String toString() {
 		return String.format("<%s>", type);
 	}
+
+	protected String getType() {
+		return type;
+	}
+
+	protected void setType(String type) {
+		this.type = type;
+	}
 }
