@@ -172,7 +172,7 @@ public class ScriptTestCase extends TestCase {
 
 			PageTest test = lines.get(lineNumber);
 			String line = test.getArguments();
-			System.out.printf("%d: %s%n", lineNumber, line);
+			System.out.printf("%d: %s%n", lineNumber, test);
 			
 			Command c = test.getCommand();
 			String restOfLine =  variables.substVars(test.getArguments());
@@ -214,6 +214,7 @@ public class ScriptTestCase extends TestCase {
 					if (!(xo instanceof TestFilter)) {
 						throw new IllegalArgumentException("class " + className + " does not implement TestFilter");
 					}
+					System.out.println("Installing filter " + className);
 					filterList.add((TestFilter)xo);			
 					continue;
 					
@@ -222,7 +223,8 @@ public class ScriptTestCase extends TestCase {
 					if (clazzName == null || clazzName.length() == 0) {
 						throw new IllegalArgumentException("Plug-In Command must have class name");
 					}
-					for (Object yo : filterList) {
+					for (int i = 0; i < filterList.size(); i++) {
+						TestFilter yo = filterList.get(i);
 						if (yo.getClass().getName().equals(clazzName)) {
 							System.out.println("Removing filter " + clazzName);
 							filterList.remove(yo);
@@ -612,9 +614,9 @@ public class ScriptTestCase extends TestCase {
 			return new String[] { verb, args };
 		} else {
 			return new String[] { lineAfterCommand, null };
-		}
-		
+		}		
 	}
+	
 	/**
 	 * Returns true if debug is enabled.
 	 */
