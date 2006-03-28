@@ -55,6 +55,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.EM,
 			HTML.Tag.STRIKE,
 			HTML.Tag.STRONG,
+			HTML.Tag.TABLE,
+			HTML.Tag.TR,
+			HTML.Tag.TD
 	};
 	
 	private HTMLForm currentForm;		// for addInput()
@@ -114,15 +117,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			System.out.println("StartTag: " + tag);
 		}
 		HTMLComponent comp = null;
-		boolean found = false;
-		for (HTML.Tag t : wantedComplexTags) {
-			if (t==tag) {
-				comp = HTMLComponentFactory.create(tag, attrs);
-				found = true;
-				break;				
-			}
+		if (isWantedComplexTag(tag)) {
+			comp = HTMLComponentFactory.create(tag, attrs);
 		}
-		if (!found) {
+		// If not a known start tag, but not utterly trivial, make generic tag.
+		if (comp == null) {
 			if (totallyIgnoreThisTag(tag)) {
 				return;
 			}
@@ -148,6 +147,13 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		return;
 	}
 
+	private boolean isWantedComplexTag(Tag tag) {
+		for (HTML.Tag t : wantedComplexTags) {
+			if (tag == t)
+				return true;
+		}
+		return false;
+	}
 	private boolean totallyIgnoreThisTag(Tag tag) {
 		for (HTML.Tag t : totallyIgnoreTags) {
 			if (t == tag) {
@@ -208,12 +214,11 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (debug) {
 			System.out.printf("HTMLParser.handleEndTag(%s)%n", tag);
 		}
-		if (totallyIgnoreThisTag(tag)) {
-			return;
-		}
-		popComponent();
-		if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
-			popContainer();
+		if (isWantedComplexTag(tag) && !totallyIgnoreThisTag(tag)) {
+			popComponent();
+			if (HTMLContainer.class.isAssignableFrom(HTMLComponentFactory.classForTagType(tag))) {
+				popContainer();
+			}
 		}
 	}
 	
