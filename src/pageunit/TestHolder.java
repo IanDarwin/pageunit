@@ -43,7 +43,7 @@ public class PageTest implements Test {
 		throw new IllegalStateException("Called run method in PageTest line wrapper class!");
 	}	
 	public String toString() {
-		return String.format("PageTest: %c %s:%d", command, fileName, lineNumber);
+		return String.format("PageTest[%s %s:%d]", command, fileName, lineNumber);
 	}
 
 	public Command getCommand() {
