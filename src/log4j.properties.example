@@ -3,6 +3,9 @@
 
 log4j.rootLogger=INFO, R, C
 
+# Suppress chit-chat from httpclient.
+log4j.logger.org.apache.commons.httpclient=ERROR
+
 #log4j.logger.pageunit.Command=debug
 #log4j.logger.pageunit.LifeCycle=debug
 #log4j.logger.pageunit.NullTestFilter=debug
