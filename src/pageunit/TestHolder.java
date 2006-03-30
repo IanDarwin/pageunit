@@ -7,7 +7,7 @@ import junit.framework.TestResult;
  * which will have been read from a file...
  * @author ian
  */
-public class PageTest implements Test {
+public class TestHolder implements Test {
 	private final Command command;
 	private final String args;
 	private final String fileName;
@@ -17,7 +17,7 @@ public class PageTest implements Test {
 	 * @param fileName
 	 * @param lineNumber
 	 */
-	public PageTest(final char commandChar, final String args, final String fileName, final int lineNumber) {
+	public TestHolder(final char commandChar, final String args, final String fileName, final int lineNumber) {
 		super();
 		String commandString = new String(new char[] {commandChar});
 		if (commandChar == '<')
