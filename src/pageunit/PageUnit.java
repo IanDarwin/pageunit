@@ -53,7 +53,7 @@ public class PageUnit {
 	 * @throws Exception
 	 */
 	private static void processOne(final File f) throws Exception {
-		logger.info(String.format("pageunit: processOne(%s)%n", f));
+		logger.info(String.format("pageunit: processOne(%s)", f));
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
