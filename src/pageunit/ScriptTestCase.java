@@ -46,7 +46,7 @@ public class ScriptTestCase extends TestCase {
 	private static Logger logger = Logger.getLogger(ScriptTestCase.class);
 
 	private String fileName;
-	private final List<PageTest> lines = new ArrayList<PageTest>();
+	private final List<TestHolder> lines = new ArrayList<TestHolder>();
 	
 	private WebSession session;
 	private WebResponse theResult = null;
@@ -118,7 +118,7 @@ public class ScriptTestCase extends TestCase {
 			if (!looksLikeCommand(line)) {
 				continue;
 			}
-			lines.add(new PageTest(ch, args, fileName, is.getLineNumber()));
+			lines.add(new TestHolder(ch, args, fileName, is.getLineNumber()));
 		}
 	}
 		
@@ -173,7 +173,7 @@ public class ScriptTestCase extends TestCase {
 
 		for (int lineNumber = 0, numLines = lines.size(); lineNumber < numLines; lineNumber++) {	// MAIN LOOP PER LINE
 
-			PageTest test = lines.get(lineNumber);
+			TestHolder test = lines.get(lineNumber);
 			String line = test.getArguments();
 			System.out.printf("%d: %s%n", lineNumber, test);
 			
@@ -523,7 +523,7 @@ public class ScriptTestCase extends TestCase {
 	 * @param e
 	 * @param lineNumber
 	 */
-	private void printThrowable(final String type, final Throwable e, PageTest pt) {
+	private void printThrowable(final String type, final Throwable e, TestHolder pt) {
 		System.err.print(type + ": " + pt.getFileName() + ";" + pt.getLineNumber() + " (" + e);
 		final Throwable cause = e.getCause();
 		if (cause != null) {
@@ -539,8 +539,8 @@ public class ScriptTestCase extends TestCase {
 	private void fixupStackTrace(Throwable e, Test test) {
 		StackTraceElement[] oldStack = e.getStackTrace();
 		StackTraceElement newTop = new StackTraceElement(getClass().getName(), "Test Runner", 
-				((PageTest)test).getFileName(),
-				((PageTest)test).getLineNumber());
+				((TestHolder)test).getFileName(),
+				((TestHolder)test).getLineNumber());
 		int oldSize = oldStack.length;
 		StackTraceElement[] newStack = new StackTraceElement[oldSize + 1];	
 		System.arraycopy(oldStack, 0, newStack, 1, oldSize);
