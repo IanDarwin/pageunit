@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 
+import org.apache.log4j.Logger;
+
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
@@ -11,6 +13,7 @@ import junit.framework.TestResult;
  * @author ian
  */
 public class PageUnit {
+	private static Logger logger = Logger.getLogger(PageUnit.class);
 	
 	private static final String TEST_FILENAME_EXT = ".txt";
 
@@ -50,6 +53,7 @@ public class PageUnit {
 	 * @throws Exception
 	 */
 	private static void processOne(final File f) throws Exception {
+		logger.info(String.format("pageunit: processOne(%s)%n", f));
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;

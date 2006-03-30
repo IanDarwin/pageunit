@@ -22,6 +22,7 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.log4j.Logger;
 
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
@@ -42,6 +43,7 @@ import com.darwinsys.util.VariableMap;
  * @version $Id$
  */
 public class ScriptTestCase extends TestCase {	
+	private static Logger logger = Logger.getLogger(ScriptTestCase.class);
 
 	private String fileName;
 	private final List<PageTest> lines = new ArrayList<PageTest>();
@@ -98,6 +100,7 @@ public class ScriptTestCase extends TestCase {
 	 * @throws IOException
 	 */
 	private void readTests(Reader r, String fileName) throws IOException {
+		logger.debug("readTests" + fileName);
 		LineNumberReader is = new LineNumberReader(r);
 		String line;
 		while ((line = is.readLine()) != null) {
