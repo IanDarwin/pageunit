@@ -63,7 +63,6 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private HTMLForm currentForm;		// for addInput()
 	
 	public HTMLParser() {
-		logger.info("LOGGER: " + logger);
 		// Nothing to do this time.
 	}
 	
