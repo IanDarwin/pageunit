@@ -12,6 +12,8 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.parser.ParserDelegator;
 
+import org.apache.log4j.Logger;
+
 /**
  * Try to build a simple-enough HTML parser using the one true built-in HTML
  * parser, that is, Swing's HTMLEditorKit (this saves several dependencies on
@@ -24,14 +26,11 @@ import javax.swing.text.html.parser.ParserDelegator;
  * @version $Id$
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
-	
-	private boolean debug = false;
-	private boolean debugComponentStack = false;
-	private boolean debugContainerStack = false;
+	private static Logger logger = Logger.getLogger(HTMLParser.class);
 		
 	private HTMLPage currentPage;
 	
-	private final HTML.Tag[] wantedComplexTags = {
+	public static final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
 			HTML.Tag.FORM,
 			HTML.Tag.SELECT,
@@ -40,7 +39,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.SCRIPT,
 			HTML.Tag.STYLE,
 	};
-	private final HTML.Tag[] wantedSimpleTags = {
+	public static HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag by the Swing HTML Parser
 			HTML.Tag.META,
 			HTML.Tag.OPTION,
@@ -64,7 +63,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private HTMLForm currentForm;		// for addInput()
 	
 	public HTMLParser() {
-		System.out.println("CONSTRUCT NEW HTMLParser.HTMLParser()");
+		logger.info("LOGGER: " + logger);
 		// Nothing to do this time.
 	}
 	
@@ -72,8 +71,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private Stack<HTMLContainer> containerStack = new Stack<HTMLContainer>();
 	
 	void pushContainer(HTMLContainer newbie) {
-		if (debugContainerStack)
-			System.out.printf("HTMLParser.pushContainer(%s) [%d]%n", newbie, containerStack.size());
+		if (logger.isDebugEnabled())
+			logger.info(String.format("HTMLParser.pushContainer(%s) [%d]", newbie, containerStack.size()));
 		if (newbie == null) {
 			throw new IllegalArgumentException("may not push null");
 		}
@@ -82,8 +81,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	HTMLContainer popContainer() {
 		HTMLContainer c = containerStack.pop();
-		if (debugContainerStack)
-			System.out.printf("HTMLParser.popContainer(%s) [%d]%n", c, containerStack.size());
+		if (logger.isDebugEnabled())
+			logger.info(String.format("HTMLParser.popContainer(%s) [%d]", c, containerStack.size()));
 		return c;
 	}
 	
@@ -100,25 +99,25 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			throw new IllegalArgumentException("may not push null");
 		}
 		componentStack.push(newbie);
-		if (debugComponentStack)
-			System.out.printf("HTMLParser.pushComponent(%s) [%d]%n", newbie, componentStack.size());
+		if (logger.isDebugEnabled())
+			logger.info(String.format("HTMLParser.pushComponent(%s) [%d]", newbie, componentStack.size()));
 	}
 	
 	HTMLComponent popComponent() {
 		HTMLComponent c = componentStack.pop();
-		if (debugComponentStack)
-			System.out.printf("HTMLParser.popComponent(%s) [%d]%n", c, componentStack.size());
+		if (logger.isDebugEnabled())
+			logger.info(String.format("HTMLParser.popComponent(%s) [%d]", c, componentStack.size()));
 		return c;
 	}
 	
 	HTMLComponent currentComponent() {
-		return componentStack.peek();
+		return componentStack.isEmpty() ? null : componentStack.peek();
 	}
 	
 	@Override
 	public void handleStartTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-		if (debug) {
-			System.out.println("StartTag: " + tag);
+		if (logger.isDebugEnabled()) {
+			logger.info("StartTag: " + tag);
 		}
 		HTMLComponent comp = null;
 		if (isWantedComplexTag(tag)) {
@@ -131,8 +130,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			}
 			comp = new GenericHTMLContainer(null, tag.toString());
 		}
-		if (debug) {
-			System.out.println("DOING COMPLEX: " + comp);
+		if (logger.isDebugEnabled()) {
+			logger.info("DOING COMPLEX: " + comp);
 		}
 		pushComponent(comp);
 		handleCommon(comp);
@@ -169,8 +168,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 
 	@Override
 	public void handleSimpleTag(HTML.Tag tag, MutableAttributeSet attrs, int pos) {
-		if (debug) {
-			System.out.println("SimpleTag: " + tag);
+		if (logger.isDebugEnabled()) {
+			logger.info("SimpleTag: " + tag);
 		}
 		HTMLComponent comp = null;
 		for (HTML.Tag t : wantedSimpleTags) {
@@ -182,8 +181,8 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		if (comp == null && !totallyIgnoreThisTag(tag)) {
 			comp = new GenericHTMLComponent(null, tag.toString());		
 		}
-		if (debug) {
-			System.out.println("DOING SIMPLE: " + comp);
+		if (logger.isDebugEnabled()) {
+			logger.info("DOING SIMPLE: " + comp);
 		}
 
 		handleCommon(comp);
@@ -213,31 +212,34 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 * element (as happened prior to this revision).
 	 */
 	public void handleEndTag(HTML.Tag tag, int pos) {
-		if (debug) {
-			System.out.printf("HTMLParser.handleEndTag(%s)%n", tag);
+		if (logger.isDebugEnabled()) {
+			logger.info(String.format("HTMLParser.handleEndTag(%s)", tag));
 		}
 		Class<?> classForTagType = HTMLComponentFactory.classForTagType(tag);
 		HTMLComponent curComp = currentComponent();
+		
+		// If this end tag matches the current component, pop it.
+		// The test may be redundant but I'm wrestling with stackunderflow...
 		if (curComp.getClass().isAssignableFrom(classForTagType)) {
 			popComponent();
 		}
+		// If this end tag represents a container, pop that as well.
 		if (HTMLContainer.class.isAssignableFrom(classForTagType)) {
 			popContainer();
 		}
-
 	}
 	
 	@Override
 	public void handleText(char[] data, int pos) {
 		final String bodyContent = new String(data);
-		if (debug) {
-			System.out.println("TEXT += " + bodyContent);
+		if (logger.isDebugEnabled()) {
+			logger.info("TEXT += " + bodyContent);
 		}
 		if (">".equals(bodyContent))
 			return;	// A glitch in the Java 5.0 parser causes this with abbreviated tags.
 		currentComponent().appendBody(bodyContent);
-		if (debug) {
-			System.out.println("TEXT NOW " + currentContainer().getBody());
+		if (logger.isDebugEnabled()) {
+			logger.info("TEXT NOW " + currentContainer().getBody());
 		}
 	}
 	
@@ -247,13 +249,13 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	 */
 	@Override
 	public void handleComment(char[] data, int pos) {
-		if (debug)
-			System.out.println("HTMLParser.handleComment()");
+		if (logger.isDebugEnabled())
+			logger.info("HTMLParser.handleComment()");
 		if (currentComponent() instanceof HTMLScript) {
 			currentComponent().appendBody(new String(data));
 		} else {
-			if (debug)
-				System.out.println("LOSING THIS, because curComp = " + currentComponent() + " " + new String(data));
+			if (logger.isDebugEnabled())
+				logger.info("LOSING THIS, because curComp = " + currentComponent() + " " + new String(data));
 		}
 	}
 	
@@ -298,7 +300,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		HTMLEditorKit.ParserCallback callback = new HTMLParser();
 		int n = 0;
 		for (String fileName : args) {
-			System.out.println("** START FILE: " + fileName);
+			logger.info("** START FILE: " + fileName);
 			Reader reader = new FileReader(fileName);
 			new ParserDelegator().parse(reader, callback, true);
 			++n;
