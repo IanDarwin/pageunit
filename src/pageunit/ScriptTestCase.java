@@ -280,9 +280,7 @@ public class ScriptTestCase extends TestCase {
 					break;
 					
 				case N:	// start new session
-					session = new WebSession();
-					session.setThrowExceptionOnFailingStatusCode(false);
-					theLink = null;
+					newSession();
 					continue;
 			
 			// Second-half testing: exceptions thrown here are converted to failures, and only fail one test.
@@ -306,6 +304,7 @@ public class ScriptTestCase extends TestCase {
 					break;
 					
 				case J:	// get J2EE protected page
+					newSession();
 					resetForPage();
 					page = restOfLine;
 					assertValidRURL(page);
@@ -517,6 +516,15 @@ public class ScriptTestCase extends TestCase {
 		stars();
 
 		return;
+	}
+
+	/**
+	 * 
+	 */
+	private void newSession() {
+		session = new WebSession();
+		session.setThrowExceptionOnFailingStatusCode(false);
+		theLink = null;
 	}
 
 	/** print the throwable along with the filename and line number
