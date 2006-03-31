@@ -40,7 +40,8 @@ public class PageUnit {
 					processOne(f);
 				}
 			}
-			System.out.printf("%d files run, results: %s\n", numFilesRun, results);
+			System.out.printf("%d %s run, results: %s\n", numFilesRun,
+					numFilesRun > 1 ? "files" : "file", results);
 		} catch (Exception e) {
 			System.out.printf("FAILED: caught Exception %s after %d runs\n", e, numFilesRun);
 			e.printStackTrace();
