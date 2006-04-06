@@ -3,9 +3,6 @@ package pageunit.html;
 import java.io.IOException;
 import java.io.StringReader;
 
-import pageunit.html.*;
-import pageunit.html.HTMLParseException;
-import pageunit.html.HTMLParser;
 import junit.framework.TestCase;
 
 public class ParserTest2 extends TestCase {
@@ -13,7 +10,7 @@ public class ParserTest2 extends TestCase {
 	 * calendar.phenogenomics.ca and only cleaned up minorly
 	 * (and quotes escaped to make it compile as a String).
 	 */
-	String testData = 
+	private final static String testData = 
 	"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">" +
 	"<html lang=\"en\" >" +
 	"<head><title>This Title Added</title>" +
