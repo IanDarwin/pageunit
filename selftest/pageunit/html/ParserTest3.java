@@ -13,7 +13,7 @@ import pageunit.html.HTMLParser;
 import pageunit.html.HTMLScript;
 
 public class ParserTest3 extends TestCase {
-	final String testData = "<html><head><title>Fool</title></head>" +
+	final static String testData = "<html><head><title>Fool</title></head>" +
 	"<script language='javascript'>function(bleah) if (a < b) return -1;</script>" +
 	"<body><form action='/foo' method='post' onSubmit='crazy eights'>" +
 	"<input type='submit' name='submit'/></form>" +
