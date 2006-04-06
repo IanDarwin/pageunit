@@ -30,7 +30,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		
 	private HTMLPage currentPage;
 	
-	public static final HTML.Tag[] wantedComplexTags = {
+	static final HTML.Tag[] wantedComplexTags = {
 			HTML.Tag.HTML,
 			HTML.Tag.FORM,
 			HTML.Tag.SELECT,
@@ -39,7 +39,7 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 			HTML.Tag.SCRIPT,
 			HTML.Tag.STYLE,
 	};
-	public static HTML.Tag[] wantedSimpleTags = {
+	static HTML.Tag[] wantedSimpleTags = {
 			HTML.Tag.INPUT,	// Input is treated as simple tag by the Swing HTML Parser
 			HTML.Tag.META,
 			HTML.Tag.OPTION,
@@ -64,6 +64,14 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	public HTMLParser() {
 		// Nothing to do this time.
+	}
+	
+	public static HTML.Tag[] getWantedSimpleTags() {
+		return wantedSimpleTags.clone();
+	}
+
+	public static HTML.Tag[] getWantedComplexTags() {
+		return wantedComplexTags.clone();
 	}
 	
 	// This variable and three methods implement a semi-opaque stack of HTML containers
@@ -306,4 +314,5 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		}
 		System.out.printf("Parsed %d files%n", n);
 	}
+
 }

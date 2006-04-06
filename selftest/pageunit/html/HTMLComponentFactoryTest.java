@@ -48,12 +48,12 @@ public class HTMLComponentFactoryTest extends TestCase {
 	 * create() and classForTag() give same type.
 	 */
 	public void testCreateWanted() {
-		for (HTML.Tag t : HTMLParser.wantedSimpleTags) {
+		for (HTML.Tag t : HTMLParser.getWantedSimpleTags()) {
 			HTMLComponent comp = HTMLComponentFactory.create(t, null);
 			Class<?> cl = HTMLComponentFactory.classForTagType(t);
 			assertSame(comp.getClass(), cl);
 		}
-		for (HTML.Tag t : HTMLParser.wantedComplexTags) {
+		for (HTML.Tag t : HTMLParser.getWantedComplexTags()) {
 			HTMLComponent comp = HTMLComponentFactory.create(t, null);
 			Class<?> cl = HTMLComponentFactory.classForTagType(t);
 			assertSame(comp.getClass(), cl);
