@@ -29,8 +29,8 @@ import sun.net.URLCanonicalizer;
  */
 public class LinkChecker {
 
-	protected static int indent = 0;
-	protected final static List<String> cache = new ArrayList<String>();
+	static int indent = 0;
+	final static List<String> cache = new ArrayList<String>();
   
 	/** Start checking, given a URL by name.
 	 * Calls checkLink to check each link.
