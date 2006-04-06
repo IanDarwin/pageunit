@@ -157,10 +157,10 @@ public class ScriptTestCase extends TestCase {
 		
 		variables.clear();
 
-		variables.setVar("USER", TestUtils.getProperty("login"));
-		variables.setVar("PASS", TestUtils.getProperty("password"));
-		variables.setVar("HOST", TestUtils.getProperty("host"));
-		variables.setVar("PORT", TestUtils.getProperty("port"));
+		variables.setVar(TestUtils.PROP_USER, TestUtils.getProperty(TestUtils.PROP_USER));
+		variables.setVar(TestUtils.PROP_PASS, TestUtils.getProperty(TestUtils.PROP_PASS));
+		variables.setVar(TestUtils.PROP_HOST, TestUtils.getProperty(TestUtils.PROP_HOST));
+		variables.setVar(TestUtils.PROP_PORT, TestUtils.getProperty(TestUtils.PROP_PORT));
 		
 		stars();
 		System.out.println("PageUnit $Version$");

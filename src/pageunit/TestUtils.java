@@ -17,16 +17,21 @@ import org.apache.commons.httpclient.HttpStatus;
 public class TestUtils {
 	
 	private static final String PAGEUNIT_PROPERTIES_FILENAME = ".pageunit.properties";
+	public static final String PROP_USER = "USER";
+	public static final String PROP_PASS = "PASS";
+	public static final String PROP_HOST = "HOST";
+	public static final String PROP_PORT = "PORT";
+	public static final String PROP_DEBUG = "DEBUG";
 	private static final String DEFAULT_PROTO = "http";
 	private static final int DEFAULT_PORT = 80;
 	private static final String DEFAULT_PATH = "/";
 	
 	/** A Standard Properties mechanism: the following props are expected:<br/>
-	 * <pre>host=host.dom</pre>
+	 * <pre>HOST=host.dom</pre>
 	 * <p>The following properties are optional:<br/>
-	 * <pre>port=8080 # defaults to 80
-	 * login=myName
-	 * password=myPassword</pre>
+	 * <pre>PORT=8080 # defaults to 80
+	 * USER=myName
+	 * PASS=myPassword</pre>
 	 */
 	private static Properties props  = new Properties();
 	private static boolean debug;
@@ -36,14 +41,14 @@ public class TestUtils {
 		String propsFileName = home + File.separator + PAGEUNIT_PROPERTIES_FILENAME;
 		try {
 			props.load(new FileInputStream(propsFileName));
+			if (getProperty(PROP_DEBUG) != null) {
+				setDebug(Boolean.parseBoolean(getProperty(PROP_DEBUG)));
+			}
 		} catch (IOException ex) {
-			final String message = "Can't load " + propsFileName;
+			final String message = "Warning: Can't load " + propsFileName;
 			System.err.println(message);
-			throw new RuntimeException(message);
 		}
 	}
-
-
 
 	/**
 	 * @param targetHost
@@ -90,7 +95,7 @@ public class TestUtils {
 	
 	/** Retrieve a property, either from the System Properties
 	 * (consulted first, to allow overriding via command line -D)
-	 * or in the user's property file (${user.home} + TCPTEST_PROPERTIES_FILENAME);
+	 * or in the user's property file (loaded in the static block above).
 	 * @param key the key to look up
 	 * @return The value corresponding to the given key.
 	 */
@@ -102,7 +107,7 @@ public class TestUtils {
 	
 	public static int getIntProperty(String key) {
 		String val = getProperty(key);
-		if (val == null && "port".equals(key)) {
+		if (val == null && PROP_PORT.equals(key)) {
 			return 80;
 		}
 		if (val == null) {
@@ -111,8 +116,6 @@ public class TestUtils {
 		}
 		return Integer.parseInt(val);
 	}
-
-
 	
 	/**
 	 * @return Returns the debug level.
@@ -139,10 +142,10 @@ public class TestUtils {
 			prot = DEFAULT_PROTO;
 		String host = u.getHost();
 		if (host == null)
-			host = getProperty("host");
+			host = getProperty(PROP_HOST);
 		int port = u.getPort();
 		if (port == -1)
-			port = getIntProperty("port");
+			port = getIntProperty(PROP_PORT);
 		if (port /* still */ == -1) 
 			port = DEFAULT_PORT;
 		String path = u.getPath();
@@ -155,4 +158,7 @@ public class TestUtils {
 		return completeURL(new URL(u));
 	}
 
+	public static Properties getProperties() {		
+		return props;
+	}
 }
