@@ -1,7 +1,5 @@
 package pageunit.html;
 
-import pageunit.html.*;
-
 import junit.framework.TestCase;
 
 public class HTMLSelectTest extends TestCase {
