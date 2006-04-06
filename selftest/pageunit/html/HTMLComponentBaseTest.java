@@ -1,4 +1,4 @@
-package regress.html;
+package pageunit.html;
 
 import junit.framework.TestCase;
 import pageunit.html.HTMLAnchorImpl;

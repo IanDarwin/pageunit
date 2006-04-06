@@ -1,4 +1,4 @@
-package regress;
+package pageunit;
 
 import pageunit.TestFilter;
 import pageunit.html.HTMLPage;

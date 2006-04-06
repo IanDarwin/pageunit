@@ -1,4 +1,4 @@
-package regress.html;
+package pageunit.html;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;

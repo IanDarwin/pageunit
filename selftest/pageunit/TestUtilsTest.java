@@ -1,4 +1,4 @@
-package regress;
+package pageunit;
 
 import pageunit.TestUtils;
 import junit.framework.TestCase;

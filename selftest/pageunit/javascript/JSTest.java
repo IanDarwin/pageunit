@@ -1,4 +1,4 @@
-package regress.javascript;
+package pageunit.javascript;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;

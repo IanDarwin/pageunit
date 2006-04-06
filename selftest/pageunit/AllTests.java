@@ -1,17 +1,17 @@
-package regress;
+package pageunit;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import regress.html.HTMLComponentBaseTest;
-import regress.html.HTMLComponentFactoryTest;
-import regress.html.HTMLMetaImplTest;
-import regress.html.HTMLSelectTest;
-import regress.html.ParserTest;
-import regress.html.ParserTest2;
-import regress.html.ParserTest3;
-import regress.html.ParserTest4;
-import regress.javascript.JSTest;
-import regress.linkchecker.LinkCheckerTest;
+import pageunit.html.HTMLComponentBaseTest;
+import pageunit.html.HTMLComponentFactoryTest;
+import pageunit.html.HTMLMetaImplTest;
+import pageunit.html.HTMLSelectTest;
+import pageunit.html.ParserTest;
+import pageunit.html.ParserTest2;
+import pageunit.html.ParserTest3;
+import pageunit.html.ParserTest4;
+import pageunit.javascript.JSTest;
+import pageunit.linkchecker.LinkCheckerTest;
 
 /** Runs all self-tests for PageUnit
  */

@@ -1,4 +1,4 @@
-package regress.linkchecker;
+package pageunit.linkchecker;
 
 import java.net.URL;
 
