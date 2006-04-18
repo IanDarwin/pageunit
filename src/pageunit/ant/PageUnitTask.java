@@ -6,6 +6,8 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 
+import pageunit.PageUnit;
+
 /**
  * Simple Ant Task for running PageUnit tests.
  * Usage Prerequisite:
@@ -19,28 +21,34 @@ import org.apache.tools.ant.types.Path;
 public class PageUnitTask extends Task {
 
 	private File theFile;
+	private File theDir;
 	private String theTest;
 	private Path thePath;
 	
 	@Override
 	public void execute() throws BuildException {
-		if (theFile == null && theTest == null) {
-			throw new BuildException("Either file, or test (and optionally path) must be specified");
-		}
-		if (theFile != null) {
-			// XXX process file
-			return;
-		}
-		if (theTest != null) {
-			if (thePath == null) {
-				// create File(theTest), try to process
-				return;
+		PageUnit.init();
+		try {
+			if (theFile != null) {
+				PageUnit.processOne(theFile);
+			} else if (theDir != null) {
+				PageUnit.processOne(theDir);
+			} else if (theTest != null) {
+				if (thePath == null) {
+					PageUnit.processOne(new File(theTest));
+				} else {
+					// walk thePath, looking for test, first found, process 
+					throw new BuildException("code not written yet: walk thePath, looking for test, first found, process");
+				}
 			} else {
-				// walk thePath, looking for test, first found, process 
-				return;
+				throw new BuildException("Either file, or dir, or test (and optionally path) must be specified");			
 			}
+		} catch (Exception e) {
+			throw new BuildException(e.toString());
 		}
-		throw new BuildException("Value of fileName must be set");		
+		if (PageUnit.isFailed()) {
+			throw new BuildException(PageUnit.getTestResults().toString());
+		}
 	}
 
 
@@ -49,6 +57,11 @@ public class PageUnitTask extends Task {
 	}
 	
 	// --------------- Simple Accessors -------------------
+
+	public void setTheDir(File theDir) {
+		this.theDir = theDir;
+	}
+
 
 	public void setFile(File fileName) {
 		this.theFile = fileName;
