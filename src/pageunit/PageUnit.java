@@ -21,13 +21,24 @@ public class PageUnit {
 	
 	private static int numFilesRun = 0;
 	private static boolean debug;
-	private static TestResult results = new TestResult() {
+	
+	private static class PageUnitTestResult extends TestResult implements Cloneable {
 		@Override
 		public String toString() {
 			return String.format("%d Errors, %d Failures", errorCount(), failureCount());
-		}		
-	};
+		}
 		
+		@Override
+		public Object clone() {
+			try {
+			return super.clone();
+			} catch (CloneNotSupportedException e) {
+				throw new RuntimeException("Trivial class threw CloneNotSupported exception, doh!");
+			}
+		}
+	};
+	private static PageUnitTestResult results = new PageUnitTestResult();
+
 	public static void main(final String[] args) {
 		
 		try {
@@ -87,5 +98,20 @@ public class PageUnit {
 		for (File f : files) {
 			processOne(f);
 		}
+	}
+
+	/**
+	 * Returns true if any tests have reported errors or failures.
+	 * @return
+	 */
+	public static boolean isFailed() {
+		return results.errorCount() > 0 || results.failureCount() > 0;
+	}
+	
+	/**
+	 * Get a copy of the JUnit TestResults for this run.
+	 */
+	public static TestResult getTestResults() {
+		return (TestResult) results.clone();
 	}	
 }
