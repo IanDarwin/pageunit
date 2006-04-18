@@ -12,7 +12,7 @@ import pageunit.PageUnit;
  * Simple Ant Task for running PageUnit tests.
  * Usage Prerequisite:
  * junit and pageunit (and their depends) on classpath.
- * &lt;taskdef name="pageunit" classname="pageunit.ant.AntTask"&gt;
+ * &lt;taskdef name="pageunit" classname="pageunit.ant.PageUnitTask"&gt;
  * Usage examples: 
  * &lt;pageunit file="/foo.bar/test.txt"/&gt;
  * &lt;pageunit testPath="dir1:dir2" test="test1.txt"/&gt;
@@ -61,7 +61,6 @@ public class PageUnitTask extends Task {
 	public void setTheDir(File theDir) {
 		this.theDir = theDir;
 	}
-
 
 	public void setFile(File fileName) {
 		this.theFile = fileName;
