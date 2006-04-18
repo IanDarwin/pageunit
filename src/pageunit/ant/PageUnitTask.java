@@ -53,12 +53,15 @@ public class PageUnitTask extends Task {
 
 
 	public void addText(String unwantedText) {
-		throw new BuildException("The PageUnit task does not support nested text");
+		if (unwantedText != null && unwantedText.trim().length() > 0) {
+			throw new BuildException(String.format(
+				"The PageUnit task does not support nested text: `%s'", unwantedText));
+		}
 	}
 	
 	// --------------- Simple Accessors -------------------
 
-	public void setTheDir(File theDir) {
+	public void setDir(File theDir) {
 		this.theDir = theDir;
 	}
 
