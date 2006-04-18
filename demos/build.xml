@@ -4,7 +4,7 @@
 	</taskdef>
 
 	<target name="test">
-		<pageunit dir="demos" file="org.pageunit.TestCase">
-		</pageunit>
+		<pageunit file="testphpproject.txt"/>
+		<pageunit dir="."/>
 	</target>
 </project>
