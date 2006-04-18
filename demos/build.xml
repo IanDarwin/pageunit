@@ -1,0 +1,10 @@
+<project name="pageunit demo" default="test">
+
+	<taskdef name="pageunit" classname="pageunit.ant.AntTask">
+	</taskdef>
+
+	<target name="test">
+		<pageunit dir="demos" file="org.pageunit.TestCase">
+		</pageunit>
+	</target>
+</project>
