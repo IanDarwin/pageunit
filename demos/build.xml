@@ -40,7 +40,12 @@
 	</taskdef>
 
 	<target name="test">
+		<!-- This runs one file -->
 		<pageunit file="testphpproject.txt"/>
+		<!-- This runs all the .txt files in one directory -->
 		<pageunit dir="."/>
+		<!-- Not implemented yet:
+			pageunit testpath="foo:bar" tests="aleph,omicron,gamma"/>
+		  -->
 	</target>
 </project>
