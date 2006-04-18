@@ -1,6 +1,6 @@
 <project name="pageunit demo" default="test">
 
-	<taskdef name="pageunit" classname="pageunit.ant.AntTask">
+	<taskdef name="pageunit" classname="pageunit.ant.PageUnitTask">
 	</taskdef>
 
 	<target name="test">

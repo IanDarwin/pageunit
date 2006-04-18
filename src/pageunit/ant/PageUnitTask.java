@@ -16,7 +16,7 @@ import org.apache.tools.ant.types.Path;
  * &lt;pageunit testPath="dir1:dir2" test="test1.txt"/&gt;
  * &lt;pageunit dir="/foo.bar"/&gt;
  */
-public class AntTask extends Task {
+public class PageUnitTask extends Task {
 
 	private File theFile;
 	private String theTest;
