@@ -37,7 +37,11 @@ public class PageUnit {
 			}
 		}
 	};
-	private static PageUnitTestResult results = new PageUnitTestResult();
+	private static PageUnitTestResult results;
+	
+	public static void init() {
+		results = new PageUnitTestResult();
+	}
 
 	public static void main(final String[] args) {
 		
@@ -64,7 +68,7 @@ public class PageUnit {
 	 * @param f The File object to process.
 	 * @throws Exception
 	 */
-	private static void processOne(final File f) throws Exception {
+	public static void processOne(final File f) throws Exception {
 		logger.info(String.format("pageunit: processOne(%s)", f));
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
@@ -79,7 +83,7 @@ public class PageUnit {
 		} else if (f.isDirectory()) {
 			loopThrough(f);
 		} else {
-			System.err.printf("%s is neither file nor directory\n", f.getName());
+			System.err.printf("%s is neither file nor directory\n", f.getAbsolutePath());
 		}
 	}
 	
