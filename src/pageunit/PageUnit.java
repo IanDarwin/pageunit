@@ -37,10 +37,10 @@ public class PageUnit {
 			}
 		}
 	};
-	private static PageUnitTestResult results;
+	private static PageUnitTestResult results = new PageUnitTestResult();
 	
 	public static void init() {
-		results = new PageUnitTestResult();
+		
 	}
 
 	public static void main(final String[] args) {
