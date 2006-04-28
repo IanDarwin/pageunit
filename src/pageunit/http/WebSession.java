@@ -87,6 +87,7 @@ public class WebSession {
 			responseText = new String(responseBody);			// must save in field.
 			
 			page = new HTMLParser().parse(responseText);
+			
 		} while ((url = isRedirectpage(page)) != null);
 		return page;
 	}
@@ -98,6 +99,7 @@ public class WebSession {
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
 				HTMLMeta m = (HTMLMeta)c;
+				System.out.printf("isRedirectURLPage(%s) found META tag %s%n", page, m);
 				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
 					return null;
 				}
@@ -106,7 +108,9 @@ public class WebSession {
 				Matcher mat = patt.matcher(content);
 				if (mat.find()) {
 					try {
-						return new URL(mat.group(1));
+						URL url = new URL(mat.group(1));
+						System.out.printf("isRedirectURLPage(%s) Returning URL %s%n", page, url);
+						return url;
 					} catch (MalformedURLException e) {
 						System.err.println("HTTP META REFRESH BOMBED: " + e);
 						return null;
@@ -114,6 +118,7 @@ public class WebSession {
 				}
 			}
 		}
+		System.out.printf("isRedirectpage(%s) returning null.%n", page);
 		return null;
 	}
 
