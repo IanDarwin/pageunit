@@ -62,31 +62,31 @@ public class WebSession {
 	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException {
 		HTMLPage page;
 		do {
-		client.getHostConfiguration().setHost(
-				url.getHost(), url.getPort(), url.getProtocol());
-
-		GetMethod getter = new GetMethod(url.toString());		
-		getter.setFollowRedirects(followRedirects);
-		
-		System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
-
-		int status = client.executeMethod(getter);
-		if (status >= 400 && throwExceptionOnFailingStatusCode) {
-			throw new IOException("Status code: " + status);
-		}
-		
-		byte[] responseBody = getter.getResponseBody();
-		System.out.println("Read body length was " + responseBody.length);
-		responseText = new String(responseBody);
-		response = new WebResponse(responseText, url.toString(), status);
-
-		System.out.println("Got to simple page: " + url);
-		response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
-		getter.releaseConnection();	
-		
-		responseText = new String(responseBody);			// must save in field.
-		
-		page = new HTMLParser().parse(responseText);
+			client.getHostConfiguration().setHost(
+					url.getHost(), url.getPort(), url.getProtocol());
+			
+			GetMethod getter = new GetMethod(url.toString());		
+			getter.setFollowRedirects(followRedirects);
+			
+			System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
+			
+			int status = client.executeMethod(getter);
+			if (status >= 400 && throwExceptionOnFailingStatusCode) {
+				throw new IOException("Status code: " + status);
+			}
+			
+			byte[] responseBody = getter.getResponseBody();
+			System.out.println("Read body length was " + responseBody.length);
+			responseText = new String(responseBody);
+			response = new WebResponse(responseText, url.toString(), status);
+			
+			System.out.println("Got to simple page: " + url);
+			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
+			getter.releaseConnection();	
+			
+			responseText = new String(responseBody);			// must save in field.
+			
+			page = new HTMLParser().parse(responseText);
 		} while ((url = isRedirectpage(page)) != null);
 		return page;
 	}
