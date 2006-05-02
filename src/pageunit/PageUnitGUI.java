@@ -17,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -79,40 +80,47 @@ public class PageUnitGUI extends PageUnit {
 		testButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent evt) {
-				String fileName = tf.getText();
+				final String fileName = tf.getText();
 				if (fileName == null || fileName.length() == 0) {
 					return;
 				}
-				File f = new File(fileName);
+				final File f = new File(fileName);
 				if (!f.canRead()) {
 					error(jf, "Can't read file " + f);
 				}
-				try {
-					TestResult results = new TestResult() {
-						@Override
-						public void startTest(Test test) {
-							crank();
+				
+				// Run rest of this under Swing's control, so we don't block the EventDispatch thread...
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+				
+						try {
+							TestResult results = new TestResult() {
+								@Override
+								public void startTest(Test test) {
+									crank();
+								}
+								@Override
+								public synchronized void addError(Test test, Throwable t) {
+									seeRed();
+								}
+								@Override
+								public synchronized void addFailure(Test test, AssertionFailedError t) {
+									seeRed();
+								}
+							};
+							TestCase t = new ScriptTestCase(f.getAbsolutePath());
+							int max = t.countTestCases();
+							System.out.printf("Starting %d tests%n", max);
+							bar.setMaximum(max);
+							t.run(results);
+						} catch (Exception e) {
+							error(jf, e.toString());
 						}
-						@Override
-						public synchronized void addError(Test test, Throwable t) {
-							seeRed();
-						}
-						@Override
-						public synchronized void addFailure(Test test, AssertionFailedError t) {
-							seeRed();
-						}
-					};
-					TestCase t = new ScriptTestCase(f.getAbsolutePath());
-					int max = t.countTestCases();
-					System.out.printf("Starting %d tests%n", max);
-					bar.setMaximum(max);
-					t.run(results);
-				} catch (Exception e) {
-					error(jf, e.toString());
-					e.printStackTrace();
-				}
+					}}
+				);
 			}			
-		});		
+		});	
+		
 		jf.add(bar, BorderLayout.SOUTH);
 		seeGreen();
 		
@@ -137,6 +145,15 @@ public class PageUnitGUI extends PageUnit {
 	void crank() {
 		int x = bar.getValue();
 		bar.setValue(++x);
+		bar.repaint();
+		boolean debug = false;
+		if (debug) {
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			// canthappen
+		}
+		}
 	}
 	
 	static void error(final JFrame tf, String mesg) {
