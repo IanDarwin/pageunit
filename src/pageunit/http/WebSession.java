@@ -33,8 +33,9 @@ import pageunit.html.HTMLParser;
  */
 public class WebSession {
 	
-	static final String META_REFRESH_CONTENT_REGEX_STRING = "\\d+;\\s*URL=['\']?(.*)['\']?";
-	static final Pattern META_REFRESH_CONTENT_REGEX_PATTERN = Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING, Pattern.CASE_INSENSITIVE);
+	static final String META_REFRESH_CONTENT_REGEX_STRING = "\\d+;\\s*URL=['\"]?(.*)['\"]?";
+	static final Pattern META_REFRESH_CONTENT_REGEX_PATTERN = 
+		Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING, Pattern.CASE_INSENSITIVE);
 	private HttpClient client;
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
