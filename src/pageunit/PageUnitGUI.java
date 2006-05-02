@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -12,6 +13,9 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import junit.framework.TestCase;
+import junit.framework.TestResult;
 
 import com.darwinsys.swingui.UtilGUI;
 
@@ -21,6 +25,8 @@ import com.darwinsys.swingui.UtilGUI;
 public class PageUnitGUI extends PageUnit {
 
 	final static JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
+	
+	final static Preferences p = Preferences.userNodeForPackage(PageUnitGUI.class);
 	
 	/**
 	 * Main method; ignores arguments.
@@ -62,7 +68,12 @@ public class PageUnitGUI extends PageUnit {
 					error(jf, "Can't read file " + f);
 				}
 				try {
-					processOne(f);
+					TestResult results = new TestResult();
+					TestCase t = new ScriptTestCase(f.getAbsolutePath());
+					int max = results.runCount();
+					System.out.printf("Out of %d runs%n", max);
+					
+					t.run(results);
 				} catch (Exception e) {
 					error(jf, e.toString());
 					e.printStackTrace();
@@ -71,7 +82,7 @@ public class PageUnitGUI extends PageUnit {
 		});		
 		
 		jf.pack();
-		UtilGUI.centre(jf);
+		UtilGUI.monitorWindowPosition(jf, p);
 		jf.setVisible(true);
 	}
 	
