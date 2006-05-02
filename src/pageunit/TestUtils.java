@@ -9,6 +9,8 @@ import java.util.Properties;
 
 import org.apache.commons.httpclient.HttpStatus;
 
+import com.darwinsys.util.VariableMap;
+
 /**
  * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
  * 
@@ -50,6 +52,12 @@ public class TestUtils {
 		}
 	}
 
+	public static URL qualifyURL(final VariableMap map, final String target) throws MalformedURLException {
+		String targetHost = map.getVar(PROP_HOST, "localhost");
+		int targetPort = map.getIntVar(PROP_PORT, 80);
+		return qualifyURL(targetHost, targetPort, target);
+	}
+	
 	/**
 	 * @param targetHost
 	 * @param targetPort
