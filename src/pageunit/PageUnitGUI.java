@@ -97,14 +97,17 @@ public class PageUnitGUI extends PageUnit {
 							TestResult results = new TestResult() {
 								@Override
 								public void startTest(Test test) {
+									super.startTest(test);
 									crank();
 								}
 								@Override
 								public synchronized void addError(Test test, Throwable t) {
+									super.addError(test, t);
 									seeRed();
 								}
 								@Override
 								public synchronized void addFailure(Test test, AssertionFailedError t) {
+									super.addFailure(test, t);
 									seeRed();
 								}
 							};
