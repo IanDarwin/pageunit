@@ -14,11 +14,13 @@ public class WebSessionTest extends TestCase {
 			"12345;Url='/abc.html",	// test if typo, missing end quote, still passes, lax is good.
 		};
 		for (String refresh : refreshTests) {
-			System.out.println("Trying " + refresh);
+			System.out.print("Trying " + refresh);
 			Matcher matcher = WebSession.META_REFRESH_CONTENT_REGEX_PATTERN.matcher(refresh);
 			assertTrue(matcher.matches());
 			assertEquals(1, matcher.groupCount());
-			assertTrue(refresh.endsWith(matcher.group(1)));
+			String urlPattern = matcher.group(1);
+			System.out.println("; URL part = " + urlPattern);
+			assertTrue(refresh.endsWith(urlPattern));
 		}
 	}
 }
