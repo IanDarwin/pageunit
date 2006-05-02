@@ -13,7 +13,8 @@ import pageunit.html.HTMLParser;
 import pageunit.html.HTMLScript;
 
 public class ParserTest3 extends TestCase {
-	final static String testData = "<html><head><title>Fool</title></head>" +
+	final static String testData = "<html><head><title>Fool</title>" +
+	"<meta http-equiv=\"Refresh\" content=\"2; URL=/foo.jsp\"></head>" +
 	"<script language='javascript'>function(bleah) if (a < b) return -1;</script>" +
 	"<body><form action='/foo' method='post' onSubmit='crazy eights'>" +
 	"<input type='submit' name='submit'/></form>" +
@@ -30,7 +31,7 @@ public class ParserTest3 extends TestCase {
 		boolean found = false;
 		List<HTMLComponent> children = page.getChildren();
 		for (HTMLComponent c : children) {
-			System.out.printf("HTML Page Child %s%n", c);
+			// System.out.printf("HTML Page Child %s%n", c);
 			if (c instanceof HTMLForm) {
 				System.out.printf("FORM: onSubmit=%s%n", ((HTMLForm)c).getOnSubmit());
 			}
@@ -41,5 +42,19 @@ public class ParserTest3 extends TestCase {
 			}
 		}
 		assertTrue("Look for Script element", found);
+	}
+	
+	public void testMeta() throws Throwable {
+		assertNotNull(page);
+		boolean found = false;
+		List<HTMLComponent> children = page.getChildren();
+		for (HTMLComponent c : children) {
+			if (c instanceof HTMLMeta) {
+				HTMLMeta cc = (HTMLMeta) c;
+				System.out.println("FOUND META: " + cc);		
+				found = true;
+			}
+		}
+		assertTrue("Look for Meta element", found);
 	}
 }
