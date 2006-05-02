@@ -20,7 +20,7 @@ public class WebSessionTest extends TestCase {
 			assertEquals(1, matcher.groupCount());
 			String urlPattern = matcher.group(1);
 			System.out.println("; URL part = " + urlPattern);
-			assertTrue(refresh.endsWith(urlPattern));
+			assertTrue(refresh.endsWith(urlPattern) || refresh.substring(0, refresh.length()-1).endsWith(urlPattern));
 		}
 	}
 }
