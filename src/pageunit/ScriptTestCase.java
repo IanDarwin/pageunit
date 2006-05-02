@@ -169,7 +169,7 @@ public class ScriptTestCase extends TestCase {
 		System.out.println("Run at " + new Date());
 		stars();
 
-		session = new WebSession();
+		session = new WebSession(variables);
 
 		for (int lineNumber = 0, numLines = lines.size(); lineNumber < numLines; lineNumber++) {	// MAIN LOOP PER LINE
 
@@ -522,7 +522,7 @@ public class ScriptTestCase extends TestCase {
 	 * 
 	 */
 	private void newSession() {
-		session = new WebSession();
+		session = new WebSession(variables);
 		session.setThrowExceptionOnFailingStatusCode(false);
 		theLink = null;
 	}
@@ -584,7 +584,7 @@ public class ScriptTestCase extends TestCase {
 		
 		if (session == null) {
 			System.err.println("Warning: no Session before Get Unprotected Page");
-			session = new WebSession();
+			session = new WebSession(variables);
 		}
 	}
 	
