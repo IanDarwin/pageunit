@@ -14,6 +14,8 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import com.darwinsys.util.VariableMap;
+
 import pageunit.TestUtils;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
@@ -31,15 +33,23 @@ import pageunit.html.HTMLParser;
  */
 public class WebSession {
 	
+	static final String META_REFRESH_CONTENT_REGEX_STRING = "\\d+;\\s*URL=['\']?(.*)['\']?";
+	static final Pattern META_REFRESH_CONTENT_REGEX_PATTERN = Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING, Pattern.CASE_INSENSITIVE);
 	private HttpClient client;
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
 	private WebResponse response;
 	private boolean debug = true;
+	private VariableMap variables;
 	
 	public WebSession() {
+		this(new VariableMap());
+	}
+	
+	public WebSession(VariableMap vars) {
 		super();
 		client = new HttpClient();
+		this.variables = vars;
 	}
 
 	
@@ -99,22 +109,31 @@ public class WebSession {
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
 				HTMLMeta m = (HTMLMeta)c;
-				System.out.printf("isRedirectURLPage(%s) found META tag %s%n", page, m);
+				System.out.printf("WebSession.isRedirectURLPage(%s) found META tag %s%n", page, m);
 				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
 					return null;
 				}
 				String content = m.getMetaContent();
-				Pattern patt = Pattern.compile("\\d+;\\s*(.*)");
+				Pattern patt = Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING);
 				Matcher mat = patt.matcher(content);
 				if (mat.find()) {
 					try {
-						URL url = new URL(mat.group(1));
+						String urlPattern = mat.group(1);
+						URL url = null;
+						if (variables != null) {
+							url = TestUtils.qualifyURL(variables, urlPattern);
+						} else {
+							url = new URL(urlPattern);
+						}
 						System.out.printf("isRedirectURLPage(%s) Returning URL %s%n", page, url);
 						return url;
 					} catch (MalformedURLException e) {
 						System.err.println("HTTP META REFRESH BOMBED: " + e);
 						return null;
 					}
+				} else {
+					System.err.printf("can't parse META refresh pattern '%s'%n", content);
+					return null;
 				}
 			}
 		}
@@ -305,5 +324,7 @@ public class WebSession {
 		return response;
 	}
 
-
+	VariableMap getVariablesMap() {
+		return variables;
+	}
 }
