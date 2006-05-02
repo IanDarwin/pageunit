@@ -18,6 +18,7 @@ public class WebSessionTest extends TestCase {
 			Matcher matcher = WebSession.META_REFRESH_CONTENT_REGEX_PATTERN.matcher(refresh);
 			assertTrue(matcher.matches());
 			assertEquals(1, matcher.groupCount());
+			assertTrue(refresh.endsWith(matcher.group(1)));
 		}
 	}
 }
