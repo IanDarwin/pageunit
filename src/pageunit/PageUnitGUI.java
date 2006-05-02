@@ -17,7 +17,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -89,8 +88,8 @@ public class PageUnitGUI extends PageUnit {
 					error(jf, "Can't read file " + f);
 				}
 				
-				// Run rest of this under Swing's control, so we don't block the EventDispatch thread...
-				SwingUtilities.invokeLater(new Runnable() {
+				// Run rest of this under a new Thread, so we don't block the EventDispatch thread...
+				new Thread(new Runnable() {
 					public void run() {
 				
 						try {
@@ -120,7 +119,7 @@ public class PageUnitGUI extends PageUnit {
 							error(jf, e.toString());
 						}
 					}}
-				);
+				).start();
 			}			
 		});	
 		
