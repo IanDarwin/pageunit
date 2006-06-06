@@ -89,7 +89,7 @@ public class PageUnitGUI extends PageUnit {
 				}
 				
 				// Run rest of this under a new Thread, so we don't block the EventDispatch thread...
-				new Thread(new Runnable() {
+				new Thread() {
 					public void run() {
 				
 						try {
@@ -118,8 +118,9 @@ public class PageUnitGUI extends PageUnit {
 						} catch (Exception e) {
 							error(jf, e.toString());
 						}
-					}}
-				).start();
+					}
+				}.start();
+				
 			}			
 		});	
 		
