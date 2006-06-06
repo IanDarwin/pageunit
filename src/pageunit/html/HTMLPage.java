@@ -2,10 +2,12 @@ package pageunit.html;
 
 import java.util.List;
 
+import org.w3c.dom.Document;
+
 /** The Content of an HTML page is the raw HTML page, whilst the
  * Body of an HTMLContainer is the text content it contains.
  */
-public interface HTMLPage extends HTMLContainer {
+public interface HTMLPage extends HTMLContainer, Document {
 	
 	void setContent(String bodyContent);
 	public String getContent();
