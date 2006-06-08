@@ -279,7 +279,7 @@ public class WebSession {
 	
 				HTMLInputImpl input = (HTMLInputImpl) inputsIterator.next();
 		
-				if (input.getType().equals(HTMLInput.Type.SUBMIT)
+				if (input.getInputType().equals(HTMLInput.InputType.SUBMIT)
 						&& !input.getName().equals(button.getName()))
 					inputsIterator.remove();
 			}
