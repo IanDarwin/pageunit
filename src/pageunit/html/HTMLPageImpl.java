@@ -14,6 +14,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.EntityReference;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
@@ -122,8 +123,28 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 		return content.length();
 	}
 
+	// Node methods
+	@Override
+	public String getNodeName() {
+		return "#document";
+	}
+	
+	/* Must return null */
+	@Override
+	public String getNodeValue() throws DOMException {
+		return null;
+	}
+	
+	/* Must return null */
+	@Override
+	public NamedNodeMap getAttributes() {
+		return null;
+	}
+	
+	// Document methods
+	
 	public DocumentType getDoctype() {
-		// TODO Auto-generated method stub
+		// DocumentType object is too complex to make up, and you are allowed to return null.
 		return null;
 	}
 
@@ -133,8 +154,7 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public Element getDocumentElement() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // XXX
 	}
 
 	public Element createElement(String tagName) throws DOMException {
@@ -183,8 +203,7 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public Node importNode(Node importedNode, boolean deep) throws DOMException {
-		// TODO Auto-generated method stub
-		return null;
+		return errorImmutable();
 	}
 
 	public Element createElementNS(String namespaceURI, String qualifiedName) throws DOMException {
@@ -208,8 +227,7 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public String getInputEncoding() {
-		// TODO Auto-generated method stub
-		return null;
+		return "UTF-8";
 	}
 
 	public String getXmlEncoding() {
@@ -227,24 +245,21 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 		
 	}
 
+	String HTMLVersion = "<HTML>";
 	public String getXmlVersion() {
-		// TODO Auto-generated method stub
-		return null;
+		return HTMLVersion;
 	}
 
 	public void setXmlVersion(String xmlVersion) throws DOMException {
-		// TODO Auto-generated method stub
-		
+		HTMLVersion = xmlVersion;
 	}
 
 	public boolean getStrictErrorChecking() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public void setStrictErrorChecking(boolean strictErrorChecking) {
-		// TODO Auto-generated method stub
-		
+		throw new RuntimeException("You can't be serious");
 	}
 
 	public String getDocumentURI() {
@@ -258,8 +273,7 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public Node adoptNode(Node source) throws DOMException {
-		// TODO Auto-generated method stub
-		return null;
+		return errorImmutable();		
 	}
 
 	public DOMConfiguration getDomConfig() {
@@ -273,7 +287,6 @@ public class HTMLPageImpl extends HTMLContainerBase implements HTMLPage {
 	}
 
 	public Node renameNode(Node n, String namespaceURI, String qualifiedName) throws DOMException {
-		// TODO Auto-generated method stub
-		return null;
+		return errorImmutable();
 	}
 }

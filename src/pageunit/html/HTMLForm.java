@@ -2,7 +2,7 @@ package pageunit.html;
 
 import java.util.List;
 
-public interface HTMLForm extends HTMLContainer,OnSubmitSettable {
+public interface HTMLForm extends HTMLContainer, OnSubmitSettable {
 	public abstract String getAction();
 	public abstract List<HTMLInput> getInputs();
 	public HTMLInput getInputByName(String regex);

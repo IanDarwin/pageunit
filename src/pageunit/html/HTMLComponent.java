@@ -1,6 +1,8 @@
 package pageunit.html;
 
-public interface HTMLComponent {
+import org.w3c.dom.Node;
+
+public interface HTMLComponent extends Node {
     public String getName();
     /* no setName, always passed in constructor, immutable */
     public String getBody();
