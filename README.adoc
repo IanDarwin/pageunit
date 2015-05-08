@@ -1,3 +1,5 @@
 == pageunit
 
 Another web testing framework, written in Java, based on JUnit style of testing.
+
+See web site http://darwinsys.com/pageunit/docs/ for information on how to use.
