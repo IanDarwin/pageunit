@@ -4,6 +4,7 @@
 	<groupId>com.darwinsys</groupId>
 	<artifactId>pageunit</artifactId>
 	<version>1.0.1-SNAPSHOT</version>
+	<inceptionYear>2005</inceptionYear>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
