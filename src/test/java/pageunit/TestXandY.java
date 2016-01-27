@@ -11,7 +11,7 @@ public class TestXandY extends TestCase {
 	
 	public void test() throws Exception {
 		System.out.println("TestXandY.test()");
-		String script = "D on\nX regress.DummyFilter\nY regress.DummyFilter\n";
+		String script = "D on\nX pageunit.DummyFilter\nY pageunit.DummyFilter\n";
 		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
 		TestResult tr;
 		t.run(tr = new TestResult());
