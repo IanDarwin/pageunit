@@ -159,4 +159,4 @@ public class LinkChecker {
 		cache.add(s);
 		return false;
 	}
- }
+}
