@@ -12,3 +12,7 @@ To build and package for command-line use:
 Simplify code.
 
 Improve documentation.
+
+Add a 'Head' command (maybe I for "IsItThere?") to send HEAD instead of GET.
+
+Options: set timeout time. (maybe U for "timeoUt and other options"
