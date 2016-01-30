@@ -1,5 +1,14 @@
-== pageunit
+= PageUnit
 
 Another web testing framework, written in Java, based on JUnit style of testing.
 
-See web site http://darwinsys.com/pageunit/docs/ for information on how to use.
+See http://darwinsys.com/pageunit/docs/ for (outdated) information on how to use.
+
+To build and package for command-line use:
+`mvn package assembly:single` then use `java -jar JARFILE fileName [...]'
+
+== TODO
+
+Simplify code.
+
+Improve documentation.
