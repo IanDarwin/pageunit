@@ -13,7 +13,7 @@ public class QuickDemo {
 		//$JUnit-BEGIN$
 		try {
 			suite.addTest(new ScriptTestCase("demos/testphpproject.txt"));
-			suite.addTest(new ScriptTestCase("demos/j2ee.txt"));
+			suite.addTest(new ScriptTestCase("demos/javaee.txt"));
 			suite.addTest(new ScriptTestCase("demos/tiny.txt"));			
 		} catch (Exception e) {
 			e.printStackTrace();
