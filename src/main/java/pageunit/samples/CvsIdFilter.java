@@ -17,8 +17,10 @@ public class CvsIdFilter implements TestFilter {
 	public void filterPage(HTMLPage thePage, WebResponse theResult) throws Exception {
 
 		String contentAsString = theResult.getContentAsString();
-		if (!(contentAsString.indexOf("$Source") > -1) && !(contentAsString.indexOf("$Id") > -1))  {
-			throw new RuntimeException("ERROR: Page does not have a CVS Identifier (neither Source nor Id)");
+		if (!(contentAsString.indexOf("$Id") > -1) && 
+			!(contentAsString.indexOf("$Source") > -1) &&
+			!(contentAsString.indexOf("$Version") > -1))  {
+			throw new RuntimeException("ERROR: Page does not have any valid CVS Identifier");
 		}
 	}
 
