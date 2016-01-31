@@ -37,10 +37,9 @@ import com.darwinsys.util.VariableMap;
 
 /**
  * Run the tests listed in the input file.
- * This file is the heart of PageUnit (but not, I hope,
- * its "heart of darkness").
- * 
- * @version $Id$
+ * This file is the heart of PageUnit (but not, I hope, its "heart of darkness").
+ * This is a JUnit 3.8 "test case" that makes a bunch of tests and runs them.
+ * Should upgrade to JUnit 4 someday...
  */
 public class ScriptTestCase extends TestCase {	
 	private static Logger logger = Logger.getLogger(ScriptTestCase.class);
@@ -163,7 +162,7 @@ public class ScriptTestCase extends TestCase {
 		variables.setVar(TestUtils.PROP_PORT, TestUtils.getProperty(TestUtils.PROP_PORT));
 		
 		stars();
-		System.out.println("PageUnit $Version$");
+		System.out.println("PageUnit Running");
 		System.out.println("Test run with default URL http://" + variables.getVar("HOST") + ":" + variables.getVar("PORT"));
 		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
