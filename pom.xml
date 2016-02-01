@@ -80,6 +80,10 @@
 					<artifactId>javaee-web-api</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>javax.persistence</groupId>
+					<artifactId>persistence-api</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>javax.mail</groupId>
 					<artifactId>mail</artifactId>
 				</exclusion>
