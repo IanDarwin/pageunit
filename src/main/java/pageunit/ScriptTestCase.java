@@ -93,6 +93,17 @@ public class ScriptTestCase extends TestCase {
 		readTests(reader, fileName);
 	}
 	
+	/** Set some default variables */
+	private void setDefaultVariables(VariableMap variables) {
+		variables.clear();
+		if (variables.get(TestUtils.PROP_HOST) == null) {
+			variables.put(TestUtils.PROP_HOST, "localhost");
+		}
+		if (variables.get(TestUtils.PROP_PORT) == null) {
+			variables.put(TestUtils.PROP_PORT, "80");
+		}
+	}
+
 	/** Read all the tests.
 	 * @param r
 	 * @param fileName
@@ -153,17 +164,18 @@ public class ScriptTestCase extends TestCase {
 	 */
 	@Override
 	public void run(TestResult results) {
-		
-		variables.clear();
 
 		variables.setVar(TestUtils.PROP_USER, TestUtils.getProperty(TestUtils.PROP_USER));
 		variables.setVar(TestUtils.PROP_PASS, TestUtils.getProperty(TestUtils.PROP_PASS));
 		variables.setVar(TestUtils.PROP_HOST, TestUtils.getProperty(TestUtils.PROP_HOST));
 		variables.setVar(TestUtils.PROP_PORT, TestUtils.getProperty(TestUtils.PROP_PORT));
 		
+		setDefaultVariables(variables);
+		
 		stars();
 		System.out.println("PageUnit Running");
-		System.out.println("Test run with default URL http://" + variables.getVar("HOST") + ":" + variables.getVar("PORT"));
+		System.out.println("Test run with default URL http://" + variables.getVar(TestUtils.PROP_HOST) + ":" + 
+				variables.getVar(TestUtils.PROP_PORT));
 		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
 		stars();
@@ -308,15 +320,13 @@ public class ScriptTestCase extends TestCase {
 					page = restOfLine;
 					assertValidRURL(page);
 					
-					if (debug) {
-						System.err.println("J " + new URL("http", variables.getVar("HOST"),
+					logger.debug("J " + new URL("http", variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
-					}
 					
-					assertNotNull("username", variables.getVar("USER"));
-					assertNotNull("password", variables.getVar("PASS"));
-					thePage = session.getPage(variables.getVar("HOST"),
-							variables.getIntVar("PORT"), page, 
+					assertNotNull("username", variables.getVar(TestUtils.PROP_USER));
+					assertNotNull("password", variables.getVar(TestUtils.PROP_PASS));
+					thePage = session.getPage(variables.getVar(TestUtils.PROP_HOST),
+							variables.getIntVar(TestUtils.PROP_PORT), page, 
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -430,18 +440,20 @@ public class ScriptTestCase extends TestCase {
 				// FORMS
 					
 				case F: // Find Form By Name
+					theForm = null;
 					String formName = restOfLine;
 					List<HTMLForm> theForms = thePage.getForms();
 					for (Iterator<HTMLForm> iterator = theForms.iterator(); iterator.hasNext();) {
 						HTMLForm oneForm = iterator.next();
 						if (oneForm.getName().indexOf(formName) != -1) {
-							theForm = oneForm;	// "You are the One"
+							theForm = oneForm;	// Found it
+							break;
 						}
 					}
 					assertNotNull("Find form named " + formName, theForm);
 					break;
 					
-				case R:	// set parameter to value
+				case R:	// set HTML Form parameter to value
 					// PRECONDITION: theForm has been set by a previous F command
 					assertNotNull("find a form before setting Parameters", theForm);
 					
@@ -537,6 +549,7 @@ public class ScriptTestCase extends TestCase {
 			System.err.print(":" + cause);
 		}
 		System.err.println(")");
+		e.printStackTrace(System.err);
 	}
 
 	/** Modify the stack trace by adding a fake element that contains the filename and line number of the actual test.

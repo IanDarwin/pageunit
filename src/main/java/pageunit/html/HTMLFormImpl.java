@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 import pageunit.http.HTTPMethod;
 
 public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
@@ -13,11 +15,13 @@ public class HTMLFormImpl extends HTMLContainerBase implements HTMLForm {
 	List<HTMLInput> inputs = new ArrayList<HTMLInput>();
 	private String onSubmit;
 	
+	private static Logger logger = Logger.getLogger(HTMLFormImpl.class);
+	
 	public HTMLFormImpl(String name, String action, String method) {
 		super(name);
 		this.action = action;
 		if (method == null) {
-			System.err.println("Warning: form has no method attribute");
+			logger.warn("Warning: form " + name + " has no method attribute, assuming 'get'");
 			method = "get";
 		}
 		this.method = HTTPMethod.valueOf(method.toUpperCase());

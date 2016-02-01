@@ -2,7 +2,7 @@ package pageunit.html;
 
 public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 
-	private InputType type;
+	private HTMLInputType type;
 	private String value;
 	private String onClick;
 	private String onChange;
@@ -10,11 +10,11 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 	public HTMLInputImpl(String name, String type) {
 		super(name);
 		if (type != null) {
-			this.type = InputType.valueOf(type.toUpperCase());
+			this.type = HTMLInputType.valueOf(type.toUpperCase());
 		}
 	}
 
-	public InputType getInputType() {
+	public HTMLInputType getInputType() {
 		return type;
 	}
 
@@ -28,7 +28,7 @@ public class HTMLInputImpl extends HTMLContainerBase implements HTMLInput {
 	@Override
 	public String toString() {		
 		return String.format(
-			"<input type=%s name=%s value=%s>", type, getName(), value);
+			"<input type='%s' name='%s' value='%s'/>", type, getName(), value);
 	}
 
 	public void setOnChanged(String script) {

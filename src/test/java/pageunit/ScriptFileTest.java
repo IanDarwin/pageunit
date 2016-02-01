@@ -84,14 +84,14 @@ public class ScriptFileTest extends TestCase {
 			"M Toronto (Centre) for Phenogenomics\n" +
 			"E M0 is ${M0}\n" +
 			"E M1 is ${M1}\n";
-		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
+		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded M test data");
 		t.run(new TestResult());
 	}
 	
 	public void testBadCommand() throws Exception {
 		String script = "* This should fail";
 		try {
-			new ScriptTestCase(null, new StringReader(script), "Imbedded test data");
+			new ScriptTestCase(null, new StringReader(script), "Imbedded M-bad test data");
 			fail("did not throw expected IAE on bad command");
 		} catch (IllegalArgumentException e) {
 			System.out.println("Caught expected IAE on invalid command");

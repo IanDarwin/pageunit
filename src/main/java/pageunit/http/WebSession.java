@@ -13,6 +13,7 @@ import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.log4j.Logger;
 
 import com.darwinsys.util.VariableMap;
 
@@ -22,14 +23,14 @@ import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLInput;
 import pageunit.html.HTMLInputImpl;
+import pageunit.html.HTMLInputType;
 import pageunit.html.HTMLMeta;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 
-/** represents an HTTP session
- * 
- * @version $Id$
+/** 
+ * Represents an HTTP session
  */
 public class WebSession {
 	
@@ -40,9 +41,10 @@ public class WebSession {
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
 	private WebResponse response;
-	private boolean debug = true;
 	private VariableMap variables;
 	
+	private static Logger logger = Logger.getLogger(WebSession.class);
+
 	public WebSession() {
 		this(new VariableMap());
 	}
@@ -79,7 +81,7 @@ public class WebSession {
 			GetMethod getter = new GetMethod(url.toString());		
 			getter.setFollowRedirects(followRedirects);
 			
-			System.out.printf("Initial GET request: %s (followRedirects %b)%n", url, followRedirects);
+			logger.info(String.format("Initial GET request: %s (followRedirects %b)%n", url, followRedirects));
 			
 			int status = client.executeMethod(getter);
 			if (status >= 400 && throwExceptionOnFailingStatusCode) {
@@ -110,7 +112,7 @@ public class WebSession {
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
 				HTMLMeta m = (HTMLMeta)c;
-				System.out.printf("WebSession.isRedirectURLPage(%s) found META tag %s%n", page, m);
+				logger.info(String.format("WebSession.isRedirectURLPage(%s) found META tag %s%n", page, m));
 				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
 					return null;
 				}
@@ -126,10 +128,10 @@ public class WebSession {
 						} else {
 							url = new URL(urlPattern);
 						}
-						System.out.printf("isRedirectURLPage(%s) Returning URL %s%n", page, url);
+						logger.info(String.format("isRedirectURLPage(%s) Returning URL %s%n", page, url));
 						return url;
 					} catch (MalformedURLException e) {
-						System.err.println("HTTP META REFRESH BOMBED: " + e);
+						logger.error("HTTP META REFRESH BOMBED: " + e);
 						return null;
 					}
 				} else {
@@ -138,7 +140,7 @@ public class WebSession {
 				}
 			}
 		}
-		System.out.printf("isRedirectpage(%s) returning null.%n", page);
+		logger.info(String.format("isRedirectpage(%s) returning null.%n", page));
 		return null;
 	}
 
@@ -195,9 +197,8 @@ public class WebSession {
 		
 		WebResponse interaction = getWebResponse();
 		int statusCode = interaction.getStatus();
-        if (debug) {     	
-			System.out.println("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode);
-        }
+	
+		logger.info(String.format("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode));
 
         // Find J2EE login form using regex: must begin with j_security_check, may have jsessionid...
         HTMLForm form = page1.getFormByURL("^j_security_check");
@@ -219,21 +220,21 @@ public class WebSession {
 		
 		// SEND THE LOGIN; disable redirects, HttpClient can't redirect "entity enclosing request" e.g., POST, how helpful.
 		HTMLPage formResultsPage = submitForm(form);   
-		if (debug) {
-			System.out.println("Login return " + formResultsPage.getTitleText());
-		}
+
+		logger.info("Login return " + formResultsPage.getTitleText());
+
 
 		// Should be yet another redirect, back to original request page
 		WebResponse finalResponse = getWebResponse();
 		statusCode = finalResponse.getStatus();
-		System.out.printf("After submit login, statusCode = %d%n", statusCode);
+		logger.info(String.format("After submit login, statusCode = %d%n", statusCode));
 		
 		if (!TestUtils.isRedirectCode((statusCode))) {
 			throw new IllegalStateException("expected redirect status but got " + statusCode);
 		}
 		
 		String redirectLocation = finalResponse.getHeader("location");
-		System.out.println("WebSession.getPage(): redirect location = " + redirectLocation);
+		logger.info("WebSession.getPage(): redirect location = " + redirectLocation);
 		
 		// "To reach, at the end, the goal with which one started..."
 		return getPage(TestUtils.qualifyURL(targetHost, targetPort, redirectLocation), true);
@@ -279,7 +280,7 @@ public class WebSession {
 	
 				HTMLInputImpl input = (HTMLInputImpl) inputsIterator.next();
 		
-				if (input.getInputType().equals(HTMLInput.InputType.SUBMIT)
+				if (input.getInputType().equals(HTMLInputType.SUBMIT)
 						&& !input.getName().equals(button.getName()))
 					inputsIterator.remove();
 			}
@@ -296,9 +297,7 @@ public class WebSession {
 		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
-		if (debug) {
-			System.out.println("WebSession.submitForm(): status code after post was: " + status);
-		}
+		logger.info("WebSession.submitForm(): status code after post was: " + status);
 		
 		byte[] responseBody = handler.getResponseBody();
 		System.out.println("Read body length was " + responseBody.length);

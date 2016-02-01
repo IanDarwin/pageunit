@@ -7,9 +7,17 @@ public abstract class HTMLComponentBase extends NodeBase implements HTMLComponen
 	private String name;
 	private StringBuffer body = new StringBuffer();
 	private boolean debug = false;
+	private static int unnamedComponentNumber = 0;
 
 	public HTMLComponentBase(String name) {
+		if (name == null || name.isEmpty()) {
+			name = generateMissingName();
+		}
 		this.name = name;
+	}
+
+	public String generateMissingName() {
+		return getClass().getSimpleName() + Integer.toString(unnamedComponentNumber++);
 	}
 
 	public String getName() {
