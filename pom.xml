@@ -87,6 +87,10 @@
 					<groupId>javax.mail</groupId>
 					<artifactId>mail</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.apache.directory.studio</groupId>
+					<artifactId>org.apache.commons.codec</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
