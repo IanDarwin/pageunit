@@ -74,6 +74,16 @@
 			<groupId>com.darwinsys</groupId>
 			<artifactId>darwinsys-api</artifactId>
 			<version>1.0.5</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax</groupId>
+					<artifactId>javaee-web-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.mail</groupId>
+					<artifactId>mail</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Java EE API -->
