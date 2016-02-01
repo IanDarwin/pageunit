@@ -81,7 +81,7 @@ public class ScriptFileTest extends TestCase {
 	
 	public void testCommandM() throws Exception {
 		String script = "P http://www.phenogenomics.ca/\n" +
-			"M Toronto (Centre) for Phenogenomics\n" +
+			"M The (Centre) for Phenogenomics\n" +
 			"E M0 is ${M0}\n" +
 			"E M1 is ${M1}\n";
 		Test t = new ScriptTestCase(null, new StringReader(script), "Imbedded M test data");
