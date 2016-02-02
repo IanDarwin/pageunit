@@ -22,8 +22,8 @@ import org.apache.log4j.Logger;
  * the article
  * <a href="http://java.sun.com/products/jfc/tsc/articles/bookmarks/">
  * The Swing HTML Parser</a> on Sun's JFC web site.
- * @note This class is NOT thread-safe; for use in one thread at a time!
- * @version $Id$
+ * Note: This class is NOT thread-safe; for use in one thread at a time!
+ * XXX Replace with TagSoup?
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	private static Logger logger = Logger.getLogger(HTMLParser.class);
@@ -232,9 +232,9 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		logger.info("TEXT NOW " + currentContainer().getBody());
 	}
 	
-	/** The Swing HTML parser sends the body of all SCRIPT tags as comments, even if they are
+	/** 
+	 * The Swing HTML parser sends the body of all SCRIPT tags as comments, even if they are
 	 * non-comment Script elements. So convert them here.
-	 * @see javax.swing.text.html.HTMLEditorKit$ParserCallback#handleComment(char[], int)
 	 */
 	@Override
 	public void handleComment(char[] data, int pos) {
@@ -250,14 +250,14 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	/** Parse an HTML page given a Reader. Since we will 99% likely need the page as a String,
 	 * read it all into a String (content), and pass it to parse(String).
-	 * @param reader
-	 * @return
-	 * @throws IOException
-	 * @throws HTMLParseException
+	 * @param reader The input
+	 * @return The HTMLPage object
+	 * @throws IOException If something fails to read
+	 * @throws HTMLParseException If something fails to parse
 	 */
 	public HTMLPage parse(Reader reader) throws IOException, HTMLParseException {
 		StringBuffer sb = new StringBuffer();
-		int ch;		
+		int ch;
 		while ((ch = reader.read()) != -1) {
 			sb.append((char)ch);
 		}
@@ -267,10 +267,10 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 	
 	/** Parse an HTML page given it as a (long) String.
 	 * Create a StringReader and pass that to ParserDelegator().parse().
-	 * @param s
-	 * @return
-	 * @throws IOException
-	 * @throws HTMLParseException
+	 * @param s The input page as a string
+	 * @return The HTMLPage
+	 * @throws IOException If something fails to read
+	 * @throws HTMLParseException If something fails to parse
 	 */
 	public HTMLPage parse(String s) throws IOException, HTMLParseException {
 		currentPage = new HTMLPageImpl("Outer Page");
@@ -279,20 +279,4 @@ public class HTMLParser extends HTMLEditorKit.ParserCallback {
 		new ParserDelegator().parse(new StringReader(s), this, true);
 		return currentPage;
 	}
-	
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) throws Exception {
-		HTMLEditorKit.ParserCallback callback = new HTMLParser();
-		int n = 0;
-		for (String fileName : args) {
-			logger.info("** START FILE: " + fileName);
-			Reader reader = new FileReader(fileName);
-			new ParserDelegator().parse(reader, callback, true);
-			++n;
-		}
-		System.out.printf("Parsed %d files%n", n);
-	}
-
 }
