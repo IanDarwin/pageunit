@@ -122,7 +122,13 @@
 
 	</dependencies>
 
-	<!-- The only profile we use is for releases. -->
+	<!-- The only profile we use is for releases. 
+	mvn -Prelease release:clean
+	mvn -Prelease release:prepare
+	mvn release:perform
+	open https://oss.sonatype.org/
+	echo Find it under Staging Repositories; Close it; Reload page, select again, Release.
+	-->
 	<profiles>
 		<profile> 
 		<id>release</id>
