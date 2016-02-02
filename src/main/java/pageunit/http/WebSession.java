@@ -150,8 +150,6 @@ public class WebSession {
 	/**
 	 * Get an unprotected page
 	 * 
-	 * @param session
-	 *            The HTTP Session
 	 * @param targetHost
 	 *            The name (or maybe IP as a String) for the host
 	 * @param targetPort
@@ -176,17 +174,17 @@ public class WebSession {
 	 * Get an HTML page that is protected by J2EE Container-based Forms
 	 * Authentication.
 	 * 
-	 * @param session The HTTP Session
 	 * @param targetHost The name (or maybe IP as a String) for the host
 	 * @param targetPort The port number, 80 for default
 	 * @param targetPage The pathname part of the URL
+	 * @param login The label on the tin says it all
+	 * @param pass The label on the tin says it all
 	 * @return An HttpMethod object containing the response.
 	 * @throws IOException If the reading fails
 	 * @throws HTMLParseException If the page fails to parse
 	 */
-	public HTMLPage getPage(final String targetHost, final int targetPort,
-			final String targetPage, final String login,
-			final String pass) throws IOException, HTMLParseException {
+	public HTMLPage getPage(final String targetHost, final int targetPort, final String targetPage, 
+			final String login, final String pass) throws IOException, HTMLParseException {
 		
 		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
 		
@@ -254,9 +252,11 @@ public class WebSession {
 	/** 
 	 * Post an HTML Form
 	 * @param form The form to submit
+	 * @param followRedirects True to follow redirects, false to return the 3XX page
+	 * @param button The HtmlInput to blame it on
 	 * @return The resulting page
 	 * @throws HTMLParseException If the page fails to parse
-	 * @throws IOExceptionIf the reading fails
+	 * @throws IOException If the reading fails
 	 */
 	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException {
 
