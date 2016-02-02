@@ -14,7 +14,7 @@ public class HTMLComponentFactory {
 
 	/** Factory pattern: Create a new tag. 
 	 * DO NOT CHANGE without also changing classForTagType() accordingly!
-	 * @param tag
+	 * @param tag The HTML tag to create
 	 * @param attrs The Set of attributes (note that the names are coerced to lower case for us, so look em up in lower case!).
 	 * @return The construct HTMLComponent.
 	 */
@@ -106,8 +106,8 @@ public class HTMLComponentFactory {
 
 	/** Return the Class type in my hierarchy that corresponds to the HTML.Tag type in Swing's HTML;
 	 * used in HTMLParser to know when to pop a Container.
-	 * @param tag
-	 * @return
+	 * @param tag The HTML tag
+	 * @return The Class descriptor for the HTML tag representation
 	 */
 	public static Class<?> classForTagType(HTML.Tag tag) {
 		if (tag == HTML.Tag.HTML) {

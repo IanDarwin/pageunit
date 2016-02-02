@@ -14,9 +14,9 @@ public class HTMLMetaImpl extends HTMLComponentBase implements HTMLMeta {
 	}
 
 	/**
-	 * @param name
-	 * @param content
-	 * @param equiv
+	 * @param name The tag name
+	 * @param equiv The equiv element
+	 * @param content The tag content
 	 */
 	public HTMLMetaImpl(String name, String equiv, String content) {
 		super(name);
