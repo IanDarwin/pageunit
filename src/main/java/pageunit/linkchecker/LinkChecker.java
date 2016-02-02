@@ -31,8 +31,11 @@ public class LinkChecker {
 	static int indent = 0;
 	final static List<String> cache = new ArrayList<String>();
   
-	/** Start checking, given a URL by name.
+	/**
+	 * Start checking, given a URL by name.
 	 * Calls checkLink to check each link.
+	 * @param rootURLString Where to start checking
+	 * @throws IOException if the reading fails
 	 */
 	public synchronized static void checkStartingAt(String rootURLString) throws IOException {
 		URL rootURL = null;
@@ -118,7 +121,11 @@ public class LinkChecker {
 	
 	private static URLCanonicalizer uc = new URLCanonicalizer();
 	
-	/** Check one link, given its DocumentBase and the tag */
+	/**
+	 * Check one link, given its DocumentBase and the tag
+	 * @param linkURL The link to be checked
+	 * @return a String containing the status
+	 */
 	public static synchronized String checkOneLink(URL linkURL) {
 		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 

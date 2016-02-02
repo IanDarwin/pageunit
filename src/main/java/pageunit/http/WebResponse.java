@@ -39,9 +39,11 @@ public class WebResponse {
 		this.url = url;
 	}
 	
-	/** Save the given headers in a Map for simpler access (don't export Commons HTTPClient Header[] type to client!)
+	/** 
+	 * Save the given headers in a Map for simpler access 
+	 * (don't export Commons HTTPClient Header[] type to client!)
 	 * Names are converted to lowercase, 
-	 * @param headers
+	 * @param headers The Http Headers
 	 */
 	public void setHeaders(Header[] headers) {
 		for (Header h : headers) {

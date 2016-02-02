@@ -56,21 +56,23 @@ public class WebSession {
 	}
 
 	
-	/** If this is set to true, 400/500 errors will throw an exception;
+	/** 
+	 * If this is set to true, 400/500 errors will throw an exception;
 	 * if false (the default), errors simply return and the user must 
 	 * check with getStatus().
-	 * @param b
+	 * @param b Whether to throw on 400/500 staus codes
 	 */
 	public void setThrowExceptionOnFailingStatusCode(final boolean b) {
 		throwExceptionOnFailingStatusCode = b;
 	}
 
-	/** load the given page, parse the HTML response
+	/**
+	 * Load the given page, parse the HTML response
 	 * @param url The page to get
+	 * @param followRedirects True to follow redirects, false to return the 3XX page
 	 * @return the parsed HTML page
-	 * @throws IOException 
-	 * @throws HTMLParseException 
-	 * @throws HttpException 
+	 * @throws IOException If the page can't be read
+	 * @throws HTMLParseException If the page fails to parse
 	 */
 	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException {
 		HTMLPage page;
@@ -157,8 +159,8 @@ public class WebSession {
 	 * @param targetPage
 	 *            The pathname part of the URL
 	 * @return An HttpMethod object containing the response.
-	 * @throws IOException
-	 * @throws HTMLParseException 
+	 * @throws IOException If the reading fails
+	 * @throws HTMLParseException If the page fails to parse
 	 */
 	public HTMLPage getPage(
 			String targetHost, int targetPort, String targetPage)
@@ -174,17 +176,13 @@ public class WebSession {
 	 * Get an HTML page that is protected by J2EE Container-based Forms
 	 * Authentication.
 	 * 
-	 * @param session
-	 *            The HTTP Session
-	 * @param targetHost
-	 *            The name (or maybe IP as a String) for the host
-	 * @param targetPort
-	 *            The port number, 80 for default
-	 * @param targetPage
-	 *            The pathname part of the URL
+	 * @param session The HTTP Session
+	 * @param targetHost The name (or maybe IP as a String) for the host
+	 * @param targetPort The port number, 80 for default
+	 * @param targetPage The pathname part of the URL
 	 * @return An HttpMethod object containing the response.
-	 * @throws IOException
-	 * @throws HTMLParseException 
+	 * @throws IOException If the reading fails
+	 * @throws HTMLParseException If the page fails to parse
 	 */
 	public HTMLPage getPage(final String targetHost, final int targetPort,
 			final String targetPage, final String login,
@@ -243,21 +241,22 @@ public class WebSession {
 	/**
 	 * A thin wrapper around getPage(): GET the page linked
 	 * to an anchor imbedded in a page.
-	 * @param theLink
-	 * @return
-	 * @throws HTMLParseException 
-	 * @throws IOException 
+	 * @param theLink The page to load
+	 * @return The resulting page
+	 * @throws HTMLParseException If the page fails to parse
+	 * @throws IOException If the reading fails
 	 */
 	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
 		URL u = TestUtils.completeURL(theLink.getURL());
 		return getPage(u, true);
 	}
 	
-	/** Post an HTML Form
-	 * @param form
-	 * @return
-	 * @throws HTMLParseException
-	 * @throws IOException
+	/** 
+	 * Post an HTML Form
+	 * @param form The form to submit
+	 * @return The resulting page
+	 * @throws HTMLParseException If the page fails to parse
+	 * @throws IOExceptionIf the reading fails
 	 */
 	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException {
 
@@ -310,11 +309,12 @@ public class WebSession {
 		return new HTMLParser().parse(responseText);
 	}
 	
-	/** Submit a Form with defaults
-	 * @param form
-	 * @return
-	 * @throws HTMLParseException
-	 * @throws IOException
+	/** 
+	 * Submit a Form with defaults
+	 * @param form The form to be submitted
+	 * @return The resulting HTMLPage
+	 * @throws HTMLParseException If the parse fails
+	 * @throws IOException If the reading fails
 	 */
 	public HTMLPage submitForm(final HTMLForm form) throws HTMLParseException, IOException {
 		return submitForm(form, false, null);
