@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Ian F. Darwin 2006-2014
+ * Copyright (c) Ian F. Darwin 2005-2016
  * Software written by Ian F. Darwin.
  *
  * Redistribution and use in source and binary forms, with or without
