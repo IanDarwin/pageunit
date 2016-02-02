@@ -22,10 +22,9 @@ import sun.net.URLCanonicalizer;
 /** A simple HTML Link Checker. 
  * Should have Properties to set depth, URLs to check. etc.
  * Responses not adequate; need to check at least for 404-type errors!
- * <br/>
+ * <br>
  * XXX Move cache into a ThreadLocal, then un-synchronize all the methods.
- * @author Ian Darwin, www.darwinsys.com.
- * @version $Id$
+ * @author Ian Darwin, http://darwinsys.com/
  */
 public class LinkChecker {
 

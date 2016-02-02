@@ -28,9 +28,9 @@ public class TestUtils {
 	private static final int DEFAULT_PORT = 80;
 	private static final String DEFAULT_PATH = "/";
 	
-	/** A Standard Properties mechanism: the following props are expected:<br/>
+	/** A Standard Properties mechanism: the following props are expected:<br>
 	 * <pre>HOST=host.dom</pre>
-	 * <p>The following properties are optional:<br/>
+	 * <p>The following properties are optional:<br>
 	 * <pre>PORT=8080 # defaults to 80
 	 * USER=myName
 	 * PASS=myPassword</pre>
@@ -59,15 +59,16 @@ public class TestUtils {
 	}
 	
 	/**
-	 * @param targetHost
-	 * @param targetPort
-	 * @param targetPage
-	 * @return
-	 * @throws MalformedURLException
+	 * Qualify a URL which may be relative or absolute
+	 * @param targetHost The hostname
+	 * @param targetPort The port number
+	 * @param targetPage The destination
+	 * @return The final URL
+	 * @throws MalformedURLException If the inputs don't add up to a valid URL
 	 */
 	public static URL qualifyURL(final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
 		final URL url;
-		if (targetPage.startsWith("http:")) {
+		if (targetPage.startsWith("http:") || targetPage.startsWith("https:")) {
 			url = new URL(targetPage);
 		} else {
 			if (!targetPage.startsWith("/")) {
@@ -81,8 +82,8 @@ public class TestUtils {
 	
 	/**
 	 * Return true iff the given status code is one that indicates redirection, e.g., 3xx codes.
-	 * @param formResultsPage
-	 * @return The redirect location, or null
+	 * @param statusCode The numeric HTTP status code (200, 404, ...)
+	 * @return true if the status code is a redirect code
 	 */
 	public static boolean isRedirectCode(int statusCode) {
 		return (statusCode == HttpStatus.SC_MOVED_TEMPORARILY)
@@ -140,9 +141,9 @@ public class TestUtils {
 
 	/** Convert partial URLs to full URLS, providing defaults
 	 * from getProperties() and then from baked-in defaults.
-	 * @param u
-	 * @return
-	 * @throws MalformedURLException
+	 * @param u The partial URL to be converted
+	 * @return The completed URL
+	 * @throws MalformedURLException If the partial URL doen't cut it.
 	 */
 	public static URL completeURL(URL u) throws MalformedURLException {
 		String prot = u.getProtocol();

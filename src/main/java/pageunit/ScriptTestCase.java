@@ -63,7 +63,7 @@ public class ScriptTestCase extends TestCase {
 	
 	/** Construct a ScriptTestCase from the named test file.
 	 * @param fileName the test script file name.
-	 * @throws Exception
+	 * @throws Exception If something blows
 	 */
 	public ScriptTestCase(String fileName) throws Exception {			
 		this(new File(fileName), fileName);
@@ -71,9 +71,9 @@ public class ScriptTestCase extends TestCase {
 
 	/** Construct a ScriptTestCase from a java.io.File object.
 	 * @param theFile A File object representing the file; MUST NOT be null unless there are guaranteed to be no
-	 * inclusion operators ('<') in the input.
-	 * @param fileName
-	 * @throws IOException
+	 * inclusion operators ('&lt;') in the input.
+	 * @param fileName The file to read
+	 * @throws IOException If the file can't be read
 	 */
 	public ScriptTestCase(File theFile, String fileName) throws IOException {		
 		this(theFile, new BufferedReader(new FileReader(theFile)), fileName);
@@ -82,10 +82,10 @@ public class ScriptTestCase extends TestCase {
 	/** Construct a ScriptTestCase, reading the file into a List.
 	 * N.B. This constructor is needed for running from JUnit tests.
 	 * @param theFile A File object representing the file; MUST NOT be null unless there are guaranteed to be no
-	 * inclusion operators ('<') in the input.
+	 * inclusion operators ('&lt;') in the input.
 	 * @param reader An open Reader for the file.
 	 * @param fileName The filename.
-	 * @throws IOException
+	 * @throws IOException If the file can't be read
 	 */
 	public ScriptTestCase(File theFile, Reader reader, String fileName) throws IOException {
 		this.file = theFile;
@@ -93,7 +93,7 @@ public class ScriptTestCase extends TestCase {
 		readTests(reader, fileName);
 	}
 	
-	/** Set some default variables */
+	/* Set some default variables */
 	private void setDefaultVariables(VariableMap variables) {
 		variables.clear();
 		if (variables.get(TestUtils.PROP_HOST) == null) {
@@ -105,9 +105,9 @@ public class ScriptTestCase extends TestCase {
 	}
 
 	/** Read all the tests.
-	 * @param r
-	 * @param fileName
-	 * @throws IOException
+	 * @param r The reader to read from
+	 * @param fileName The filename of 'r'
+	 * @throws IOException If something fails
 	 */
 	private void readTests(Reader r, String fileName) throws IOException {
 		logger.debug("readTests" + fileName);
@@ -605,7 +605,8 @@ public class ScriptTestCase extends TestCase {
 	
 	/**
 	 * Get a Boolean from an input line.
-	 * @param input
+	 * @param input The input line
+	 * @return The boolean value of the input
 	 */
 	public static boolean getBoolean(final String input) {
 		if ("on".equals(input) || "t".equals(input) || "true".equals(input)) {
@@ -641,7 +642,8 @@ public class ScriptTestCase extends TestCase {
 	}
 	
 	/**
-	 * Returns true if debug is enabled.
+	 * Is Debug?
+	 * @return true if debug is enabled.
 	 */
 	public boolean isDebug() {
 		return debug;

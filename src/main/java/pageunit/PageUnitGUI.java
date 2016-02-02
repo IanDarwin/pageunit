@@ -38,6 +38,7 @@ public class PageUnitGUI extends PageUnit {
 	
 	/**
 	 * Main method; ignores arguments.
+	 * @param The input arguments
 	 */
 	public static void main(String[] args) {
 		new PageUnitGUI();

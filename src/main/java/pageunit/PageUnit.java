@@ -66,7 +66,7 @@ public class PageUnit {
 	/** Process one File; if it's a directory, recurse,
 	 * if it's a file, ending in .txt, run it as a test file.
 	 * @param f The File object to process.
-	 * @throws Exception
+	 * @throws Exception If error
 	 */
 	public static void processOne(final File f) throws Exception {
 		logger.info(String.format("pageunit: processOne(%s)", f));
@@ -106,7 +106,7 @@ public class PageUnit {
 
 	/**
 	 * Returns true if any tests have reported errors or failures.
-	 * @return
+	 * @return True if any tests failed
 	 */
 	public static boolean isFailed() {
 		return results.errorCount() > 0 || results.failureCount() > 0;
@@ -114,6 +114,7 @@ public class PageUnit {
 	
 	/**
 	 * Get a copy of the JUnit TestResults for this run.
+	 * @return The test results
 	 */
 	public static TestResult getTestResults() {
 		return (TestResult) results.clone();

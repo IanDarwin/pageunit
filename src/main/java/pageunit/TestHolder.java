@@ -12,10 +12,12 @@ public class TestHolder implements Test {
 	private final String args;
 	private final String fileName;
 	private final int lineNumber;
+
 	/**
-	 * @param commandChar 
-	 * @param fileName
-	 * @param lineNumber
+	 * @param commandChar The verb
+	 * @param args  The arguments
+	 * @param fileName Name of file it came from
+	 * @param lineNumber Line number within the file
 	 */
 	public TestHolder(final char commandChar, final String args, final String fileName, final int lineNumber) {
 		super();
