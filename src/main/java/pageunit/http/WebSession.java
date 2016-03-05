@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -171,7 +170,7 @@ public class WebSession {
 	}
 
 	/**
-	 * Get an HTML page that is protected by J2EE Container-based Forms
+	 * Get an HTML page that is protected by Java EE Container-based Forms
 	 * Authentication.
 	 * 
 	 * @param targetHost The name (or maybe IP as a String) for the host
@@ -196,21 +195,21 @@ public class WebSession {
 	
 		logger.info(String.format("Protected Page get: " + page1.getTitleText() + ", status: " + statusCode));
 
-        // Find J2EE login form using regex: must begin with j_security_check, may have jsessionid...
+        // Find Java EE login form using regex: must begin with j_security_check, may have jsessionid...
         HTMLForm form = page1.getFormByURL("^j_security_check");
 		if (form == null) {
-			throw new IllegalStateException("Not a valid J2EE page, can't find form with action of j_security_check");
+			throw new IllegalStateException("Not a valid Java EE page, can't find form with action of j_security_check");
 		}
 
 		HTMLInput userNameFormField = form.getInputByName("j_username");
 		if (userNameFormField == null) {
-			throw new IllegalStateException("Not a valid J2EE login form - no j_username field");
+			throw new IllegalStateException("Not a valid Java EE login form - no j_username field");
 		}
 		userNameFormField.setValue(login);
 		
 		HTMLInput userPassFormField = form.getInputByName("j_password");
 		if (userPassFormField == null) {
-			throw new IllegalStateException("Not a valid J2EE login form - no j_password field");
+			throw new IllegalStateException("Not a valid Java EE login form - no j_password field");
 		}
 		userPassFormField.setValue(pass);
 		
@@ -263,7 +262,7 @@ public class WebSession {
 		String action = form.getAction();
 		
 		if (!action.contains("/")) {
-			action = "/" + action;	// Handle e.g., J2EE form "action='j_security_check'" from Tomcat
+			action = "/" + action;	// Handle e.g., Java EE form "action='j_security_check'" from Tomcat
 		}
 		PostMethod handler = new PostMethod(action);
 		handler.setFollowRedirects(followRedirects);
