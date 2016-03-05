@@ -72,7 +72,7 @@ public class TestUtils {
 			url = new URL(targetPage);
 		} else {
 			if (!targetPage.startsWith("/")) {
-				System.err.println("Warning: link " + targetPage + ": leading slash added, this is a browser");
+				// System.err.println("Warning: link " + targetPage + ": leading slash added");
 				targetPage = "/" + targetPage;
 			}
 			url = new URL("http", targetHost, targetPort, targetPage);
