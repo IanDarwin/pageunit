@@ -15,7 +15,7 @@ public enum Command {
 		F,	// Find Form
 		G,	// Go to link
 		H,	// hard-code hostname
-		J,	// get J2EE-protected page
+		J,	// get Java EE-protected page
 		L,	// page contains Link
 		M,	// page contains text
 		N,	// start new session

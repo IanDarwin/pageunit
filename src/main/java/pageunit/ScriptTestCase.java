@@ -314,7 +314,7 @@ public class ScriptTestCase extends TestCase {
 					System.out.println("Got page " + page);
 					break;
 					
-				case J:	// get J2EE protected page
+				case J:	// get Java EE protected page
 					newSession();
 					resetForPage();
 					page = restOfLine;
