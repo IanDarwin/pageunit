@@ -6,7 +6,14 @@ and very simple input language.
 See http://pageunit.darwinsys.com/docs/ for information on how to use.
 
 To build and package for command-line use:
-`mvn package assembly:single` then use `java -jar JARFILE fileName [...]'
+
+. `mvn package assembly:single` 
+. copy the uber-jar target/pageunit-1.0.2-SNAPSHOT-jar-with-dependencies.jar to someplace on your path, e.g.,
+`cp target/pageunit-1.0.2-SNAPSHOT-jar-with-dependencies.jar ~/lib`
+. Run it as `java -jar ~/lib/pageunit-1.0.2-SNAPSHOT-jar-with-dependencies.jar fileName [...]`
+(the script in scripts does this).
+
+Of course the version number will change over time; use th' latest.
 
 == TODO
 
