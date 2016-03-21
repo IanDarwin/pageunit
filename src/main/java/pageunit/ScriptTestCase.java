@@ -254,6 +254,7 @@ public class ScriptTestCase extends TestCase {
 					URL u = null;
 					try {
 						u = new URL(restOfLine);
+						variables.setVar("PROTOCOL", u.getProtocol());
 						variables.setVar("HOST", u.getHost());
 						variables.setVar("PORT", Integer.toString(u.getPort()));
 					} catch (MalformedURLException e1) {
@@ -264,6 +265,8 @@ public class ScriptTestCase extends TestCase {
 					
 				case H:	// hard-code hostname
 					variables.setVar("HOST", restOfLine.trim());
+					// If 'H' is given alone, use protocol http by default; change to https someday
+					variables.setVar("PROTOCOL", "http");
 					continue;
 					
 				case O:	// hard-code pOrt number
@@ -303,10 +306,13 @@ public class ScriptTestCase extends TestCase {
 					assertValidRURL(page);
 					
 					if (debug) {
-						System.err.println("G " + new URL("http", variables.getVar("HOST"),
+						System.err.println(Command.P + " " + new URL(
+								variables.getVar("PROTOCOL"),
+								variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
 					}
 					thePage = session.getPage(
+							variables.getVar("PROTOCOL"),
 							variables.getVar("HOST"), variables.getIntVar("PORT"), page);
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -325,7 +331,9 @@ public class ScriptTestCase extends TestCase {
 					
 					assertNotNull("username", variables.getVar(TestUtils.PROP_USER));
 					assertNotNull("password", variables.getVar(TestUtils.PROP_PASS));
-					thePage = session.getPage(variables.getVar(TestUtils.PROP_HOST),
+					thePage = session.getPage(
+							variables.getVar(TestUtils.PROP_PROTOCOL),
+							variables.getVar(TestUtils.PROP_HOST),
 							variables.getIntVar(TestUtils.PROP_PORT), page, 
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();

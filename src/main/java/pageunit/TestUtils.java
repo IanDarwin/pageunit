@@ -21,6 +21,7 @@ public class TestUtils {
 	private static final String PAGEUNIT_PROPERTIES_FILENAME = ".pageunit.properties";
 	public static final String PROP_USER = "USER";
 	public static final String PROP_PASS = "PASS";
+	public static final String PROP_PROTOCOL = "PROTOCOL";
 	public static final String PROP_HOST = "HOST";
 	public static final String PROP_PORT = "PORT";
 	public static final String PROP_DEBUG = "DEBUG";
@@ -53,9 +54,10 @@ public class TestUtils {
 	}
 
 	public static URL qualifyURL(final VariableMap map, final String target) throws MalformedURLException {
+		String protocol = map.getVar(PROP_PROTOCOL, "http");
 		String targetHost = map.getVar(PROP_HOST, "localhost");
 		int targetPort = map.getIntVar(PROP_PORT, 80);
-		return qualifyURL(targetHost, targetPort, target);
+		return qualifyURL(protocol, targetHost, targetPort, target);
 	}
 	
 	/**
@@ -66,7 +68,7 @@ public class TestUtils {
 	 * @return The final URL
 	 * @throws MalformedURLException If the inputs don't add up to a valid URL
 	 */
-	public static URL qualifyURL(final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
+	public static URL qualifyURL(final String protocol, final String targetHost, final int targetPort, String targetPage) throws MalformedURLException {
 		final URL url;
 		if (targetPage.startsWith("http:") || targetPage.startsWith("https:")) {
 			url = new URL(targetPage);
@@ -75,7 +77,7 @@ public class TestUtils {
 				// System.err.println("Warning: link " + targetPage + ": leading slash added");
 				targetPage = "/" + targetPage;
 			}
-			url = new URL("http", targetHost, targetPort, targetPage);
+			url = new URL(protocol, targetHost, targetPort, targetPage);
 		}
 		return url;
 	}

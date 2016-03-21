@@ -160,10 +160,11 @@ public class WebSession {
 	 * @throws HTMLParseException If the page fails to parse
 	 */
 	public HTMLPage getPage(
+			String protocol,
 			String targetHost, int targetPort, String targetPage)
 			throws IOException, HTMLParseException {
 
-		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
+		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		return getPage(url, true);
 
@@ -182,10 +183,10 @@ public class WebSession {
 	 * @throws IOException If the reading fails
 	 * @throws HTMLParseException If the page fails to parse
 	 */
-	public HTMLPage getPage(final String targetHost, final int targetPort, final String targetPage, 
+	public HTMLPage getPage(final String protocol, final String targetHost, final int targetPort, final String targetPage, 
 			final String login, final String pass) throws IOException, HTMLParseException {
 		
-		final URL url = TestUtils.qualifyURL(targetHost, targetPort, targetPage);
+		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		// request protected page, and let WebSession handle redirection here.
 		final HTMLPage page1 = (HTMLPage) getPage(url, true);	// Ask for one page, really get login page
@@ -218,7 +219,6 @@ public class WebSession {
 
 		logger.info("Login return " + formResultsPage.getTitleText());
 
-
 		// Should be yet another redirect, back to original request page
 		WebResponse finalResponse = getWebResponse();
 		statusCode = finalResponse.getStatus();
@@ -232,7 +232,7 @@ public class WebSession {
 		logger.info("WebSession.getPage(): redirect location = " + redirectLocation);
 		
 		// "To reach, at the end, the goal with which one started..."
-		return getPage(TestUtils.qualifyURL(targetHost, targetPort, redirectLocation), true);
+		return getPage(TestUtils.qualifyURL(protocol, targetHost, targetPort, redirectLocation), true);
 	}
 	
 	/**
