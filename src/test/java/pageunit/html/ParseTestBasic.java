@@ -12,7 +12,7 @@ import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 
-public class ParserTest extends TestCase {
+public class ParseTestBasic extends TestCase {
 	final static String testData = "<html><head><title>Fool</title></head><body>" +
 	"<form action='/foo' method='post'><input type='submit' name='submit'/></form>" +
 	"<a href='/bar' name='froo'>Link <b>Text</b></a>";

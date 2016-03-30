@@ -5,7 +5,7 @@ import java.io.StringReader;
 
 import junit.framework.TestCase;
 
-public class ParserTest2 extends TestCase {
+public class ParseTestMessierHtml extends TestCase {
 	/** This is pretty much a "wild type" page, taken from
 	 * calendar.phenogenomics.ca and only cleaned up minorly
 	 * (and quotes escaped to make it compile as a String).
