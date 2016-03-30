@@ -8,8 +8,8 @@ import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 
-/** Test handling of META redirects */
-public class ParserTest5 extends TestCase {
+/** Test handling of messy html */
+public class ParseTestMessyHtml extends TestCase {
 	
 	final static String testData = "<html><head><title>DuMmY</title></head>" + 
 		"<body><table>" +

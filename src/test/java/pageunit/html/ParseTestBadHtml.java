@@ -9,7 +9,7 @@ import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 
 /** Test handling really bad HTML */
-public class ParserTest6 extends TestCase {
+public class ParseTestBadHtml extends TestCase {
 	
 	final static String twoHTMLtagsData = "<html><head><title>DuMmY</title></head>" + 
 		"<body><html><head></head><body><p>Hello</p>" +
