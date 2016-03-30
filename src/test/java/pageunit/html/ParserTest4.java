@@ -11,7 +11,7 @@ import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 import pageunit.html.HTMLScript;
 
-/** Test handling of META redirects */
+/** Test handling of Script elements */
 public class ParserTest4 extends TestCase {
 	
 	final static String testData = "<html><head><title>AIS - Index</title>" + 
