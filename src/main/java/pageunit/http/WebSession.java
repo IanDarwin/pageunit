@@ -86,7 +86,7 @@ public class WebSession {
 			logger.info(message);
 			System.out.println("WebSession.getPage(): " + message);
 			
-			// MOVE ON TO THE NEXT PAGE
+			// MOVE TO THE (NEXT) PAGE
 			int status = client.executeMethod(getter);
 			
 			System.out.println("WebSession.getPage(): status: " + status);
@@ -101,9 +101,10 @@ public class WebSession {
 			response = new WebResponse(responseText, url.toString(), status);
 			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 			
-			System.out.println("Got to simple page: " + url);
+			System.out.println("Got to page: " + url);
 			getter.releaseConnection();	
 			
+			// Now set URL to next http-equiv redirect, if there is one, or null
 		} while ((url = isRedirectpage(page)) != null);
 		return page;
 	}
