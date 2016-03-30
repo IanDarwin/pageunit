@@ -26,6 +26,7 @@ public class HTMLMetaImpl extends HTMLComponentBase implements HTMLMeta {
 
 	@Override
 	public String toString() {
+		// <meta equiv 'Refresh' Content '0; URL=home.seam'>
 		return String.format("<meta equiv '%s' Content '%s'>", metaEquiv, metaContent);
 	}
 }
