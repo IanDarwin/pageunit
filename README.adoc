@@ -17,7 +17,6 @@ Of course the version number will change over time; use th' latest.
 
 == TODO
 
-Simplify code.
 
 Improve documentation.
 
@@ -25,7 +24,9 @@ Add a 'Head' command (maybe I for "IsItThere?") to send HEAD instead of GET.
 
 Options: set timeout time. (maybe U for "timeoUt and other options"
 
-Break out the test controller bit into a JUnit4 Test Runner class, so we can say
+On ERROR, skip tests until B or H.
+
+Create a JUnit4 Test Runner class that uses ScriptTestRunner (or its guts), so can say:
 
 	@RunWith(PageUnit.class)
 	public class TestWeb {
@@ -36,3 +37,7 @@ Break out the test controller bit into a JUnit4 Test Runner class, so we can say
 		@PageUnitDir
 		public String dir() {...}
 	}
+
+Simplify code:
+	all those trivial HTML things don't need to be Interface+Impl.
+	etc
