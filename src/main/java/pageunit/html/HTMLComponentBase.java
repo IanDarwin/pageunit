@@ -48,7 +48,7 @@ public abstract class HTMLComponentBase extends NodeBase implements HTMLComponen
 	
 	@Override
 	public String toString() {
-		return String.format("<%s: Name %s>", getClass().getName(), getName());
+		return String.format("<%s: Name %s>", getClass().getSimpleName(), getName());
 	}
 
 	public String getNodeName() {
