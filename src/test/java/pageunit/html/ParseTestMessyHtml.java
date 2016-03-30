@@ -3,13 +3,14 @@ package pageunit.html;
 import java.io.IOException;
 import java.io.StringReader;
 
-import junit.framework.TestCase;
+import org.junit.*;
+import static org.junit.Assert.*;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 
 /** Test handling of messy html */
-public class ParseTestMessyHtml extends TestCase {
+public class ParseTestMessyHtml {
 	
 	final static String testData = "<html><head><title>DuMmY</title></head>" + 
 		"<body><table>" +
@@ -52,13 +53,15 @@ public class ParseTestMessyHtml extends TestCase {
 	
 	private HTMLPage page;
 	
+	@Before
 	public void setUp() throws IOException, HTMLParseException {
 		// System.err.println("Analyze THIS: " + testData);
 		page = new HTMLParser().parse(new StringReader(testData));
 		assertNotNull("parse", page);
 	}
 	
+	@Test
 	public void test1() {
-		
+		// fail("not written yet, dude");
 	}
 }
