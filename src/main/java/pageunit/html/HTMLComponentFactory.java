@@ -6,7 +6,9 @@ import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
 
-/** Encapsulate all knowledge of how to create any HTMLComponent.
+/** 
+ * Encapsulate all knowledge of how to create any HTMLComponent.
+ * Horribly depends on javax.swing.text stuff; please rewrite with plain HTML manglers?
  */
 public class HTMLComponentFactory {
 
