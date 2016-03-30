@@ -114,7 +114,8 @@ public class WebSession {
 
 	/** Check the content of the page to see if it contains an HTML redirect,
 	 * such as "<meta http-equiv=\"Refresh\" content=\"0; URL=barcode_list.jsp\">".
-	 * Does NOT check for the HTTP status, of course, which you might also check.
+	 * The HttpClient library handles "Http 3xx" statuses, but does not
+	 * handle the second, imbedded style, so we, like a Browser, must handle it.
 	 * @param page The HTMLPageImpl object to be checked
 	 * @return The Redirect url if there is one, or null.
 	 */
@@ -123,18 +124,18 @@ public class WebSession {
 		// check for META tag with Refresh
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
-				HTMLMeta m = (HTMLMeta)c;
-				final String message = String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, m);
+				HTMLMeta meta = (HTMLMeta)c;
+				final String message = String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, meta);
 				logger.info(message);
 				System.out.println("WebSession.isRedirectpage(): " + message);
-				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
+				if (!"refresh".equalsIgnoreCase(meta.getMetaEquiv())) {
 					return null;
 				}
-				String content = m.getMetaContent();
-				Matcher mat = META_REFRESH_CONTENT_REGEX_PATTERN.matcher(content);
-				if (mat.find()) {
+				String content = meta.getMetaContent();
+				Matcher match = META_REFRESH_CONTENT_REGEX_PATTERN.matcher(content);
+				if (match.find()) {
 					try {
-						String urlPattern = mat.group(1);
+						String urlPattern = match.group(1);
 						URL url = null;
 						if (variables != null) {
 							url = TestUtils.qualifyURL(variables, urlPattern);
