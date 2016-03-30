@@ -82,15 +82,14 @@ public class WebSession {
 			GetMethod getter = new GetMethod(url.toString());		
 			getter.setFollowRedirects(followRedirects);
 			
-			final String message = String.format("Initial GET request: %s (followRedirects %b)", url, followRedirects);
+			final String message = String.format("GET request: %s (followRedirects %b)", url, followRedirects);
 			logger.info(message);
 			System.out.println("WebSession.getPage(): " + message);
 			
+			// MOVE ON TO THE NEXT PAGE
 			int status = client.executeMethod(getter);
-			System.out.println("WebSession.getPage(): status: " + status);
-			response = new WebResponse(responseText, url.toExternalForm(), status);
-			response.setHeaders(getter.getResponseHeaders());
 			
+			System.out.println("WebSession.getPage(): status: " + status);
 			if (status >= 400 && throwExceptionOnFailingStatusCode) {
 				throw new IOException("Status code: " + status);
 			}
@@ -98,15 +97,12 @@ public class WebSession {
 			byte[] responseBody = getter.getResponseBody();
 			System.out.println("Read body length was " + responseBody.length);
 			responseText = new String(responseBody);
+			page = new HTMLParser().parse(responseText);
 			response = new WebResponse(responseText, url.toString(), status);
+			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 			
 			System.out.println("Got to simple page: " + url);
-			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 			getter.releaseConnection();	
-			
-			responseText = new String(responseBody);			// must save in field.
-			
-			page = new HTMLParser().parse(responseText);
 			
 		} while ((url = isRedirectpage(page)) != null);
 		return page;
@@ -129,7 +125,7 @@ public class WebSession {
 				logger.info(message);
 				System.out.println("WebSession.isRedirectpage(): " + message);
 				if (!"refresh".equalsIgnoreCase(meta.getMetaEquiv())) {
-					return null;
+					continue;
 				}
 				String content = meta.getMetaContent();
 				Matcher match = META_REFRESH_CONTENT_REGEX_PATTERN.matcher(content);
@@ -142,7 +138,7 @@ public class WebSession {
 						} else {
 							url = new URL(urlPattern);
 						}
-						System.out.println(String.format("isRedirectURLPage(%s) Returning URL %s", page, url));
+						System.out.println(String.format("isRedirectPage(%s) Returning URL %s", page, url));
 						return url;
 					} catch (MalformedURLException e) {
 						throw new IllegalArgumentException("HTTP META REFRESH BOMBED: " + e);
@@ -152,6 +148,7 @@ public class WebSession {
 				}
 			}
 		}
+		// We did not find any meta refresh tags, so return null.
 		logger.info(String.format("isRedirectpage(%s) returning null.", page));
 		return null;
 	}
