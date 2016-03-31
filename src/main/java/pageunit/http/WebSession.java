@@ -84,24 +84,22 @@ public class WebSession {
 			
 			final String message = String.format("GET request: %s (followRedirects %b)", url, followRedirects);
 			logger.info(message);
-			System.out.println("WebSession.getPage(): " + message);
 			
 			// MOVE TO THE (NEXT) PAGE
 			int status = client.executeMethod(getter);
 			
-			System.out.println("WebSession.getPage(): status: " + status);
 			if (status >= 400 && throwExceptionOnFailingStatusCode) {
 				throw new IOException("Status code: " + status);
 			}
 			
 			byte[] responseBody = getter.getResponseBody();
-			System.out.println("Read body length was " + responseBody.length);
+			logger.info("Read body length was " + responseBody.length);
 			responseText = new String(responseBody);
 			page = new HTMLParser().parse(responseText);
 			response = new WebResponse(responseText, url.toString(), status);
 			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
 			
-			System.out.println("Got to page: " + url);
+			logger.info("Got to page: " + url);
 			getter.releaseConnection();	
 			
 			// Now set URL to next http-equiv redirect, if there is one, or null
@@ -111,7 +109,7 @@ public class WebSession {
 
 	/** Check the content of the page to see if it contains an HTML redirect,
 	 * such as "<meta http-equiv=\"Refresh\" content=\"0; URL=barcode_list.jsp\">".
-	 * The HttpClient library handles "Http 3xx" statuses, but does not
+	 * The HttpClient library handles "Http 3xx" redirect statuses, but does not
 	 * handle the second, imbedded style, so we, like a Browser, must handle it.
 	 * @param page The HTMLPageImpl object to be checked
 	 * @return The Redirect url if there is one, or null.
@@ -124,13 +122,12 @@ public class WebSession {
 				HTMLMeta meta = (HTMLMeta)c;
 				final String message = String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, meta);
 				logger.info(message);
-				System.out.println("WebSession.isRedirectpage(): " + message);
 				if (!"refresh".equalsIgnoreCase(meta.getMetaEquiv())) {
 					continue;
 				}
 				String content = meta.getMetaContent();
 				Matcher match = META_REFRESH_CONTENT_REGEX_PATTERN.matcher(content);
-				if (match.find()) {
+				if (match.matches()) {
 					try {
 						String urlPattern = match.group(1);
 						URL url = null;
@@ -139,7 +136,7 @@ public class WebSession {
 						} else {
 							url = new URL(urlPattern);
 						}
-						System.out.println(String.format("isRedirectPage(%s) Returning URL %s", page, url));
+						logger.info(String.format("isRedirectPage(%s) Returning URL %s", page, url));
 						return url;
 					} catch (MalformedURLException e) {
 						throw new IllegalArgumentException("HTTP META REFRESH BOMBED: " + e);
