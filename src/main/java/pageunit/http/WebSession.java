@@ -1,12 +1,9 @@
 package pageunit.http;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
@@ -27,15 +24,13 @@ import pageunit.html.HTMLMeta;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
+import pageunit.html.HtmlRedirect;
 
 /** 
  * Represents an HTTP session
  */
 public class WebSession {
-	
-	static final String META_REFRESH_CONTENT_REGEX_STRING = "\\d+;\\s*URL=['\"]?(.*?)['\"]?";
-	static final Pattern META_REFRESH_CONTENT_REGEX_PATTERN = 
-		Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING, Pattern.CASE_INSENSITIVE);
+
 	private HttpClient client;
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
@@ -50,11 +45,10 @@ public class WebSession {
 	
 	public WebSession(VariableMap vars) {
 		super();
-		client = new HttpClient();
+		this.client = new HttpClient();
 		this.variables = vars;
 	}
 
-	
 	/** 
 	 * If this is set to true, 400/500 errors will throw an exception;
 	 * if false (the default), errors simply return and the user must 
@@ -126,24 +120,13 @@ public class WebSession {
 					continue;
 				}
 				String content = meta.getMetaContent();
-				Matcher match = META_REFRESH_CONTENT_REGEX_PATTERN.matcher(content);
-				if (match.matches()) {
-					try {
-						String urlPattern = match.group(1);
-						URL url = null;
-						if (variables != null) {
-							url = TestUtils.qualifyURL(variables, urlPattern);
-						} else {
-							url = new URL(urlPattern);
-						}
-						logger.info(String.format("isRedirectPage(%s) Returning URL %s", page, url));
-						return url;
-					} catch (MalformedURLException e) {
-						throw new IllegalArgumentException("HTTP META REFRESH BOMBED: " + e);
-					}
-				} else {
-					throw new IllegalArgumentException("can't parse META refresh pattern " + content);
+				HtmlRedirect redir = HtmlRedirect.parse(content, variables);
+				if (redir.url != null) {
+					return redir.url;
 				}
+				// Some sites like mrtg use just a number, to refresh the page
+				// periodically forever; a number only will leave the URL null so we get here.
+				// Don't return in case of the off chance there might be a 2nd meta redir tag.
 			}
 		}
 		// We did not find any meta refresh tags, so return null.
