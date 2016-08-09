@@ -28,8 +28,9 @@ import sun.net.URLCanonicalizer;
  */
 public class LinkChecker {
 
-	static int indent = 0;
+	private static int indent = 0;
 	final static List<String> cache = new ArrayList<String>();
+	private static boolean verbose = false;
   
 	/**
 	 * Start checking, given a URL by name.
@@ -69,21 +70,25 @@ public class LinkChecker {
 					href = ((HTMLIMG)tag).getSrc();
 				}				
 		
-				for (int j=0; j<indent; j++)
-					System.out.println("\t");
-				System.out.print(href + " -- ");
-		
 				// Can't really validate these!
 				if (href == null) {
-					System.out.println(" null? !!\n");
+					System.out.println("href is null?!!\n");
 					continue;
 				}
 		
 				if (href.equals("/") || href.startsWith("..") || href.startsWith("#")) {
-					System.out.println(href + " -- not checking");
+					if (verbose) {
+						System.out.println(href + " -- not checking");
+					}
 					// nothing doing!
 					continue; 
 				}
+
+				// We're gonna try it, so print indentation and the URL:
+				for (int j=0; j<indent; j++) {
+					System.out.println("\t");
+				}
+				System.out.print(href + " -- ");
 				
 				URL hrefURL = new URL(rootURL, href);
 		
@@ -137,12 +142,13 @@ public class LinkChecker {
 
 			// Open it; if the open fails we'll likely throw an exception
 			URLConnection luf = linkURL.openConnection();
-			if (linkURL.getProtocol().equals("http")) {
+			String proto = linkURL.getProtocol();
+			if (proto.equals("http") || proto.equals("https")) {
 				HttpURLConnection huf = (HttpURLConnection)luf;
 				if (huf.getResponseCode() == -1)
 					return "Server error: bad HTTP response";
 				return huf.getResponseCode() + " " + huf.getResponseMessage();
-			} else if (linkURL.getProtocol().equals("file")) {
+			} else if (proto.equals("file")) {
 				InputStream is = luf.getInputStream();
 				is.close();
 				// If that didn't throw an exception, the file is probably OK
