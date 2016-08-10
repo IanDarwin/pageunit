@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 
 /** Test handling of META redirects */
 @RunWith(Parameterized.class)
@@ -48,7 +48,7 @@ public class ParseMetaFullTest {
 				HTMLMeta m = (HTMLMeta)c;
 				assertEquals("META equiv", "refresh", m.getMetaEquiv().toLowerCase());
 				String baseUrl = m.getMetaContent().replaceAll(".*=", "");
-				assertEquals(expected, TestUtils.qualifyURL("http", "androidcookbook.com", 80, baseUrl).toExternalForm());
+				assertEquals(expected, Utilities.qualifyURL("http", "androidcookbook.com", 80, baseUrl).toExternalForm());
 				return; // Only one instance
 			}
 		}

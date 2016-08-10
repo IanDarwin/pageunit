@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.darwinsys.util.VariableMap;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
@@ -153,7 +153,7 @@ public class WebSession {
 			String targetHost, int targetPort, String targetPage)
 			throws IOException, HTMLParseException {
 
-		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
+		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		return getPage(url, true);
 
@@ -175,7 +175,7 @@ public class WebSession {
 	public HTMLPage getPage(final String protocol, final String targetHost, final int targetPort, final String targetPage, 
 			final String login, final String pass) throws IOException, HTMLParseException {
 		
-		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
+		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		// request protected page, and let WebSession handle redirection here.
 		final HTMLPage page1 = (HTMLPage) getPage(url, true);	// Ask for one page, really get login page
@@ -213,7 +213,7 @@ public class WebSession {
 		statusCode = finalResponse.getStatus();
 		logger.info(String.format("After submit login, statusCode = %d", statusCode));
 		
-		if (!TestUtils.isRedirectCode((statusCode))) {
+		if (!Utilities.isRedirectCode((statusCode))) {
 			throw new IllegalStateException("expected redirect status but got " + statusCode);
 		}
 		
@@ -221,7 +221,7 @@ public class WebSession {
 		logger.info("WebSession.getPage(): redirect location = " + redirectLocation);
 		
 		// "To reach, at the end, the goal with which one started..."
-		return getPage(TestUtils.qualifyURL(protocol, targetHost, targetPort, redirectLocation), true);
+		return getPage(Utilities.qualifyURL(protocol, targetHost, targetPort, redirectLocation), true);
 	}
 	
 	/**
@@ -233,7 +233,7 @@ public class WebSession {
 	 * @throws IOException If the reading fails
 	 */
 	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
-		URL u = TestUtils.completeURL(theLink.getURL());
+		URL u = Utilities.completeURL(theLink.getURL());
 		return getPage(u, true);
 	}
 	
@@ -281,7 +281,7 @@ public class WebSession {
         handler.setRequestBody(data);
 		
 		int status = client.executeMethod(handler);
-		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
+		if (Utilities.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
 		logger.info("WebSession.submitForm(): status code after post was: " + status);

@@ -42,7 +42,7 @@ public class TestUtilsQualifyUrlTest {
 	@Test
 	public void testQualifyUrl() throws MalformedURLException {
 		final URL actual = 
-					TestUtils.qualifyURL(DEFAULT_PROTOCOL, DEFAULT_HOST, DEFAULT_PORT, stringPart);
+					Utilities.qualifyURL(DEFAULT_PROTOCOL, DEFAULT_HOST, DEFAULT_PORT, stringPart);
 		assertEquals(expected, actual);
 	}
 

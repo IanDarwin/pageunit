@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
@@ -42,7 +43,7 @@ public class LinkChecker {
 		URL rootURL = null;
 		
 		if (rootURLString == null) {
-			System.out.println("checkOut(null) isn't very useful");
+			System.out.println("check(null) isn't very useful");
 			return;
 		}
 
@@ -135,8 +136,8 @@ public class LinkChecker {
 		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
 			final String canonURLString = uc.canonicalize(linkURL.toString());
-			if (cacheHit(canonURLString)) 
-				return null;			
+			if (cache.contains(canonURLString))
+				return "(already checked)";
 			cache.add(canonURLString);
 			linkURL = new URL(canonURLString);
 
@@ -145,16 +146,19 @@ public class LinkChecker {
 			String proto = linkURL.getProtocol();
 			if (proto.equals("http") || proto.equals("https")) {
 				HttpURLConnection huf = (HttpURLConnection)luf;
-				if (huf.getResponseCode() == -1)
+				int response = huf.getResponseCode();
+				if (response == -1)
 					return "Server error: bad HTTP response";
+				if (Utilities.isRedirectCode(response)) {
+					String newUrl = huf.getHeaderField("location"); // XXX??
+					return "(redirect to " + newUrl + ")" + ' ' + checkOneLink(new URL(newUrl));
+				}
 				return huf.getResponseCode() + " " + huf.getResponseMessage();
 			} else if (proto.equals("file")) {
-				InputStream is = luf.getInputStream();
-				is.close();
-				// If that didn't throw an exception, the file is probably OK
-				return "(File)";
+				// Only useful on localhost
+				return "(File; ignored)";
 			} else
-				return "(non-HTTP)";
+				return "(non-HTTP; ignored)";
 		}
 		catch (SocketException e) {
 			return "DEAD: " + e.toString();
@@ -163,12 +167,4 @@ public class LinkChecker {
 			return "DEAD";
 		}
     }
-	
-	/** Simple cache manager */
-	private static synchronized boolean cacheHit(String s) {
-		if (cache.contains(s)) 
-			return true;			
-		cache.add(s);
-		return false;
-	}
 }

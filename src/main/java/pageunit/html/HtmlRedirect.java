@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import com.darwinsys.util.VariableMap;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 
 /** 
  * Encapsulate the Html <meta http-equiv="refresh"..."> style of HTML redirect.
@@ -35,7 +35,7 @@ public class HtmlRedirect {
 				ret.seconds = Integer.parseInt(secondsString);
 				String urlPattern = match.group(2);
 				if (variables != null) {
-					ret.url = TestUtils.qualifyURL(variables, urlPattern);
+					ret.url = Utilities.qualifyURL(variables, urlPattern);
 				} else {
 					ret.url = new URL(urlPattern);
 				}

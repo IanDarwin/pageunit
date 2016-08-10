@@ -12,11 +12,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import com.darwinsys.util.VariableMap;
 
 /**
- * Trying to build a simple but usable test engine out of JUnit and Jakarta HttpClent
- * 
- * @version $Id$
+ * Looking for a few good utils. Parts are pageunit-specific.
  */
-public class TestUtils {
+public class Utilities {
 	
 	private static final String PAGEUNIT_PROPERTIES_FILENAME = ".pageunit.properties";
 	public static final String PROP_USER = "USER";
@@ -138,7 +136,7 @@ public class TestUtils {
 	 * @param debug The debug level to set.
 	 */
 	public static void setDebug(boolean debug) {
-		TestUtils.debug = debug;
+		Utilities.debug = debug;
 	}
 
 	/** Convert partial URLs to full URLS, providing defaults
