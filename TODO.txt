@@ -1,0 +1,6 @@
+
+Don't print 200 success if not redirected
+
+Don't repeat entire link if redirected from http to https
+
+Don't spew noise on xref links like <a name="project-foo"> or <a id="project-bar">
