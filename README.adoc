@@ -1,5 +1,10 @@
 = PageUnit
 
+Why should you have to write twelve lines of XML to load a web page and check its content? 
+PageUnit's mission is to provide a very easy-to-use web page functional testing mechanism, 
+using a "little language" tailored for this purpose.
+
+While it was developed in Java, it can be used to test web pages in any language.
 A easier web testing framework, written in Java, based on JUnit style of testing
 and very simple input language.
 
