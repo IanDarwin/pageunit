@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 
+import pageunit.linkchecker.LinkChecker;
+
 /** Main program to run test files under PageUnit.
  * @author ian
  */
@@ -47,12 +49,17 @@ public class PageUnit {
 		
 		try {
 			if (args.length == 0) {
-				processOne(new File(TESTS_FILE));
+				processFile(new File(TESTS_FILE));
 			} else {
 				for (int i = 0; i < args.length; i++) {
 					final String fsObjectName = args[i];
-					File f = new File(fsObjectName);
-					processOne(f);
+					if (fsObjectName.startsWith("http:") ||
+						fsObjectName.startsWith("https:")) {
+						LinkChecker.checkStartingAt(fsObjectName);
+					} else {
+						File f = new File(fsObjectName);
+						processFile(f);
+					}
 				}
 			}
 			System.out.printf("%d %s run, results: %s\n", numFilesRun,
@@ -68,8 +75,8 @@ public class PageUnit {
 	 * @param f The File object to process.
 	 * @throws Exception If error
 	 */
-	public static void processOne(final File f) throws Exception {
-		logger.info(String.format("pageunit: processOne(%s)", f));
+	public static void processFile(final File f) throws Exception {
+		logger.info(String.format("pageunit: processFile(%s)", f));
 		if (f.isFile()) {
 			if (f.getName().endsWith(TEST_FILENAME_EXT)) {
 				++numFilesRun;
@@ -87,7 +94,7 @@ public class PageUnit {
 		}
 	}
 	
-	/** Process one directory, recursing by calling back to processOne,
+	/** Process one directory, recursing by calling back to processFile,
 	 * and processing files.
 	 */
 	private static void loopThrough(final File dir) throws Exception {
@@ -100,7 +107,7 @@ public class PageUnit {
 		});
 		Arrays.sort(files);
 		for (File f : files) {
-			processOne(f);
+			processFile(f);
 		}
 	}
 

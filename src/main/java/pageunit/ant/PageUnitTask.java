@@ -30,12 +30,12 @@ public class PageUnitTask extends Task {
 		PageUnit.init();
 		try {
 			if (theFile != null) {
-				PageUnit.processOne(theFile);
+				PageUnit.processFile(theFile);
 			} else if (theDir != null) {
-				PageUnit.processOne(theDir);
+				PageUnit.processFile(theDir);
 			} else if (theTest != null) {
 				if (thePath == null) {
-					PageUnit.processOne(new File(theTest));
+					PageUnit.processFile(new File(theTest));
 				} else {
 					// walk thePath, looking for test, first found, process 
 					throw new BuildException("code not written yet: walk thePath, looking for test, first found, process");
