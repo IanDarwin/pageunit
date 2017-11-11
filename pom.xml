@@ -41,6 +41,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<darwinsys-api.version>1.2.0-SNAPSHOT</darwinsys-api.version>
 	</properties>
 
 	<build>
@@ -73,7 +74,7 @@
 		<dependency>
 			<groupId>com.darwinsys</groupId>
 			<artifactId>darwinsys-api</artifactId>
-			<version>1.0.5</version>
+			<version>${darwinsys-api.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax</groupId>
