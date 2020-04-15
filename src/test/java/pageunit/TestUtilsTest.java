@@ -1,6 +1,6 @@
 package pageunit;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 import junit.framework.TestCase;
 
 public class TestUtilsTest extends TestCase {
@@ -9,14 +9,14 @@ public class TestUtilsTest extends TestCase {
 	 * Test method for 'pageunit.TestUtils.isRedirectCode(int)'
 	 */
 	public void testIsRedirectCode() {
-		assertTrue("301", TestUtils.isRedirectCode(301));
+		assertTrue("301", Utilities.isRedirectCode(301));
 	}
 
 	/*
 	 * Test method for 'pageunit.TestUtils.isErrorCode(int)'
 	 */
 	public void testIsErrorCode() {
-		assertTrue("404", TestUtils.isErrorCode(404));
+		assertTrue("404", Utilities.isErrorCode(404));
 	}
 
 	/*
@@ -24,8 +24,8 @@ public class TestUtilsTest extends TestCase {
 	 */
 	public void testDebug() {
 		for (boolean b : new boolean[]{true, false} ) {
-			TestUtils.setDebug(b);
-			assertEquals(b, TestUtils.isDebug());
+			Utilities.setDebug(b);
+			assertEquals(b, Utilities.isDebug());
 		}
 	}
 

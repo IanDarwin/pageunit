@@ -11,8 +11,8 @@ import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
 import pageunit.html.HTMLScript;
 
-/** Test handling of META redirects */
-public class ParserTest4 extends TestCase {
+/** Test handling of Script elements */
+public class ParseTestScriptElement extends TestCase {
 	
 	final static String testData = "<html><head><title>AIS - Index</title>" + 
 	"<style>A.navbar1HREFSTYLE{font-family: Verdana, Arial, Helvetica, sans-serif;}</style>" +
@@ -35,6 +35,9 @@ public class ParserTest4 extends TestCase {
 		List<HTMLComponent> children = page.getChildren();
 		
 		for (HTMLComponent c : children) {
+			if (c instanceof HTMLForm) {
+				System.out.printf("FORM: onSubmit=%s%n", ((HTMLForm)c).getOnSubmit());
+			}
 			if (c instanceof HTMLScript) {
 				System.out.println("Found: " + c);
 				assertEquals("var highlight; var highlightSelected;", c.getBody());

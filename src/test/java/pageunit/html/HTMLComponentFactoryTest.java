@@ -72,4 +72,10 @@ public class HTMLComponentFactoryTest extends TestCase {
 		myTag.setBody("if a < b print(c);");
 	}
 
+	public void testCreateMeta() {
+		HTML.Tag tag = HTML.Tag.META;
+		MutableAttributeSet attrs = null;
+		HTMLComponent myTag = HTMLComponentFactory.create(tag, attrs);
+		assertSame(myTag.getClass(), HTMLMetaImpl.class);
+	}
 }

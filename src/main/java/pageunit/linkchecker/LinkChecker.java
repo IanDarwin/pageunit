@@ -12,6 +12,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
@@ -28,8 +29,9 @@ import sun.net.URLCanonicalizer;
  */
 public class LinkChecker {
 
-	static int indent = 0;
+	private static int indent = 0;
 	final static List<String> cache = new ArrayList<String>();
+	private static boolean verbose = false;
   
 	/**
 	 * Start checking, given a URL by name.
@@ -41,7 +43,7 @@ public class LinkChecker {
 		URL rootURL = null;
 		
 		if (rootURLString == null) {
-			System.out.println("checkOut(null) isn't very useful");
+			System.out.println("check(null) isn't very useful");
 			return;
 		}
 
@@ -69,21 +71,25 @@ public class LinkChecker {
 					href = ((HTMLIMG)tag).getSrc();
 				}				
 		
-				for (int j=0; j<indent; j++)
-					System.out.println("\t");
-				System.out.print(href + " -- ");
-		
 				// Can't really validate these!
 				if (href == null) {
-					System.out.println(" null? !!\n");
+					System.out.println("href is null?!!\n");
 					continue;
 				}
 		
 				if (href.equals("/") || href.startsWith("..") || href.startsWith("#")) {
-					System.out.println(href + " -- not checking");
+					if (verbose) {
+						System.out.println(href + " -- not checking");
+					}
 					// nothing doing!
 					continue; 
 				}
+
+				// We're gonna try it, so print indentation and the URL:
+				for (int j=0; j<indent; j++) {
+					System.out.println("\t");
+				}
+				System.out.print(href + " -- ");
 				
 				URL hrefURL = new URL(rootURL, href);
 		
@@ -130,25 +136,29 @@ public class LinkChecker {
 		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
 			final String canonURLString = uc.canonicalize(linkURL.toString());
-			if (cacheHit(canonURLString)) 
-				return null;			
+			if (cache.contains(canonURLString))
+				return "(already checked)";
 			cache.add(canonURLString);
 			linkURL = new URL(canonURLString);
 
 			// Open it; if the open fails we'll likely throw an exception
 			URLConnection luf = linkURL.openConnection();
-			if (linkURL.getProtocol().equals("http")) {
+			String proto = linkURL.getProtocol();
+			if (proto.equals("http") || proto.equals("https")) {
 				HttpURLConnection huf = (HttpURLConnection)luf;
-				if (huf.getResponseCode() == -1)
+				int response = huf.getResponseCode();
+				if (response == -1)
 					return "Server error: bad HTTP response";
+				if (Utilities.isRedirectCode(response)) {
+					String newUrl = huf.getHeaderField("location"); // XXX??
+					return "(redirect to " + newUrl + ")" + ' ' + checkOneLink(new URL(newUrl));
+				}
 				return huf.getResponseCode() + " " + huf.getResponseMessage();
-			} else if (linkURL.getProtocol().equals("file")) {
-				InputStream is = luf.getInputStream();
-				is.close();
-				// If that didn't throw an exception, the file is probably OK
-				return "(File)";
+			} else if (proto.equals("file")) {
+				// Only useful on localhost
+				return "(File; ignored)";
 			} else
-				return "(non-HTTP)";
+				return "(non-HTTP; ignored)";
 		}
 		catch (SocketException e) {
 			return "DEAD: " + e.toString();
@@ -157,12 +167,4 @@ public class LinkChecker {
 			return "DEAD";
 		}
     }
-	
-	/** Simple cache manager */
-	private static synchronized boolean cacheHit(String s) {
-		if (cache.contains(s)) 
-			return true;			
-		cache.add(s);
-		return false;
-	}
 }

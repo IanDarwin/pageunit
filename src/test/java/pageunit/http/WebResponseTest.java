@@ -2,7 +2,7 @@ package pageunit.http;
 
 import org.apache.commons.httpclient.Header;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 import pageunit.http.WebResponse;
 import junit.framework.TestCase;
 
@@ -23,7 +23,7 @@ public class WebResponseTest extends TestCase {
 		assertEquals("status OK", 200, response.getStatus());
 		response.setStatus(302);
 		assertEquals("get status", 302, response.getStatus());
-		assertTrue("set redirect", TestUtils.isRedirectCode(response.getStatus()));
+		assertTrue("set redirect", Utilities.isRedirectCode(response.getStatus()));
 		System.out.println("WebResponseTest.testWebResponse()");
 	}
 

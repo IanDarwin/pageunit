@@ -96,11 +96,11 @@ public class ScriptTestCase extends TestCase {
 	/* Set some default variables */
 	private void setDefaultVariables(VariableMap variables) {
 		variables.clear();
-		if (variables.get(TestUtils.PROP_HOST) == null) {
-			variables.put(TestUtils.PROP_HOST, "localhost");
+		if (variables.get(Utilities.PROP_HOST) == null) {
+			variables.put(Utilities.PROP_HOST, "localhost");
 		}
-		if (variables.get(TestUtils.PROP_PORT) == null) {
-			variables.put(TestUtils.PROP_PORT, "80");
+		if (variables.get(Utilities.PROP_PORT) == null) {
+			variables.put(Utilities.PROP_PORT, "80");
 		}
 	}
 
@@ -165,17 +165,17 @@ public class ScriptTestCase extends TestCase {
 	@Override
 	public void run(TestResult results) {
 
-		variables.setVar(TestUtils.PROP_USER, TestUtils.getProperty(TestUtils.PROP_USER));
-		variables.setVar(TestUtils.PROP_PASS, TestUtils.getProperty(TestUtils.PROP_PASS));
-		variables.setVar(TestUtils.PROP_HOST, TestUtils.getProperty(TestUtils.PROP_HOST));
-		variables.setVar(TestUtils.PROP_PORT, TestUtils.getProperty(TestUtils.PROP_PORT));
+		variables.setVar(Utilities.PROP_USER, Utilities.getProperty(Utilities.PROP_USER));
+		variables.setVar(Utilities.PROP_PASS, Utilities.getProperty(Utilities.PROP_PASS));
+		variables.setVar(Utilities.PROP_HOST, Utilities.getProperty(Utilities.PROP_HOST));
+		variables.setVar(Utilities.PROP_PORT, Utilities.getProperty(Utilities.PROP_PORT));
 		
 		setDefaultVariables(variables);
 		
 		stars();
 		System.out.println("PageUnit Running");
-		System.out.println("Test run with default URL http://" + variables.getVar(TestUtils.PROP_HOST) + ":" + 
-				variables.getVar(TestUtils.PROP_PORT));
+		System.out.println("Test run with default URL http://" + variables.getVar(Utilities.PROP_HOST) + ":" + 
+				variables.getVar(Utilities.PROP_PORT));
 		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
 		stars();
@@ -329,12 +329,12 @@ public class ScriptTestCase extends TestCase {
 					logger.debug("J " + new URL("http", variables.getVar("HOST"),
 								variables.getIntVar("PORT"), page));
 					
-					assertNotNull("username", variables.getVar(TestUtils.PROP_USER));
-					assertNotNull("password", variables.getVar(TestUtils.PROP_PASS));
+					assertNotNull("username", variables.getVar(Utilities.PROP_USER));
+					assertNotNull("password", variables.getVar(Utilities.PROP_PASS));
 					thePage = session.getPage(
-							variables.getVar(TestUtils.PROP_PROTOCOL),
-							variables.getVar(TestUtils.PROP_HOST),
-							variables.getIntVar(TestUtils.PROP_PORT), page, 
+							variables.getVar(Utilities.PROP_PROTOCOL),
+							variables.getVar(Utilities.PROP_HOST),
+							variables.getIntVar(Utilities.PROP_PORT), page, 
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -496,7 +496,7 @@ public class ScriptTestCase extends TestCase {
 					WebResponse formResponse = session.getWebResponse();
 					int statusCode = formResponse.getStatus();
 					
-					if (TestUtils.isRedirectCode(statusCode)) {
+					if (Utilities.isRedirectCode(statusCode)) {
 						String newLocation = formResponse.getHeader("location");
 						System.out.println(newLocation);
 						assertNotNull("form submit->redirection: location header", newLocation);
@@ -663,6 +663,6 @@ public class ScriptTestCase extends TestCase {
 	 */
 	public void setDebug(boolean debug) {
 		this.debug = debug;
-		TestUtils.setDebug(debug);
+		Utilities.setDebug(debug);
 	}
 }

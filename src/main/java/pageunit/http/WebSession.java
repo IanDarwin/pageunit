@@ -1,12 +1,9 @@
 package pageunit.http;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
@@ -16,7 +13,7 @@ import org.apache.log4j.Logger;
 
 import com.darwinsys.util.VariableMap;
 
-import pageunit.TestUtils;
+import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
@@ -27,15 +24,13 @@ import pageunit.html.HTMLMeta;
 import pageunit.html.HTMLPage;
 import pageunit.html.HTMLParseException;
 import pageunit.html.HTMLParser;
+import pageunit.html.HtmlRedirect;
 
 /** 
  * Represents an HTTP session
  */
 public class WebSession {
-	
-	static final String META_REFRESH_CONTENT_REGEX_STRING = "\\d+;\\s*URL=['\"]?(.*?)['\"]?";
-	static final Pattern META_REFRESH_CONTENT_REGEX_PATTERN = 
-		Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING, Pattern.CASE_INSENSITIVE);
+
 	private HttpClient client;
 	private boolean throwExceptionOnFailingStatusCode;
 	private String responseText;
@@ -50,16 +45,15 @@ public class WebSession {
 	
 	public WebSession(VariableMap vars) {
 		super();
-		client = new HttpClient();
+		this.client = new HttpClient();
 		this.variables = vars;
 	}
 
-	
 	/** 
 	 * If this is set to true, 400/500 errors will throw an exception;
 	 * if false (the default), errors simply return and the user must 
 	 * check with getStatus().
-	 * @param b Whether to throw on 400/500 staus codes
+	 * @param b Whether to throw on 400/500 status codes
 	 */
 	public void setThrowExceptionOnFailingStatusCode(final boolean b) {
 		throwExceptionOnFailingStatusCode = b;
@@ -82,66 +76,61 @@ public class WebSession {
 			GetMethod getter = new GetMethod(url.toString());		
 			getter.setFollowRedirects(followRedirects);
 			
-			logger.info(String.format("Initial GET request: %s (followRedirects %b)%n", url, followRedirects));
+			final String message = String.format("GET request: %s (followRedirects %b)", url, followRedirects);
+			logger.info(message);
 			
+			// MOVE TO THE (NEXT) PAGE
 			int status = client.executeMethod(getter);
+			
 			if (status >= 400 && throwExceptionOnFailingStatusCode) {
 				throw new IOException("Status code: " + status);
 			}
 			
 			byte[] responseBody = getter.getResponseBody();
-			System.out.println("Read body length was " + responseBody.length);
+			logger.info("Read body length was " + responseBody.length);
 			responseText = new String(responseBody);
+			page = new HTMLParser().parse(responseText);
 			response = new WebResponse(responseText, url.toString(), status);
-			
-			System.out.println("Got to simple page: " + url);
 			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
+			
+			logger.info("Got to page: " + url);
 			getter.releaseConnection();	
 			
-			responseText = new String(responseBody);			// must save in field.
-			
-			page = new HTMLParser().parse(responseText);
-			
+			// Now set URL to next http-equiv redirect, if there is one, or null
 		} while ((url = isRedirectpage(page)) != null);
 		return page;
 	}
-	
+
+	/** Check the content of the page to see if it contains an HTML redirect,
+	 * such as "<meta http-equiv=\"Refresh\" content=\"0; URL=barcode_list.jsp\">".
+	 * The HttpClient library handles "Http 3xx" redirect statuses, but does not
+	 * handle the second, imbedded style, so we, like a Browser, must handle it.
+	 * @param page The HTMLPageImpl object to be checked
+	 * @return The Redirect url if there is one, or null.
+	 */
 	private URL isRedirectpage(HTMLPage page) {
-		// XXX Do we need to check HTTP status for !isRedirectURL?
 		
 		// check for META tag with Refresh
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
-				HTMLMeta m = (HTMLMeta)c;
-				logger.info(String.format("WebSession.isRedirectURLPage(%s) found META tag %s%n", page, m));
-				if (!"refresh".equalsIgnoreCase(m.getMetaEquiv())) {
-					return null;
+				HTMLMeta meta = (HTMLMeta)c;
+				final String message = String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, meta);
+				logger.info(message);
+				if (!"refresh".equalsIgnoreCase(meta.getMetaEquiv())) {
+					continue;
 				}
-				String content = m.getMetaContent();
-				Pattern patt = Pattern.compile(META_REFRESH_CONTENT_REGEX_STRING);
-				Matcher mat = patt.matcher(content);
-				if (mat.find()) {
-					try {
-						String urlPattern = mat.group(1);
-						URL url = null;
-						if (variables != null) {
-							url = TestUtils.qualifyURL(variables, urlPattern);
-						} else {
-							url = new URL(urlPattern);
-						}
-						logger.info(String.format("isRedirectURLPage(%s) Returning URL %s%n", page, url));
-						return url;
-					} catch (MalformedURLException e) {
-						logger.error("HTTP META REFRESH BOMBED: " + e);
-						return null;
-					}
-				} else {
-					System.err.printf("can't parse META refresh pattern '%s'%n", content);
-					return null;
+				String content = meta.getMetaContent();
+				HtmlRedirect redir = HtmlRedirect.parse(content, variables);
+				if (redir.url != null) {
+					return redir.url;
 				}
+				// Some sites like mrtg use just a number, to refresh the page
+				// periodically forever; a number only will leave the URL null so we get here.
+				// Don't return in case of the off chance there might be a 2nd meta redir tag.
 			}
 		}
-		logger.info(String.format("isRedirectpage(%s) returning null.%n", page));
+		// We did not find any meta refresh tags, so return null.
+		logger.info(String.format("isRedirectpage(%s) returning null.", page));
 		return null;
 	}
 
@@ -164,7 +153,7 @@ public class WebSession {
 			String targetHost, int targetPort, String targetPage)
 			throws IOException, HTMLParseException {
 
-		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
+		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		return getPage(url, true);
 
@@ -186,7 +175,7 @@ public class WebSession {
 	public HTMLPage getPage(final String protocol, final String targetHost, final int targetPort, final String targetPage, 
 			final String login, final String pass) throws IOException, HTMLParseException {
 		
-		final URL url = TestUtils.qualifyURL(protocol, targetHost, targetPort, targetPage);
+		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
 		// request protected page, and let WebSession handle redirection here.
 		final HTMLPage page1 = (HTMLPage) getPage(url, true);	// Ask for one page, really get login page
@@ -222,9 +211,9 @@ public class WebSession {
 		// Should be yet another redirect, back to original request page
 		WebResponse finalResponse = getWebResponse();
 		statusCode = finalResponse.getStatus();
-		logger.info(String.format("After submit login, statusCode = %d%n", statusCode));
+		logger.info(String.format("After submit login, statusCode = %d", statusCode));
 		
-		if (!TestUtils.isRedirectCode((statusCode))) {
+		if (!Utilities.isRedirectCode((statusCode))) {
 			throw new IllegalStateException("expected redirect status but got " + statusCode);
 		}
 		
@@ -232,19 +221,19 @@ public class WebSession {
 		logger.info("WebSession.getPage(): redirect location = " + redirectLocation);
 		
 		// "To reach, at the end, the goal with which one started..."
-		return getPage(TestUtils.qualifyURL(protocol, targetHost, targetPort, redirectLocation), true);
+		return getPage(Utilities.qualifyURL(protocol, targetHost, targetPort, redirectLocation), true);
 	}
 	
 	/**
 	 * A thin wrapper around getPage(): GET the page linked
-	 * to an anchor imbedded in a page.
+	 * to an anchor embedded in a page.
 	 * @param theLink The page to load
 	 * @return The resulting page
 	 * @throws HTMLParseException If the page fails to parse
 	 * @throws IOException If the reading fails
 	 */
 	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
-		URL u = TestUtils.completeURL(theLink.getURL());
+		URL u = Utilities.completeURL(theLink.getURL());
 		return getPage(u, true);
 	}
 	
@@ -292,7 +281,7 @@ public class WebSession {
         handler.setRequestBody(data);
 		
 		int status = client.executeMethod(handler);
-		if (TestUtils.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
+		if (Utilities.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
 		logger.info("WebSession.submitForm(): status code after post was: " + status);

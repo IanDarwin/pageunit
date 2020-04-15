@@ -26,6 +26,6 @@ public class HTMLMetaImpl extends HTMLComponentBase implements HTMLMeta {
 
 	@Override
 	public String toString() {
-		return String.format("<meta equiv '%s' Content '%s'>", metaEquiv, metaContent);
+		return String.format("<meta http-equiv='%s' content='%s'>", metaEquiv, metaContent);
 	}
 }
