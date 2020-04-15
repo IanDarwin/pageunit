@@ -1,4 +1,4 @@
 B http://darwinsys.com
 P java/javaResources.jsp
-T resource
+M Resource
 V https://darwinsys.com/java/javaResources.jsp
