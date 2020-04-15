@@ -634,7 +634,7 @@ public class ScriptTestCase extends TestCase {
 	 */
 	public static String[] getTwoArgs(String wordDescription, String lineAfterCommand, char delim) {
 		String[] res = getOneOrTwoArgs(wordDescription, lineAfterCommand, delim);
-		assertTrue(wordDescription + " in line" + lineAfterCommand, res[1] != null && res[1].length() > 0);
+		assertTrue(wordDescription + " in line '" + lineAfterCommand + "'", res[1] != null && res[1].length() > 0);
 		return res;
 	}
 	
