@@ -39,7 +39,7 @@ import com.darwinsys.util.VariableMap;
  * Run the tests listed in the input file.
  * This file is the heart of PageUnit (but not, I hope, its "heart of darkness").
  * This is a JUnit 3.8 "test case" that makes a bunch of tests and runs them.
- * Should upgrade to JUnit 4 someday...
+ * Should upgrade to JUnit 4 someday... Or go straight to JUnit 5
  */
 public class ScriptTestCase extends TestCase {	
 	private static Logger logger = Logger.getLogger(ScriptTestCase.class);
@@ -174,7 +174,7 @@ public class ScriptTestCase extends TestCase {
 		
 		stars();
 		System.out.println("PageUnit Running");
-		System.out.println("Test run with default URL http://" + variables.getVar(Utilities.PROP_HOST) + ":" + 
+		System.out.println("Test run with default URL http://" + variables.getVar(Utilities.PROP_HOST) + ":" +
 				variables.getVar(Utilities.PROP_PORT));
 		System.out.println("Input test file: " + fileName);
 		System.out.println("Run at " + new Date());
@@ -248,7 +248,7 @@ public class ScriptTestCase extends TestCase {
 					
 				case D:	// debug on/off
 					setDebug(getBoolean(restOfLine));
-					continue; 
+					continue;
 					
 				case B:	// set Base URL
 					URL u = null;
@@ -306,10 +306,15 @@ public class ScriptTestCase extends TestCase {
 					assertValidRURL(page);
 					
 					if (debug) {
-						System.err.println(Command.P + " " + new URL(
+						try {
+							URL tmpURL = new URL(
 								variables.getVar("PROTOCOL"),
 								variables.getVar("HOST"),
-								variables.getIntVar("PORT"), page));
+								variables.getIntVar("PORT"), page);
+							System.err.println("P url => " + tmpURL);
+						} catch (MalformedURLException mue) {
+							throw new AssertionFailedError("Invalid URL");
+						}
 					}
 					thePage = session.getPage(
 							variables.getVar("PROTOCOL"),
@@ -334,7 +339,7 @@ public class ScriptTestCase extends TestCase {
 					thePage = session.getPage(
 							variables.getVar(Utilities.PROP_PROTOCOL),
 							variables.getVar(Utilities.PROP_HOST),
-							variables.getIntVar(Utilities.PROP_PORT), page, 
+							variables.getIntVar(Utilities.PROP_PORT), page,
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
@@ -486,7 +491,7 @@ public class ScriptTestCase extends TestCase {
 					
 					if (submitValue == null || "".equals(submitValue)) {
 						thePage = (HTMLPage)session.submitForm(theForm);   // SEND THE LOGIN
-					} else { 
+					} else {
 						// Use only getInputByName() here! Too confusing otherwise.
 						final HTMLInput button = (HTMLInput)theForm.getInputByName(submitValue);
 						thePage = (HTMLPage)session.submitForm(theForm, false, button);
@@ -529,7 +534,6 @@ public class ScriptTestCase extends TestCase {
 				results.endTest(test);
 			}
 		}
-		
 		stars();
 		System.out.printf("** END OF FILE %s **%n", fileName);
 		stars();
@@ -538,7 +542,7 @@ public class ScriptTestCase extends TestCase {
 	}
 
 	/**
-	 * 
+	 * start new WebSession
 	 */
 	private void newSession() {
 		session = new WebSession(variables);
@@ -566,7 +570,8 @@ public class ScriptTestCase extends TestCase {
 	 */
 	private void fixupStackTrace(Throwable e, Test test) {
 		StackTraceElement[] oldStack = e.getStackTrace();
-		StackTraceElement newTop = new StackTraceElement(getClass().getName(), "Test Runner", 
+		StackTraceElement newTop =
+			new StackTraceElement(getClass().getName(), "Test Runner",
 				((TestHolder)test).getFileName(),
 				((TestHolder)test).getLineNumber());
 		int oldSize = oldStack.length;
@@ -587,7 +592,7 @@ public class ScriptTestCase extends TestCase {
 	}
 
 	private void assertValidRURL(String page) throws URISyntaxException {
-		// XXX FAILURE: tests.txt:38 (java.net.URISyntaxException: Illegal character 
+		// XXX FAILURE: tests.txt:38 (java.net.URISyntaxException: Illegal character
 		//   in path at index 10: HtmlAnchor[<a href="PersonDetail.jsp?person_key=58" ...
 		//URI url;
 		//url = new URI(page);
@@ -628,7 +633,7 @@ public class ScriptTestCase extends TestCase {
 	/**
 	 * Split the rest of the line into a tag and the rest of the line, based on delim
 	 * @param wordDescription a short description of what you are looking for, e.g., "tag" or "name" or ...
-	 * @param lineAfterCommand The "restOfLine" variable, that is, the input line minus the one-letter command. 
+	 * @param lineAfterCommand The "restOfLine" variable, that is, the input line minus the one-letter command.
 	 * @param delim A character such as ' ' or '=' to split the line on.
 	 * @return String[2] containing the tag and the rest of the line
 	 */

@@ -1,1 +1,1 @@
-cp target/pageunit-1.0.2-SNAPSHOT-jar-with-dependencies.jar ~/lib
+cp target/pageunit-1.0.3-SNAPSHOT-jar-with-dependencies.jar ~/lib

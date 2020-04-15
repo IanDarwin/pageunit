@@ -52,7 +52,7 @@ public class LinkChecker {
 		} catch (MalformedURLException e) {
 			// If not a valid URL, try again as a file.
 			rootURL = new File(rootURLString).toURL();
-		}		
+		}
 		System.out.printf("LinkChecker.checkStartingAt(%s)%n", rootURL);
 		
 		try {
@@ -91,8 +91,13 @@ public class LinkChecker {
 				}
 				System.out.print(href + " -- ");
 				
-				URL hrefURL = new URL(rootURL, href);
-		
+				URL hrefURL = null;
+				try {
+					hrefURL = new URL(rootURL, href);
+				} catch (MalformedURLException mue) {
+					System.out.println(rootURL + "--" + href + ": invalid URL");
+					continue;
+				}
 				if (hrefURL.getProtocol().equals("mailto:")) {
 					System.out.println(href + " -- not checking");
 					continue;
