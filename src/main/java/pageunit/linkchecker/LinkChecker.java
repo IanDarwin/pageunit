@@ -12,13 +12,13 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
 import pageunit.html.HTMLIMG;
 import pageunit.html.HTMLParseException;
-import sun.net.URLCanonicalizer;
 
 /** A simple HTML Link Checker. 
  * Should have Properties to set depth, URLs to check. etc.
@@ -130,8 +130,6 @@ public class LinkChecker {
 		}		
 	}
 	
-	private static URLCanonicalizer uc = new URLCanonicalizer();
-	
 	/**
 	 * Check one link, given its DocumentBase and the tag
 	 * @param linkURL The link to be checked
@@ -140,7 +138,7 @@ public class LinkChecker {
 	public static synchronized String checkOneLink(URL linkURL) {
 		// System.out.printf("LinkChecker.checkLink(%s)%n", linkURL);
 		try { 
-			final String canonURLString = uc.canonicalize(linkURL.toString());
+			final String canonURLString = URLCanonicalizer.getCanonicalURL(linkURL.toString());
 			if (cache.contains(canonURLString))
 				return "(already checked)";
 			cache.add(canonURLString);
