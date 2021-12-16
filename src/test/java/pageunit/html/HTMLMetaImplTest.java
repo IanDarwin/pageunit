@@ -1,7 +1,5 @@
 package pageunit.html;
 
-import pageunit.html.HTMLMeta;
-import pageunit.html.HTMLMetaImpl;
 import junit.framework.TestCase;
 
 public class HTMLMetaImplTest extends TestCase {

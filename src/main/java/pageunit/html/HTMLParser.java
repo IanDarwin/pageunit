@@ -11,7 +11,8 @@ import javax.swing.text.html.HTML.Tag;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Try to build a simple-enough HTML parser using the one true built-in HTML
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
  * XXX Replace with TagSoup?
  */
 public class HTMLParser extends HTMLEditorKit.ParserCallback {
-	private static Logger logger = Logger.getLogger(HTMLParser.class);
+	private static Logger logger = LogManager.getLogger(HTMLParser.class);
 		
 	private HTMLPage currentPage;
 	

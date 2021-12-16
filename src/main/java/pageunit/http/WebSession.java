@@ -9,7 +9,8 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.darwinsys.util.VariableMap;
 
@@ -37,7 +38,7 @@ public class WebSession {
 	private WebResponse response;
 	private VariableMap variables;
 	
-	private static Logger logger = Logger.getLogger(WebSession.class);
+	private static Logger logger = LogManager.getLogger(WebSession.class);
 
 	public WebSession() {
 		this(new VariableMap());

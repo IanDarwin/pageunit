@@ -1,9 +1,8 @@
 package pageunit.samples;
 
 import pageunit.TestFilter;
-
-import pageunit.http.WebResponse;
 import pageunit.html.HTMLPage;
+import pageunit.http.WebResponse;
 
 /**
  * WebTest filter that checks every page for $Source or $Id

@@ -4,18 +4,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-
 import pageunit.linkchecker.LinkChecker;
 
 /** Main program to run test files under PageUnit.
  * @author ian
  */
 public class PageUnit {
-	private static Logger logger = Logger.getLogger(PageUnit.class);
+	private static Logger logger = LogManager.getLogger(PageUnit.class);
 	
 	private static final String TEST_FILENAME_EXT = ".txt";
 
@@ -101,7 +101,7 @@ public class PageUnit {
 		assert dir.isDirectory() : "Logic error: not a directory";
 		File[] files = dir.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
-				return name != null || name.endsWith(".txt");
+				return name != null && name.endsWith(".txt");
 			}
 			
 		});

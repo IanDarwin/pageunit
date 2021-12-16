@@ -3,7 +3,6 @@ package pageunit.linkchecker;
 import java.net.URL;
 
 import junit.framework.TestCase;
-import pageunit.linkchecker.LinkChecker;
 
 public class LinkCheckerTest extends TestCase {
 	

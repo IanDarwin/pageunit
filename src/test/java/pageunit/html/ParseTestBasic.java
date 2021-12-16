@@ -5,12 +5,6 @@ import java.io.StringReader;
 import java.util.List;
 
 import junit.framework.TestCase;
-import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLForm;
-import pageunit.html.HTMLHTML;
-import pageunit.html.HTMLPage;
-import pageunit.html.HTMLParseException;
-import pageunit.html.HTMLParser;
 
 public class ParseTestBasic extends TestCase {
 	final static String testData = "<html><head><title>Fool</title></head><body>" +

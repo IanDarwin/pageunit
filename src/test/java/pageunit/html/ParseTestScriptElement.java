@@ -5,11 +5,6 @@ import java.io.StringReader;
 import java.util.List;
 
 import junit.framework.TestCase;
-import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLPage;
-import pageunit.html.HTMLParseException;
-import pageunit.html.HTMLParser;
-import pageunit.html.HTMLScript;
 
 /** Test handling of Script elements */
 public class ParseTestScriptElement extends TestCase {

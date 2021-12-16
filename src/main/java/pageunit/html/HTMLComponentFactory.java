@@ -155,7 +155,7 @@ public class HTMLComponentFactory {
 	}
 
 	private static void dumpAttrs(MutableAttributeSet attrs) {
-		Enumeration e = attrs.getAttributeNames();
+		Enumeration<String> e = (Enumeration<String>) attrs.getAttributeNames();
 		while (e.hasMoreElements()) {
 			Object key = e.nextElement();
 			System.err.print(key);

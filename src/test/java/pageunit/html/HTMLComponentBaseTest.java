@@ -1,8 +1,6 @@
 package pageunit.html;
 
 import junit.framework.TestCase;
-import pageunit.html.HTMLAnchorImpl;
-import pageunit.html.HTMLComponent;
 
 public class HTMLComponentBaseTest extends TestCase {
 	

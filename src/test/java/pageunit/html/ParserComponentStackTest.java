@@ -1,8 +1,5 @@
 package pageunit.html;
 
-import pageunit.html.GenericHTMLContainer;
-import pageunit.html.HTMLHTMLImpl;
-import pageunit.html.HTMLParser;
 import junit.framework.TestCase;
 
 public class ParserComponentStackTest extends TestCase {

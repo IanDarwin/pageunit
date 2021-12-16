@@ -1,6 +1,6 @@
 package pageunit.html;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertSame;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,6 +1,5 @@
 package pageunit;
 
-import pageunit.Utilities;
 import junit.framework.TestCase;
 
 public class TestUtilsTest extends TestCase {

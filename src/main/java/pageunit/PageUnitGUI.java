@@ -18,12 +18,12 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 
+import com.darwinsys.swingui.UtilGUI;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-
-import com.darwinsys.swingui.UtilGUI;
 
 /**
  * A static GUI to run one test file.

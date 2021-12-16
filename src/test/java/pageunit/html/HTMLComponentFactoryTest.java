@@ -5,11 +5,6 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTML.Tag;
 
 import junit.framework.TestCase;
-import pageunit.html.HTMLComponent;
-import pageunit.html.HTMLComponentFactory;
-import pageunit.html.HTMLInputImpl;
-import pageunit.html.HTMLParser;
-import pageunit.html.HTMLScriptImpl;
 
 
 public class HTMLComponentFactoryTest extends TestCase {

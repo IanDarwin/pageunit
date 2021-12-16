@@ -5,7 +5,6 @@ import java.io.StringReader;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-import pageunit.ScriptTestCase;
 
 public class TestXandY extends TestCase {
 	

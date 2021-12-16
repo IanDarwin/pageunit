@@ -2,9 +2,8 @@ package pageunit.http;
 
 import org.apache.commons.httpclient.Header;
 
-import pageunit.Utilities;
-import pageunit.http.WebResponse;
 import junit.framework.TestCase;
+import pageunit.Utilities;
 
 public class WebResponseTest extends TestCase {
 	

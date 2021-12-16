@@ -1,13 +1,12 @@
 package pageunit.html;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-import pageunit.html.HTMLPage;
-import pageunit.html.HTMLParseException;
-import pageunit.html.HTMLParser;
+import org.junit.Before;
+import org.junit.Test;
 
 /** Test handling of messy html */
 public class ParseTestMessyHtml {

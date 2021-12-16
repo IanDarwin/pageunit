@@ -1,6 +1,5 @@
 package pageunit;
 
-import pageunit.TestFilter;
 import pageunit.html.HTMLPage;
 import pageunit.http.WebResponse;
 

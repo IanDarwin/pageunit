@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import junit.framework.TestCase;
-import pageunit.html.HTMLPage;
-import pageunit.html.HTMLParseException;
-import pageunit.html.HTMLParser;
 
 /** Test handling really bad HTML */
 public class ParseTestBadHtml extends TestCase {

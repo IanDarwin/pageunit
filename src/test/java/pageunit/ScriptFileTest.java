@@ -2,7 +2,6 @@ package pageunit;
 
 import java.io.StringReader;
 
-import pageunit.ScriptTestCase;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;

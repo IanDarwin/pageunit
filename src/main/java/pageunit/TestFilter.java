@@ -1,7 +1,7 @@
 package pageunit;
 
-import pageunit.http.WebResponse;
 import pageunit.html.HTMLPage;
+import pageunit.http.WebResponse;
 
 /**
  * Site-specific extension mechanism for WebTest package

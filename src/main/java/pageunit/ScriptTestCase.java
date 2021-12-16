@@ -16,14 +16,16 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.darwinsys.util.VariableMap;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.log4j.Logger;
-
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;
 import pageunit.html.HTMLForm;
@@ -33,8 +35,6 @@ import pageunit.http.WebResponse;
 import pageunit.http.WebSession;
 import pageunit.linkchecker.LinkChecker;
 
-import com.darwinsys.util.VariableMap;
-
 /**
  * Run the tests listed in the input file.
  * This file is the heart of PageUnit (but not, I hope, its "heart of darkness").
@@ -42,7 +42,7 @@ import com.darwinsys.util.VariableMap;
  * Should upgrade to JUnit 4 someday... Or go straight to JUnit 5
  */
 public class ScriptTestCase extends TestCase {	
-	private static Logger logger = Logger.getLogger(ScriptTestCase.class);
+	private static Logger logger = LogManager.getLogger(ScriptTestCase.class);
 
 	private String fileName;
 	private final List<TestHolder> lines = new ArrayList<TestHolder>();
@@ -122,8 +122,10 @@ public class ScriptTestCase extends TestCase {
 			String args = line.substring(1).trim();
 			
 			if (line.charAt(0) == '<') {
-				readTests(new FileReader(new File(file.getParentFile(), args)), args);	// recurse
-				continue;
+				try (FileReader rdr = new FileReader(new File(file.getParentFile(), args))) {
+				readTests(rdr, args);	// recurse
+					continue;
+				}
 			}
 			if (!looksLikeCommand(line)) {
 				continue;

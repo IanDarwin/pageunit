@@ -1,7 +1,7 @@
 package pageunit;
 
-import pageunit.http.*;
-import pageunit.html.*;
+import pageunit.html.HTMLPage;
+import pageunit.http.WebResponse;
 
 /**
  * Null TestFilter implementation
