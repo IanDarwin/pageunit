@@ -82,24 +82,6 @@
 			<groupId>com.darwinsys</groupId>
 			<artifactId>darwinsys-api</artifactId>
 			<version>${darwinsys-api.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax</groupId>
-					<artifactId>javaee-web-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.persistence</groupId>
-					<artifactId>persistence-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.mail</groupId>
-					<artifactId>mail</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.apache.directory.studio</groupId>
-					<artifactId>org.apache.commons.codec</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
