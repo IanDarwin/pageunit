@@ -1,14 +1,15 @@
 package pageunit.http;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,7 +47,11 @@ public class WebSession {
 	
 	public WebSession(VariableMap vars) {
 		super();
-		this.client = new HttpClient();
+		client = HttpClient.newBuilder()
+				.followRedirects(HttpClient.Redirect.NORMAL)
+				.version(HttpClient.Version.HTTP_1_1)
+				.build();
+		;
 		this.variables = vars;
 	}
 
@@ -68,34 +73,52 @@ public class WebSession {
 	 * @throws IOException If the page can't be read
 	 * @throws HTMLParseException If the page fails to parse
 	 */
-	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException {
+	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException, URISyntaxException, InterruptedException {
 		HTMLPage page;
+		final URL finalURL = url;
 		do {
-			client.getHostConfiguration().setHost(
-					url.getHost(), url.getPort(), url.getProtocol());
-			
-			GetMethod getter = new GetMethod(url.toString());		
-			getter.setFollowRedirects(followRedirects);
-			
-			final String message = String.format("GET request: %s (followRedirects %b)", url, followRedirects);
-			logger.info(message);
+			// Build the HttpRequest object to "GET" the urlString
+			HttpRequest req =
+					HttpRequest.newBuilder(url.toURI())
+							.header("User-Agent", "PageUnit 1.0")
+							.GET()
+							.build();
+			// end::setup[]
+
+			// tag::sendSynch[]
+			// Send the request - synchronously
+			HttpResponse<String> resp =
+					client.send(req, HttpResponse.BodyHandlers.ofString());
+
+			// Collect the results
+			if (resp.statusCode() == 200) {
+				String response = resp.body();
+				System.out.println(response);
+			} else {
+				System.out.printf("ERROR: Status %d on request %s\n",
+						resp.statusCode(), url.toString());
+			}
+
+			logger.info(() ->
+                String.format("GET request: %s (followRedirects %b)", finalURL, followRedirects)
+            );
 			
 			// MOVE TO THE (NEXT) PAGE
-			int status = client.executeMethod(getter);
+			int status = resp.statusCode();
 			
 			if (status >= 400 && throwExceptionOnFailingStatusCode) {
 				throw new IOException("Status code: " + status);
 			}
 			
-			byte[] responseBody = getter.getResponseBody();
-			logger.info("Read body length was " + responseBody.length);
+			String responseBody = resp.body();
+			logger.info("Read body length was " + responseBody.length());
 			responseText = new String(responseBody);
 			page = new HTMLParser().parse(responseText);
 			response = new WebResponse(responseText, url.toString(), status);
-			response.setHeaders(getter.getResponseHeaders());	// gets converted to Map<String,String>
+			response.setHeaders(resp.headers());	// gets converted to Map<String,String>
 			
 			logger.info("Got to page: " + url);
-			getter.releaseConnection();	
+			// resp.close() - no close-type method
 			
 			// Now set URL to next http-equiv redirect, if there is one, or null
 		} while ((url = isRedirectpage(page)) != null);
@@ -152,7 +175,7 @@ public class WebSession {
 	public HTMLPage getPage(
 			String protocol,
 			String targetHost, int targetPort, String targetPage)
-			throws IOException, HTMLParseException {
+            throws IOException, HTMLParseException, URISyntaxException, InterruptedException {
 
 		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
@@ -174,7 +197,7 @@ public class WebSession {
 	 * @throws HTMLParseException If the page fails to parse
 	 */
 	public HTMLPage getPage(final String protocol, final String targetHost, final int targetPort, final String targetPage, 
-			final String login, final String pass) throws IOException, HTMLParseException {
+			final String login, final String pass) throws IOException, HTMLParseException, URISyntaxException, InterruptedException {
 		
 		final URL url = Utilities.qualifyURL(protocol, targetHost, targetPort, targetPage);
 		
@@ -233,7 +256,7 @@ public class WebSession {
 	 * @throws HTMLParseException If the page fails to parse
 	 * @throws IOException If the reading fails
 	 */
-	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException {
+	public HTMLPage follow(final HTMLAnchor theLink) throws IOException, HTMLParseException, URISyntaxException, InterruptedException {
 		URL u = Utilities.completeURL(theLink.getURL());
 		return getPage(u, true);
 	}
@@ -247,16 +270,36 @@ public class WebSession {
 	 * @throws HTMLParseException If the page fails to parse
 	 * @throws IOException If the reading fails
 	 */
-	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException {
+	public HTMLPage submitForm(final HTMLForm form, final boolean followRedirects, final HTMLInput button) throws HTMLParseException, IOException, InterruptedException {
 
 		String action = form.getAction();
 		
 		if (!action.contains("/")) {
 			action = "/" + action;	// Handle e.g., Java EE form "action='j_security_check'" from Tomcat
 		}
-		PostMethod handler = new PostMethod(action);
-		handler.setFollowRedirects(followRedirects);
+//		PostMethod handler = new PostMethod(action);
+//		handler.setFollowRedirects(followRedirects);
+		HttpRequest req =
+				HttpRequest.newBuilder(URI.create(action))
+						.header("User-Agent", "PageUnit 1.0")
+						.POST(null) // XXX
+						.build();
+
 		System.out.println("Initial POST request: " + action);
+
+		// Send the request - synchronously
+		HttpResponse<String> resp =
+				client.send(req, HttpResponse.BodyHandlers.ofString());
+
+		// Collect the results
+		if (resp.statusCode() == 200) {
+			String response = resp.body();
+			System.out.println(response);
+		} else {
+			System.out.printf("ERROR: Status %d on request %s\n",
+					resp.statusCode(), action);
+		}
+
 
 		// propagate the inputs().getValues()...
 		List<HTMLInput> inputs = form.getInputs();
@@ -273,27 +316,19 @@ public class WebSession {
 					inputsIterator.remove();
 			}
 		}
-		final int numInputs = inputs.size();
-		NameValuePair[] data = new NameValuePair[numInputs];
-		int i = 0;
-		for (HTMLInput input : inputs) {
-			data[i++] = new NameValuePair(input.getName(), input.getValue());
-		}
-        handler.setRequestBody(data);
 		
-		int status = client.executeMethod(handler);
+		int status = resp.statusCode();
 		if (Utilities.isErrorCode(status) && throwExceptionOnFailingStatusCode) {
 			throw new IOException("Status code: " + status);
 		}
 		logger.info("WebSession.submitForm(): status code after post was: " + status);
 		
-		byte[] responseBody = handler.getResponseBody();
-		System.out.println("Read body length was " + responseBody.length);
+		String responseBody = resp.body();
+		System.out.println("Read body length was " + responseBody.length());
 		responseText = new String(responseBody);
-		handler.releaseConnection();
 
 		response = new WebResponse(responseText, action, status);
-		response.setHeaders(handler.getResponseHeaders());
+		response.setHeaders(resp.headers());
 		
 		return new HTMLParser().parse(responseText);
 	}
@@ -305,7 +340,7 @@ public class WebSession {
 	 * @throws HTMLParseException If the parse fails
 	 * @throws IOException If the reading fails
 	 */
-	public HTMLPage submitForm(final HTMLForm form) throws HTMLParseException, IOException {
+	public HTMLPage submitForm(final HTMLForm form) throws HTMLParseException, IOException, InterruptedException {
 		return submitForm(form, false, null);
 	}
 

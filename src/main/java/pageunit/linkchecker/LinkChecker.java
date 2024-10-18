@@ -12,7 +12,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.uci.ics.crawler4j.url.URLCanonicalizer;
+//import edu.uci.ics.crawler4j.url.URLCanonicalizer;
 import pageunit.Utilities;
 import pageunit.html.HTMLAnchor;
 import pageunit.html.HTMLComponent;

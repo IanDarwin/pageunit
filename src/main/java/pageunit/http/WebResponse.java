@@ -1,9 +1,9 @@
 package pageunit.http;
 
+import java.net.http.HttpHeaders;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.httpclient.Header;
 
 /**
  * Similar to an HttpServletResponse but lighter.
@@ -45,9 +45,10 @@ public class WebResponse {
 	 * Names are converted to lowercase, 
 	 * @param headers The Http Headers
 	 */
-	public void setHeaders(Header[] headers) {
-		for (Header h : headers) {
-			headerMap.put(h.getName().toLowerCase(), h.getValue());
+	public void setHeaders(HttpHeaders headers) {
+		final Map<String, List<String>> map = headers.map();
+		for (String h : map.keySet()) {
+			headerMap.put(h.toLowerCase(), map.get(h).get(0)); // XXX
 		}
 	}
 	

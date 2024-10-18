@@ -12,9 +12,9 @@ import junit.framework.TestResult;
 import pageunit.linkchecker.LinkChecker;
 
 /** Main program to run test files under PageUnit.
- * @author ian
  */
 public class PageUnit {
+
 	private static Logger logger = LogManager.getLogger(PageUnit.class);
 	
 	private static final String TEST_FILENAME_EXT = ".txt";

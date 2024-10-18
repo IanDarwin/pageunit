@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -222,7 +221,7 @@ public class ScriptTestCase extends TestCase {
 					}
 					Object xo = null;
 					try {
-						xo = Class.forName(className).newInstance();
+						xo = Class.forName(className).getConstructor().newInstance();
 					} catch (Throwable e) {
 						e.printStackTrace();
 						throw new IllegalArgumentException("class " + className + " did not load: " + e);
@@ -323,7 +322,7 @@ public class ScriptTestCase extends TestCase {
 							variables.getVar("HOST"), variables.getIntVar("PORT"), page);
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
-					assertEquals("unprotected page load", HttpStatus.SC_OK, theResult.getStatus());
+					assertEquals("unprotected page load", 200, theResult.getStatus());
 					System.out.println("Got page " + page);
 					break;
 					
@@ -345,7 +344,7 @@ public class ScriptTestCase extends TestCase {
 							variables.getVar("USER"), variables.getVar("PASS"));
 					theResult = session.getWebResponse();
 					filterPage(thePage, theResult);
-					assertEquals("protected page status", HttpStatus.SC_OK, theResult.getStatus());
+					assertEquals("protected page status", 200, theResult.getStatus());
 					// Can't use assertEquals here, as page may be "/admin/foo" but
 					// the URL will be http://host/admin/foo". Just check endswith.
 					assertTrue("protected page redirect", theResult.getUrl().endsWith(page));
@@ -449,7 +448,7 @@ public class ScriptTestCase extends TestCase {
 					assertNotNull("found link before gotoLink", theLink);
 					thePage = (HTMLPage)session.follow(theLink);
 					
-					assertEquals("go to link response code", HttpStatus.SC_OK, session.getWebResponse().getStatus());
+					assertEquals("go to link response code", 200, session.getWebResponse().getStatus());
 					break;
 					
 				// FORMS
@@ -509,7 +508,7 @@ public class ScriptTestCase extends TestCase {
 						assertNotNull("form submit->redirection: location header", newLocation);
 						thePage = session.getPage(new URL(newLocation), true);
 						theResult = session.getWebResponse();
-						assertEquals("form with redirect: page load", HttpStatus.SC_OK, theResult.getStatus());
+						assertEquals("form with redirect: page load", 200, theResult.getStatus());
 					}				
 					
 					break;	
@@ -553,8 +552,9 @@ public class ScriptTestCase extends TestCase {
 	}
 
 	/** print the throwable along with the filename and line number
+	 * @param type
 	 * @param e
-	 * @param lineNumber
+	 * @param pt
 	 */
 	private void printThrowable(final String type, final Throwable e, TestHolder pt) {
 		System.err.print(type + ": " + pt.getFileName() + ";" + pt.getLineNumber() + " (" + e);

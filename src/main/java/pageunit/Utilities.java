@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.http.HttpResponse;
 import java.util.Properties;
-
-import org.apache.commons.httpclient.HttpStatus;
 
 import com.darwinsys.util.VariableMap;
 
@@ -52,7 +52,7 @@ public class Utilities {
 	}
 
 	public static URL qualifyURL(final VariableMap map, final String target) throws MalformedURLException {
-		String protocol = map.getVar(PROP_PROTOCOL, "http");
+		String protocol = map.getVar(PROP_PROTOCOL, "https");
 		String targetHost = map.getVar(PROP_HOST, "localhost");
 		int targetPort = map.getIntVar(PROP_PORT, 80);
 		return qualifyURL(protocol, targetHost, targetPort, target);
@@ -86,20 +86,13 @@ public class Utilities {
 	 * @return true if the status code is a redirect code
 	 */
 	public static boolean isRedirectCode(int statusCode) {
-		return (statusCode == HttpStatus.SC_MOVED_TEMPORARILY)
-				|| (statusCode == HttpStatus.SC_MOVED_PERMANENTLY)
-				|| (statusCode == HttpStatus.SC_SEE_OTHER)
-				|| (statusCode == HttpStatus.SC_TEMPORARY_REDIRECT);
+		return (statusCode == HttpURLConnection.HTTP_MOVED_TEMP)
+				|| (statusCode == HttpURLConnection.HTTP_MOVED_PERM)
+				|| (statusCode == HttpURLConnection.HTTP_SEE_OTHER);
 	}
 
 	public static boolean isErrorCode(int statusCode) {
-		switch((statusCode / 100)) {
-		case 4:
-		case 5:
-			return true;
-		default:
-			return false;
-		}
+		return statusCode >= 400;
 	}
 	
 	/** Retrieve a property, either from the System Properties
