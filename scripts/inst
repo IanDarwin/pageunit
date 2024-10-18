@@ -1,1 +1,7 @@
-cp target/pageunit-1.0.3-SNAPSHOT-jar-with-dependencies.jar ~/lib
+#!/bin/sh
+
+# copy the fat jar to ~/lib
+
+set -x
+
+cp target/pageunit-1.?.?*-jar-with-dependencies.jar ~/lib
