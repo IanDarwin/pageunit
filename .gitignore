@@ -3,3 +3,4 @@ build
 .fbwarnings
 target
 .settings
+.idea
