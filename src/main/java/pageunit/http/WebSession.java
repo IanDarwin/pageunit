@@ -76,6 +76,7 @@ public class WebSession {
 	public HTMLPage getPage(URL url, final boolean followRedirects) throws IOException, HTMLParseException, URISyntaxException, InterruptedException {
 		HTMLPage page;
 		final URL finalURL = url;
+		logger.info(() -> String.format("GET request: %s (followRedirects %b)", finalURL, followRedirects));
 		do {
 			// Build the HttpRequest object to "GET" the urlString
 			HttpRequest req =
@@ -83,9 +84,7 @@ public class WebSession {
 							.header("User-Agent", "PageUnit 1.0")
 							.GET()
 							.build();
-			// end::setup[]
 
-			// tag::sendSynch[]
 			// Send the request - synchronously
 			HttpResponse<String> resp =
 					client.send(req, HttpResponse.BodyHandlers.ofString());
@@ -93,16 +92,12 @@ public class WebSession {
 			// Collect the results
 			if (resp.statusCode() == 200) {
 				String response = resp.body();
-				System.out.println(response);
+				logger.info(response.toString());
 			} else {
 				System.out.printf("ERROR: Status %d on request %s\n",
 						resp.statusCode(), url.toString());
 			}
 
-			logger.info(() ->
-                String.format("GET request: %s (followRedirects %b)", finalURL, followRedirects)
-            );
-			
 			// MOVE TO THE (NEXT) PAGE
 			int status = resp.statusCode();
 			
@@ -110,9 +105,8 @@ public class WebSession {
 				throw new IOException("Status code: " + status);
 			}
 			
-			String responseBody = resp.body();
-			logger.info("Read body length was " + responseBody.length());
-			responseText = new String(responseBody);
+			String responseText = resp.body();
+			logger.info("Read body length was " + responseText.length());
 			page = new HTMLParser().parse(responseText);
 			response = new WebResponse(responseText, url.toString(), status);
 			response.setHeaders(resp.headers());	// gets converted to Map<String,String>
@@ -138,8 +132,7 @@ public class WebSession {
 		for (HTMLComponent c : page.getChildren()) {
 			if (c instanceof HTMLMeta) {
 				HTMLMeta meta = (HTMLMeta)c;
-				final String message = String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, meta);
-				logger.info(message);
+                logger.info(() -> String.format("WebSession.isRedirectURLPage(%s) found META tag %s", page, meta));
 				if (!"refresh".equalsIgnoreCase(meta.getMetaEquiv())) {
 					continue;
 				}
@@ -157,7 +150,6 @@ public class WebSession {
 		logger.info(String.format("isRedirectpage(%s) returning null.", page));
 		return null;
 	}
-
 
 	/**
 	 * Get an unprotected page
